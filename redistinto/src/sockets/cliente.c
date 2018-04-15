@@ -1,4 +1,5 @@
 #include "socket.h"
+#include "../main.h"
 
 int connect_to_server(char * port){
 	struct addrinfo *server_info;

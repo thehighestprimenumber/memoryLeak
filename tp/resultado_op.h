@@ -1,1 +1,0 @@
-enum resultado_op {OK}

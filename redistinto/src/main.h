@@ -1,14 +1,19 @@
 #ifndef MAIN_H
-#define MAIN_H
 
-#include <stdbool.h>
-#include <commons/log.h>
-#include <stdio.h>
+	#define MAIN_H
 
+	#define NULL 0
 
-void configurar_logger();
-void salir(int return_nr);
+	#include <stdbool.h>
+	#include <commons/log.h>
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <string.h>
 
-t_log* logger;
+	void configurar_logger();
+	void salir(int return_nr);
+
+	t_log* logger;
+
 
 #endif
