@@ -2,10 +2,12 @@
 #ifndef REDISTINTO_SOCKET_H_
 #define REDISTINTO_SOCKET_H_
 
-//Imports
+//Includes
 #include <sys/socket.h>
 #include <netdb.h>
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 
 
 //Defines
@@ -28,13 +30,14 @@ typedef struct {
 	int size;
 } __attribute__((packed)) ContentHeader;
 
+//Estructura del Mensaje
 typedef struct {
 	ContentHeader *header;
 	void *contenido;
 } Message;
 
 //Funciones
-int  connect_to_server(char * port);
+int connect_to_server(char * port);
 int send_msg(int socket, Message msg);
 
 

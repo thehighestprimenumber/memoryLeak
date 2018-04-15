@@ -1,5 +1,4 @@
 #include "socket.h"
-#include "../main.h"
 
 int connect_to_server(char * port){
 	struct addrinfo *server_info;
@@ -45,6 +44,6 @@ int send_msg(int socket, Message msg) {
 
 	free(buffer);
 
-	if(resultado <= 0) return -1;
+	if(resultado < 1) return -1;
 	else return 1;
 }
