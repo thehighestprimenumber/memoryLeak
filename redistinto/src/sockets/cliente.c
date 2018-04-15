@@ -39,10 +39,10 @@ int send_msg(int socket, Message msg) {
 	memcpy(buffer, msg.header, sizeof(ContentHeader));
 	memcpy(buffer + sizeof(ContentHeader), msg.contenido, msg.header->size);
 
-    //Envio y registro el resultado que es el tamaño de lo que devolvio o -1 en caso de error
+	//Envio y registro el resultado que es el tamaño de lo que devolvio o -1 en caso de error
 	int resultado = send(socket, buffer, sizeTotal, 0);
 
-    free(buffer);
+	free(buffer);
 
 	if(resultado <= 0) return -1;
 	else return 1;
