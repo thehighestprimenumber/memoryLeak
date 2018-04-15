@@ -36,14 +36,14 @@ int send_msg(int socket, Message msg) {
 
 	//Creo y relleno un buffer
 	void * buffer = malloc(sizeTotal);
-    memcpy(buffer, msg.header, sizeof(ContentHeader));
-    memcpy(buffer + sizeof(ContentHeader), msg.contenido, msg.header->size);
+	memcpy(buffer, msg.header, sizeof(ContentHeader));
+	memcpy(buffer + sizeof(ContentHeader), msg.contenido, msg.header->size);
 
     //Envio y registro el resultado que es el tamaño de lo que devolvio o -1 en caso de error
-    int resultado = send(socket, buffer, sizeTotal, 0);
+	int resultado = send(socket, buffer, sizeTotal, 0);
 
     free(buffer);
 
-    if(resultado <= 0) return -1;
-    else return 1;
+	if(resultado <= 0) return -1;
+	else return 1;
 }

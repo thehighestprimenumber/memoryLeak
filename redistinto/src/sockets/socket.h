@@ -13,12 +13,10 @@
 #define PUERTO_PLANIFICADOR "8002"
 
 
-
 //Enums
 
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
 typedef enum{IDEJMPLO1, IDEJMPLO2} tipoId;
-
 
 
 //Estructuras
