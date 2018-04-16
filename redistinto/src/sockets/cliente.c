@@ -1,6 +1,6 @@
 #include "socket.h"
 
-int connect_to_server(char * port){
+int connect_to_server(char * port) {
 	struct addrinfo *server_info;
 	struct addrinfo hints;
 
@@ -29,6 +29,7 @@ int connect_to_server(char * port){
 }
 
 int send_msg(int socket, Message msg) {
+	//Verifico la existencia del socket y que el mensaje posea contenido
 	if(socket == -1 || msg.contenido == NULL || msg.header == NULL) return -1;
 
 	//Calculo el tamaño total
@@ -46,4 +47,32 @@ int send_msg(int socket, Message msg) {
 
 	if(resultado < 1) return -1;
 	else return 1;
+}
+
+int await_msg(int socket, Message *msg) {
+	//Verifico la existencia del socket y que el puntero al mensaje no este vacio
+	if(socket == -1 || msg == NULL) return -1;
+
+	//Preparo un header para recibir (tamaño fijo)
+	ContentHeader *header = malloc(sizeof(ContentHeader));
+
+	//Recibo el header
+	int result_recv = recv(socket, header, sizeof(ContentHeader), MSG_WAITALL);
+
+	//En caso de error al recibir devuelvo -1
+	if(result_recv == -1) return -1;
+
+	//Preparo el espacio necesario para recibir el contenido (tamaño variable)
+	void *contenido = malloc(header->size);
+
+	//Recibo el contenido
+	result_recv = recv(socket, contenido, header->size, MSG_WAITALL);
+
+	//En caso de error al recibir devuelvo -1
+	if(result_recv == -1) return -1;
+
+	//En caso que todo salgo correcto relleno el msg y devuelvo 1 para informar la operacion satisfactoria
+	msg->header = header;
+	msg->contenido = contenido;
+	return 1;
 }

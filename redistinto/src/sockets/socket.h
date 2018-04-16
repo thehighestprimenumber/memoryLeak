@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-
+#include <string.h>
 
 //Defines
 #define IP "172.0.0.1"//todas estaran dentro de la maquina
@@ -39,6 +39,6 @@ typedef struct {
 //Funciones
 int connect_to_server(char * port);
 int send_msg(int socket, Message msg);
-
+int await_msg(int socket, Message *msg);
 
 #endif
