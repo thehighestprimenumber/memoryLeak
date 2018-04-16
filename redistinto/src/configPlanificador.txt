@@ -1,0 +1,6 @@
+puerto=8085
+algoritmo="SJP"
+estimacion=10
+IP_coordinador="127.0.0.3"
+puerto_coordinador=8086
+claves_bloqueadas=clave1,clave4,clave6
