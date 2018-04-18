@@ -1,4 +1,4 @@
-#include "planificador.h"
+#include <planificador.h>
 
 int main(void) {
 	inicializar_logger();
