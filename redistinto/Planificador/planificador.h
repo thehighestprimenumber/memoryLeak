@@ -15,6 +15,7 @@
 #include <commons/txt.h>
 #include <commons/config.h>
 #include <commons/string.h>
+#include <string.h>
 
 char* arch_config;
 
@@ -24,14 +25,13 @@ typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
 
 typedef struct {
        //operacion* operacion, TODO crear struct
-	   t_list* esis;
 	   int puerto_planif;
 	   	char* algoritmo_planif;
 	   	int estimacion_inicial;
 	   	char* IP_coordinador;
 	   	int puerto_coordinador;
+	   	t_list* esis;
 	   	t_list* clavesBloqueadas;
-
 } t_planificador;
 
 typedef struct {
@@ -51,6 +51,8 @@ typedef struct {
 } cola_finished;
 
 t_planificador planificador;
+
+int socket_coordinador;
 
 void inicializar_logger();
 void exit_proceso();

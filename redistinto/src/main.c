@@ -1,9 +1,7 @@
 #include "main.h"
 #include <commons/log.h>
-#include "planificador.h"
 
 int main(void) {
-	estructura_planificador();
 	configurar_logger();
 
 	printf("OK!");
