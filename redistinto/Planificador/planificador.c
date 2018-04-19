@@ -1,4 +1,4 @@
-#include <planificador.h>
+#include "planificador.h"
 
 int main(void) {
 	inicializar_logger();
@@ -8,11 +8,11 @@ int main(void) {
 	estructura_planificador();
 
 	//Pruebas datos planificador (falla todavía en algoritmo)
-	printf("\nPuerto planificador: %d", planificador.puerto_planif);
-	printf("\nAlgoritmo planificador: %s", planificador.algoritmo_planif);
-	printf("\nEstimación: %d", planificador.estimacion_inicial);
-	printf("\nIP Coordinador: %s", planificador.IP_coordinador);
-	printf("\nPuerto Coordinador: %d",planificador.puerto_coordinador);
+	printf("Puerto planificador: %d\n", planificador.puerto_planif);
+	printf("Algoritmo planificador: %s\n", planificador.algoritmo_planif);
+	printf("Estimación: %d\n", planificador.estimacion_inicial);
+	printf("IP Coordinador: %s\n", planificador.IP_coordinador);
+	printf("Puerto Coordinador: %d\n",planificador.puerto_coordinador);
 
 	list_destroy(planificador.clavesBloqueadas);
 	exit_proceso(0);
@@ -28,26 +28,26 @@ void estructura_planificador() {
 
 	planificador.clavesBloqueadas = list_create();
 
-	configuracion = config_create("configPlanificador.txt");
+	configuracion = config_create(configTxt);
 	char* algoritmo = config_get_string_value(configuracion,algoritmo_planificador);
 	char* IPcoord = config_get_string_value(configuracion,IPCoord_planificador);
 
-	if (config_has_property(configuracion, puerto_planificador)) {
-		planificador.puerto_planif = config_get_int_value(configuracion,puerto_planificador);
-	}
-
 	if (config_has_property(configuracion, algoritmo_planificador)) {
-		planificador.algoritmo_planif = malloc(strlen(algoritmo) + 1);
+		planificador.algoritmo_planif = malloc(strlen(algoritmo));
 		memcpy(planificador.algoritmo_planif,algoritmo,strlen(algoritmo));
 	}
 
+	if (config_has_property(configuracion, IPCoord_planificador)) {
+			planificador.IP_coordinador = malloc(strlen(IPcoord));
+			memcpy(planificador.IP_coordinador,IPcoord,strlen(IPcoord));
+		}
+
+	if (config_has_property(configuracion, puerto_planificador)) {
+			planificador.puerto_planif = config_get_int_value(configuracion,puerto_planificador);
+		}
+
 	if (config_has_property(configuracion, estimacion_planificador)) {
 		planificador.estimacion_inicial = config_get_int_value(configuracion,estimacion_planificador);
-	}
-
-	if (config_has_property(configuracion, IPCoord_planificador)) {
-		planificador.IP_coordinador = malloc(strlen(IPcoord));
-		memcpy(planificador.IP_coordinador,IPcoord,strlen(IPcoord));
 	}
 
 	if (config_has_property(configuracion, puertoCoord_planificador)) {

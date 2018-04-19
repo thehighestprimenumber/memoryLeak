@@ -1,5 +1,5 @@
 puerto=8085
-algoritmo=SJP
+algoritmo=HRRN
 estimacion=10
 IP_coordinador=127.0.0.3
 puerto_coordinador=8086
