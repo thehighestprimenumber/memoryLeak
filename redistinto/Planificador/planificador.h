@@ -62,4 +62,11 @@ void exit_proceso();
 
 void estructura_planificador();
 
+void puerto_planif_read(t_config* configuracion);
+void algoritmo_read(t_config* configuracion);
+void estimacion_read(t_config* configuracion);
+void ip_coordinador_read(t_config* configuracion);
+void puerto_coordinador_read(t_config* configuracion);
+void clavesBloqueadas_read(t_config* configuracion);
+
 #endif /* PRUEBA_H_ */

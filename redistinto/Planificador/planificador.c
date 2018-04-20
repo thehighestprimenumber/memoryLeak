@@ -3,8 +3,6 @@
 int main(void) {
 	inicializar_logger();
 
-	log_info(log_planificador, "Mensaje desde el planificador");
-
 	estructura_planificador();
 
 	//Pruebas datos planificador (falla todavía en algoritmo)
@@ -24,35 +22,56 @@ void inicializar_logger() {
 
 void estructura_planificador() {
 	t_config* configuracion;
-	char** claves;
 
 	planificador.clavesBloqueadas = list_create();
 
 	configuracion = config_create(configTxt);
-	char* algoritmo = config_get_string_value(configuracion,algoritmo_planificador);
-	char* IPcoord = config_get_string_value(configuracion,IPCoord_planificador);
 
-	if (config_has_property(configuracion, algoritmo_planificador)) {
-		planificador.algoritmo_planif = malloc(strlen(algoritmo));
-		memcpy(planificador.algoritmo_planif,algoritmo,strlen(algoritmo));
-	}
+	puerto_planif_read(configuracion);
+	algoritmo_read(configuracion);
+	estimacion_read(configuracion);
+	ip_coordinador_read(configuracion);
+	puerto_coordinador_read(configuracion);
+	clavesBloqueadas_read(configuracion);
 
-	if (config_has_property(configuracion, IPCoord_planificador)) {
-			planificador.IP_coordinador = malloc(strlen(IPcoord));
-			memcpy(planificador.IP_coordinador,IPcoord,strlen(IPcoord));
-		}
+	config_destroy(configuracion);
+}
 
+void puerto_planif_read(t_config* configuracion) {
 	if (config_has_property(configuracion, puerto_planificador)) {
-			planificador.puerto_planif = config_get_int_value(configuracion,puerto_planificador);
-		}
+		planificador.puerto_planif = config_get_int_value(configuracion,puerto_planificador);
+	}
+}
 
+void algoritmo_read(t_config* configuracion) {
+	char* algoritmo = config_get_string_value(configuracion,algoritmo_planificador);
+	if (config_has_property(configuracion, algoritmo_planificador)) {
+		planificador.algoritmo_planif = malloc(strlen(algoritmo) + 1);
+		memcpy(planificador.algoritmo_planif,algoritmo,strlen(algoritmo) + 1);
+	}
+}
+
+void estimacion_read(t_config* configuracion) {
 	if (config_has_property(configuracion, estimacion_planificador)) {
 		planificador.estimacion_inicial = config_get_int_value(configuracion,estimacion_planificador);
 	}
+}
 
+void ip_coordinador_read(t_config* configuracion) {
+	char* IPcoord = config_get_string_value(configuracion,IPCoord_planificador);
+
+	planificador.IP_coordinador = malloc(strlen(IPcoord) + 1);
+	memcpy(planificador.IP_coordinador,IPcoord,strlen(IPcoord) + 1);
+}
+
+void puerto_coordinador_read(t_config* configuracion) {
 	if (config_has_property(configuracion, puertoCoord_planificador)) {
 		planificador.puerto_coordinador = config_get_int_value(configuracion,puertoCoord_planificador);
 	}
+}
+
+void clavesBloqueadas_read(t_config* configuracion) {
+	char** claves;
 
 	if (config_has_property(configuracion, claves_bloqueadas)) {
 		claves = string_split(config_get_string_value(configuracion,claves_bloqueadas),",");
@@ -62,9 +81,7 @@ void estructura_planificador() {
 		list_add(planificador.clavesBloqueadas,claves[i]);
 	}
 
-	free(algoritmo);
-	free(IPcoord);
-	config_destroy(configuracion);
+	free(claves);
 }
 
 void exit_proceso(int retorno) {
