@@ -55,7 +55,7 @@ t_planificador planificador;
 
 int socket_coordinador;
 
-char* configTxt = "/home/utnso/workspace/tp-2018-1c-Memory-leak/redistinto/Planificador/configPlanificador.txt";
+char* configTxt = "./configPlanificador.txt";
 
 void inicializar_logger();
 void exit_proceso();

@@ -44,8 +44,8 @@ void puerto_planif_read(t_config* configuracion) {
 }
 
 void algoritmo_read(t_config* configuracion) {
-	char* algoritmo = config_get_string_value(configuracion,algoritmo_planificador);
 	if (config_has_property(configuracion, algoritmo_planificador)) {
+		char* algoritmo = config_get_string_value(configuracion,algoritmo_planificador);
 		planificador.algoritmo_planif = malloc(strlen(algoritmo) + 1);
 		memcpy(planificador.algoritmo_planif,algoritmo,strlen(algoritmo) + 1);
 	}
@@ -58,10 +58,13 @@ void estimacion_read(t_config* configuracion) {
 }
 
 void ip_coordinador_read(t_config* configuracion) {
-	char* IPcoord = config_get_string_value(configuracion,IPCoord_planificador);
+	if (config_has_property(configuracion, IPCoord_planificador)) {
+		char* IPcoord = config_get_string_value(configuracion,IPCoord_planificador);
 
-	planificador.IP_coordinador = malloc(strlen(IPcoord) + 1);
-	memcpy(planificador.IP_coordinador,IPcoord,strlen(IPcoord) + 1);
+		planificador.IP_coordinador = malloc(strlen(IPcoord) + 1);
+		memcpy(planificador.IP_coordinador,IPcoord,strlen(IPcoord) + 1);
+
+	}
 }
 
 void puerto_coordinador_read(t_config* configuracion) {
