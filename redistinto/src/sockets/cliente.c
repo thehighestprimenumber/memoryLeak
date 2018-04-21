@@ -1,6 +1,6 @@
 #include "socket.h"
 
-int connect_to_server(char * port) {
+int connect_to_server(char * ip, char * serverPort) {
 	struct addrinfo *server_info;
 	struct addrinfo hints;
 
@@ -10,7 +10,7 @@ int connect_to_server(char * port) {
 	hints.ai_socktype = SOCK_STREAM;  // Indica que usaremos el protocolo TCP
 
 
-	getaddrinfo(IP, port, &hints, &server_info);  // Carga en server_info los datos de la conexion
+	getaddrinfo(ip, serverPort, &hints, &server_info);  // Carga en server_info los datos de la conexion
 
 	//Si devuelve -1 tuvimos un problema
 	int server_socket = socket(server_info->ai_family, server_info->ai_socktype,server_info->ai_protocol);
