@@ -1,0 +1,5 @@
+puerto=un puerto
+retardo=1
+algoritmo=EL
+cantidad_entradas=10
+tamanio_entrada=100

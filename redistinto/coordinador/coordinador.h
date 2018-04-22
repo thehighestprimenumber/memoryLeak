@@ -1,42 +1,49 @@
 #ifndef COORDINADOR_H
 #define COORDINADOR_H
 
+#define NULL 0
+
+#include <stdbool.h>
 #include <commons/log.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <commons/collections/list.h>
-#include "../src/esi.h"
+#include "../esi/esi.h"
+#include "../operacion/operacion.h"
+#include "tabla_instancias.h"
+
+void configurar_logger();
+void salir(int return_nr);
+
+t_log* logger_coordinador;
+
+enum resultado_coord {
+	OK, ERROR, NO_HAY_INSTANCIAS, CLAVE_BLOQUEADA
+};
+
+enum algoritmo_coordinador {
+	EQUITATIVE_LOAD, LEAST_SPACE_USED, KEY_EXPLICIT
+};
+
+static char *algoritmo_coordinador_nombres[] = { "EQUITATIVE_LOAD", "LEAST_SPACE_USED", "KEY_EXPLICIT" };
 
 typedef struct {
-       //operacion* operacion, TODO crear struct
-	   t_list* instancias;
-	   int puerto_escucha;;
-	   //algoritmo de distribucion
-	   int cantidad_entradas;
-       int tamanio_entrada;
-	   int retardo;
+	t_list* operaciones;
+	t_list* tabla_instancias;
+	char* puerto_escucha;
+	enum algoritmo_coordinador algoritmo;
+	int cantidad_entradas;
+	int tamanio_entrada;
+	int retardo;
 } t_coordinador;
-
-enum tipo_operacion {GET, SET, STORE} ;
-
-typedef struct {
-	enum tipo_operacion tipo;
-	char* nombreRecurso;
-	char* clave;
-
-} operacion;
-
-enum resultado_coord {OK, ERROR} ;
-
-enum algoritmo_coordinador {EQUITATIVE_LOAD, LEAST_SPACE_USED, KEY_EXPLICIT} t_result_coord;
+t_coordinador coordinador;
 
 char* arch_config;
 t_log * log_operaciones;
 
-enum resultado_coord procesarOperacion(operacion* op_a_realizar, proceso_esi* solicitante);
+enum resultado_coord procesarOperacion(t_operacion op_a_realizar, proceso_esi solicitante);
 
-enum resultado_coord abrirCoordinador(enum algoritmo_coordinador); //recibir datos de conexion al planificador
-
-enum resultado_coord crearInstancia(); //recibir datos de instancia?
-
-enum resultado_coord eliminarInstancia(); //recibir instancia
+enum resultado_coord abrirCoordinador();
 
 #endif

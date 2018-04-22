@@ -30,3 +30,5 @@ void cargar_esi(){
 	config_destroy(configuracion);
 
 }
+
+int main(){} //para poder compilar
