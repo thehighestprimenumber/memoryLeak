@@ -26,9 +26,10 @@ int main() {
 	t_operacion op = { .clave = "k1054", .valor = "54 alumnos", .tipo = 1 };
 	proceso_esi esi = { .identificador = 1 };
 	coordinador.tabla_instancias = list_create();
-	crear_instancia();
-	crear_instancia();
-	crear_instancia();
+	crear_instancia(1);
+	crear_instancia(2);
+	crear_instancia(3);
+	ultima_instancia_usada=0;
 	enum resultado_coord resultado = procesarOperacion(op, esi);
 	resultado = procesarOperacion(op, esi);
 	informar_resultado_al_planificador(resultado);

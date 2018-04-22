@@ -271,3 +271,106 @@ algoritmo: EQUITATIVE_LOAD
 [INFO] 18:58:57:289 log_operaciones/(6833:6833): procesando solicitud: SET k1054 54 alumnos de ESI# 1
 [DEBUG] 18:58:57:289 log_operaciones/(6833:6833): usando instancia#1
 [INFO] 18:58:57:289 log_operaciones/(6833:6833): resultado: 0
+[DEBUG] 19:17:13:277 log_operaciones/(7685:7685): cargando configuracion
+
+[DEBUG] 19:17:13:279 log_operaciones/(7685:7685): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 19:17:13:282 log_operaciones/(7685:7685): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:17:13:282 log_operaciones/(7685:7685): usando instancia#1
+[INFO] 19:17:13:282 log_operaciones/(7685:7685): resultado: 0
+[INFO] 19:17:13:282 log_operaciones/(7685:7685): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:17:13:282 log_operaciones/(7685:7685): usando instancia#1
+[INFO] 19:17:13:282 log_operaciones/(7685:7685): resultado: 0
+[DEBUG] 19:17:50:859 log_operaciones/(7725:7725): cargando configuracion
+
+[DEBUG] 19:17:54:956 log_operaciones/(7725:7725): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 19:18:06:812 log_operaciones/(7725:7725): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:19:03:814 log_operaciones/(7725:7725): usando instancia#1
+[INFO] 19:19:09:436 log_operaciones/(7725:7725): resultado: 0
+[INFO] 19:19:12:739 log_operaciones/(7725:7725): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:20:13:365 log_operaciones/(7810:7810): cargando configuracion
+
+[DEBUG] 19:20:13:370 log_operaciones/(7810:7810): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 19:20:13:372 log_operaciones/(7810:7810): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:20:13:374 log_operaciones/(7810:7810): usando instancia#2
+[INFO] 19:20:13:374 log_operaciones/(7810:7810): resultado: 0
+[INFO] 19:20:13:374 log_operaciones/(7810:7810): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:20:13:374 log_operaciones/(7810:7810): usando instancia#3
+[INFO] 19:20:13:374 log_operaciones/(7810:7810): resultado: 0
+[DEBUG] 19:22:18:12 log_operaciones/(7945:7945): cargando configuracion
+
+[DEBUG] 19:22:18:12 log_operaciones/(7945:7945): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 19:22:18:16 log_operaciones/(7945:7945): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:22:18:16 log_operaciones/(7945:7945): usando instancia#2
+[INFO] 19:22:18:16 log_operaciones/(7945:7945): resultado: 0
+[INFO] 19:22:18:16 log_operaciones/(7945:7945): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:22:18:16 log_operaciones/(7945:7945): usando instancia#3
+[INFO] 19:22:18:16 log_operaciones/(7945:7945): resultado: 0
+[DEBUG] 19:22:36:251 log_operaciones/(7972:7972): cargando configuracion
+
+[DEBUG] 19:22:36:252 log_operaciones/(7972:7972): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 19:22:36:252 log_operaciones/(7972:7972): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:24:23:705 log_operaciones/(7972:7972): usando instancia#2
+[INFO] 19:24:23:705 log_operaciones/(7972:7972): resultado: 0
+[INFO] 19:24:23:705 log_operaciones/(7972:7972): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:24:25:904 log_operaciones/(7972:7972): usando instancia#3
+[INFO] 19:24:25:904 log_operaciones/(7972:7972): resultado: 0
+[DEBUG] 19:24:31:564 log_operaciones/(8042:8042): cargando configuracion
+
+[DEBUG] 19:24:31:569 log_operaciones/(8042:8042): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 19:24:31:569 log_operaciones/(8042:8042): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:24:31:572 log_operaciones/(8042:8042): usando instancia#1
+[INFO] 19:24:31:572 log_operaciones/(8042:8042): resultado: 0
+[INFO] 19:24:31:572 log_operaciones/(8042:8042): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:24:31:572 log_operaciones/(8042:8042): usando instancia#2
+[INFO] 19:24:31:572 log_operaciones/(8042:8042): resultado: 0
+[DEBUG] 19:24:54:635 log_operaciones/(8075:8075): cargando configuracion
+
+[DEBUG] 19:24:54:641 log_operaciones/(8075:8075): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 19:24:54:642 log_operaciones/(8075:8075): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:24:54:642 log_operaciones/(8075:8075): usando instancia#1
+[INFO] 19:24:54:642 log_operaciones/(8075:8075): resultado: 0
+[INFO] 19:24:54:642 log_operaciones/(8075:8075): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:24:54:642 log_operaciones/(8075:8075): usando instancia#2
+[INFO] 19:24:54:642 log_operaciones/(8075:8075): resultado: 0
