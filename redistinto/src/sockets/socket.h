@@ -48,5 +48,8 @@ typedef struct{
 int connect_to_server(char * ip, char * serverPort);
 int send_msg(int socket, Message msg);
 int await_msg(int socket, Message *msg);
+int create_listener(char * ip, char * serverPort);
+void start_listening(int socket, t_list *conexiones);
+void close_listener(Conexion *conexion){;
 
 #endif
