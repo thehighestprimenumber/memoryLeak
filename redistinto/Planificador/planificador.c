@@ -5,14 +5,29 @@ int main(void) {
 
 	estructura_planificador();
 
-	//Pruebas datos planificador (falla todavía en algoritmo)
-	printf("Puerto planificador: %d\n", planificador.puerto_planif);
-	printf("Algoritmo planificador: %s\n", planificador.algoritmo_planif);
-	printf("Estimación: %d\n", planificador.estimacion_inicial);
-	printf("IP Coordinador: %s\n", planificador.IP_coordinador);
-	printf("Puerto Coordinador: %d\n",planificador.puerto_coordinador);
+	printf("\nPuerto planificador: %d", planificador.puerto_planif);
+	printf("\nAlgoritmo planificador: %s", planificador.algoritmo_planif);
+	printf("\nEstimación: %d", planificador.estimacion_inicial);
+	printf("\nIP Coordinador: %s", planificador.IP_coordinador);
+	printf("\nPuerto Coordinador: %d",planificador.puerto_coordinador);
 
 	list_destroy(planificador.clavesBloqueadas);
+
+	printf("\nInicio de la consola\n");
+
+	pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
+
+	if (pidConsola < 0) {
+		printf("Error al intentar abrir la consola");
+		exit_proceso(-1);
+	}
+
+	pthread_join(threadConsola,NULL);
+
+	//abrir_consola();
+
+	printf("\nProceso finalizado");
+
 	exit_proceso(0);
 }
 

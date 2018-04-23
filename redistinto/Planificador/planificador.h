@@ -15,12 +15,20 @@
 #include <commons/txt.h>
 #include <commons/config.h>
 #include <commons/string.h>
+#include "time.h"
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include <pthread.h>
+#include "consola.h"
 
 char* arch_config;
 
 t_log * log_planificador;
+
+pthread_t threadConsola;
+int pidConsola;
 
 typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
 
@@ -68,5 +76,10 @@ void estimacion_read(t_config* configuracion);
 void ip_coordinador_read(t_config* configuracion);
 void puerto_coordinador_read(t_config* configuracion);
 void clavesBloqueadas_read(t_config* configuracion);
+
+//Firmas de las funciones que irian más adelante
+int abrirPlanificador(); //Abre la conexión del planificador y sus conexiones
+int planificar_esis(char* algoritmo); //Replanifica los esis y devuelve el identificador del próximo a ejecutar
+int estimar_rafaga(char* algoritmo); //Estima la duración de la próxima ráfaga usando formula de la media exponencial
 
 #endif /* PRUEBA_H_ */
