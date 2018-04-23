@@ -104,9 +104,9 @@ int create_listener(char * ip, char * serverPort){
 
 	freeaddrinfo(server_info);
 
-	if(listen(socket, 5) == -1) return -1;
+	if(listen(server_socket, 5) == -1) return -1;
 
-	return socket;
+	return server_socket;
 }
 
 
@@ -116,7 +116,10 @@ int start_listening(int socket, t_list *conexiones){
 		socklen_t addrSize = sizeof(conexion->addr);
 		int nuevoSocket;
 		if(accept(nuevoSocket, &(conexion->addr), &addrSize) == -1) return -1;
-		list_add(conexiones, conexion);//Esto deberia estar echo con un semaforo
+		conexion->socket = nuevoSocket;
+		//Deberia pedir permiso al semaforo para acceder a la lista
+		list_add(conexiones, conexion);
+		//
 	}
 	return 0;
 
@@ -126,5 +129,16 @@ void close_listener(Conexion *conexion){
 	close(conexion->socket);
 	//freeaddrinfo(conexion->addr);
 	free(conexion);
+	return;
 }
 
+void delete_conection(t_list *conexiones,int index){
+	//Deberia pedir permiso al semaforo para acceder a la lista
+	list_remove_and_destroy_element(conexiones, index, close_listener);
+	//
+}
+Conexion* get_conection(t_list *conexiones,int index){
+	//Deberia pedir permiso al semaforo para acceder a la lista
+	return (Conexion*) list_get(conexiones, index);
+	//
+}
