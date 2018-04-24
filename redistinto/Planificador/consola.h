@@ -17,13 +17,16 @@
 void* abrir_consola();
 void procesar_funcion(char* linea);
 
-void comando_continuar();
-void comando_pausar();
-void comando_bloquear(char* clave, int pid);
-void comando_desbloquear(char* clave);
-void comando_listar(char* recurso); //ACA NO ENTIENDO BIEN SI PIDE EL LISTADO DE ESIS QUE QUIEREN EJECUTAR X EJEMPLO
-void comando_kill(int pid);
-void comando_status();
-void comando_deadlock();
+void comando_continuar(char** linea);
+void comando_pausar(char** linea);
+void comando_bloquear(char** linea);
+void comando_desbloquear(char** linea);
+void comando_listar(char** linea); //ACA NO ENTIENDO BIEN SI PIDE EL LISTADO DE ESIS QUE QUIEREN EJECUTAR X EJEMPLO
+void comando_kill(char** linea);
+void comando_status(char** linea);
+void comando_deadlock(char** linea);
+
+char* limpiar_comando(char* comando);
+int tamanio_array(char** cadena);
 
 #endif /* CONSOLA_H_ */
