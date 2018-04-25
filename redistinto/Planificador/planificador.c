@@ -89,7 +89,7 @@ void puerto_coordinador_read(t_config* configuracion) {
 }
 
 void clavesBloqueadas_read(t_config* configuracion) {
-	char** claves;
+	char** claves = NULL;
 
 	if (config_has_property(configuracion, claves_bloqueadas)) {
 		claves = string_split(config_get_string_value(configuracion,claves_bloqueadas),",");
@@ -99,10 +99,19 @@ void clavesBloqueadas_read(t_config* configuracion) {
 		list_add(planificador.clavesBloqueadas,claves[i]);
 	}
 
-	free(claves);
+	liberar_split(claves);
 }
 
 void exit_proceso(int retorno) {
   log_destroy(log_planificador);
   exit(retorno);
+}
+
+void liberar_split(char** array){
+	int i = 0;
+	while (array[i] != NULL) {
+		free(array[i]);
+		i++;
+	}
+	free(array);
 }

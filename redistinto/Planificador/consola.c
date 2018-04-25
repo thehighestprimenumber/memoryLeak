@@ -2,7 +2,7 @@
 
 void* abrir_consola(void* ptr) {
 	char* retorno;
-	char* linea;
+	char* linea = NULL;
 	while(1) {
 		linea = readline(">");
 
@@ -55,7 +55,8 @@ void procesar_funcion(char* comando) {
 			comando_deadlock(list_comandos);
 		else
 			printf("Usted ha ingresado un comando inválido\n");
-	free(list_comandos);
+
+	liberar_split(list_comandos);
 }
 
 void comando_continuar(char** linea) {

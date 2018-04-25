@@ -28,5 +28,6 @@ void comando_deadlock(char** linea);
 
 char* limpiar_comando(char* comando);
 int tamanio_array(char** cadena);
+void liberar_split(char** array);
 
 #endif /* CONSOLA_H_ */

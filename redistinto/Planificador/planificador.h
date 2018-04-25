@@ -64,6 +64,7 @@ t_planificador planificador;
 int socket_coordinador;
 
 char* configTxt = "./configPlanificador.txt";
+//char* configTxt = "/home/utnso/tp/configPlanificador.txt";
 
 void inicializar_logger();
 void exit_proceso();
@@ -76,6 +77,7 @@ void estimacion_read(t_config* configuracion);
 void ip_coordinador_read(t_config* configuracion);
 void puerto_coordinador_read(t_config* configuracion);
 void clavesBloqueadas_read(t_config* configuracion);
+void liberar_split(char** array);
 
 //Firmas de las funciones que irian más adelante
 int abrirPlanificador(); //Abre la conexión del planificador y sus conexiones
