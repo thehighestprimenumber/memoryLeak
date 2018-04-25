@@ -9,15 +9,18 @@
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/log.h>
+#include <socket.h>
+#include <stdlib.h>
 
 t_log * log_esi;
+int cliente_planificador;
+int identificador;
 
 typedef struct {
-	int identificador;
-	char* ip_coord;
-	int puerto_coord;
-	char* ip_planif;
-	int puerto_planif;
-} proceso_esi;
+	char* coordinador_ip;
+	char* coordinador_puerto;
+	char* planificador_ip;
+	char* planificador_puerto;
+} esi_configuracion;
 
 #endif

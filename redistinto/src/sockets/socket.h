@@ -20,10 +20,22 @@
 //Enums
 
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
-typedef enum{ACK, IDEJMPLO1} tipoId;
+typedef enum{ACK, IDEJMPLO1, ESI, PLANIFICADOR} tipoId;
+
+typedef enum {
+	HANDSHAKE = 1
+}t_protocolo;
 
 
 //Estructuras
+
+//Estructura de paquete
+typedef struct {
+	int id_remitente; // Remitente del paquete
+	int protocolo; // Un int que representa lo que quiere hacer el remitente
+	long cantBytes;
+	void* pBuffer;
+} t_paquete;
 
 //Estructura del header
 typedef struct {
