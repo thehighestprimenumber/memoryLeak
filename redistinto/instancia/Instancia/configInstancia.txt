@@ -1,0 +1,6 @@
+IP_coordinador="127.0.0.1"
+puerto_coordinador="8086"
+algoritmo="BSU"
+punto_montaje="/home/utnso/instancia1"
+nombre_instancia="Instancia1"
+dump="10"
