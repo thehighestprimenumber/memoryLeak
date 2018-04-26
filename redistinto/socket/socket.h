@@ -10,9 +10,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <commons/collections/list.h>
+#include <pthread.h>
 
 //Defines
-#define IP "172.0.0.1"//todas estaran dentro de la maquina
+#define IP "127.0.0.1"//todas estaran dentro de la maquina
 #define PUERTO_COORDINADOR "8001"
 #define PUERTO_PLANIFICADOR "8002"
 
@@ -52,7 +53,7 @@ typedef struct {
 //Estructura de conexion
 typedef struct{
 	int socket;
-	struct sockaddr_storage addr;
+	__SOCKADDR_ARG addr;
 } Conexion;
 
 
@@ -61,9 +62,7 @@ int connect_to_server(char * ip, char * serverPort);
 int send_msg(int socket, Message msg);
 int await_msg(int socket, Message *msg);
 int create_listener(char * ip, char * serverPort);
-int start_listening(int socket, t_list *conexiones);
-void close_listener(Conexion *conexion);
-void delete_conection(t_list *conexiones,int index);
-Conexion* get_conection(t_list *conexiones,int index);
+void start_listening(int socket, void*(*manejadorDeConexion)(Conexion*));
+void close_conection(Conexion *conexion);
 
 #endif
