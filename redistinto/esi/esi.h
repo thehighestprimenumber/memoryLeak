@@ -14,6 +14,7 @@
 
 t_log * log_esi;
 int cliente_planificador;
+int cliente_coordinador;
 int identificador;
 
 typedef struct {

@@ -24,6 +24,9 @@ int main(int argc,char *argv[]) {
 	// Nos conectamos y pedimos handshake al planificador, este nos asigna un identificador
 	conectar_a_planificador(pConfig);
 
+	// Nos conectamos y pedimos handshake al coordinador
+	conectar_a_coordinador(pConfig);
+
 	return EXIT_SUCCESS;
 }
 
@@ -65,5 +68,26 @@ void conectar_a_planificador(esi_configuracion* pConfig) {
 	memcpy(&identificador,(int*)paquete.pBuffer, sizeof(int));
 	printf("El planificador asigno el id:%d a este ESI.\n", identificador);
 	log_trace(log_esi,"EL planificador asigno el id:%d a este ESI.", identificador);
+	destruir_paquete(paquete);
+}
+
+void conectar_a_coordinador(esi_configuracion* pConfig) {
+
+	t_paquete paquete;
+
+	int resultado = connect_to_server(pConfig->coordinador_ip,pConfig->coordinador_puerto);
+	//Verifico conexion con el coordinador
+	if (resultado != 0) {
+		log_error(log_esi, "Fallo conexion con el Coordinador");
+		exit(EXIT_FAILURE);
+	} else {
+		log_info(log_esi, "ESI se conecto con el Coordinador");
+	}
+
+	pedir_handshake(&cliente_coordinador, ESI);
+
+	paquete = recibir_paquete(&cliente_coordinador);
+	memcpy(&identificador,(int*)paquete.pBuffer, sizeof(int));
+
 	destruir_paquete(paquete);
 }
