@@ -12,5 +12,14 @@ int main(){
 	 return -1;
 	}
 	printf("Se pudo conectar con el coordinador");
+	Message* msg= (Message*) malloc(sizeof(Message));
+	msg->contenido = (char*) malloc(sizeof(char)*strlen("Hola coordinador"));
+	msg->contenido = "Hola coordinador";
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	msg->header->id = INSTANCIA;
+	msg->header->size = sizeof(msg);
+
+
+	send_msg(socket_coordinador, msg);
 	return 0;
 }

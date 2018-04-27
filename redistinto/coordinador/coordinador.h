@@ -39,6 +39,10 @@ typedef struct {
 } t_coordinador;
 t_coordinador coordinador;
 
+typedef struct {
+	int identificador;
+} proceso_esi;
+
 char* arch_config;
 t_log * log_operaciones;
 

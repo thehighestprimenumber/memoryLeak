@@ -20,7 +20,7 @@
 //Enums
 
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
-typedef enum{ACK, IDEJMPLO1} tipoId;
+typedef enum{ACK, IDEJMPLO1, INSTANCIA} tipoId;
 
 
 //Estructuras
