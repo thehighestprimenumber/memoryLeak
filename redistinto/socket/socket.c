@@ -119,7 +119,7 @@ int create_listener(char * ip, char * serverPort){
 }
 
 
-void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(Conexion*)){
+void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void *) ){
 	//Por si me mandan un socket con problemas
 	if(socket == -1) return;
 
@@ -145,7 +145,7 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(Conex
 		//Genero un nuevo hilo
 		pthread_t nuevoHilo;
 
-		if(pthread_create(&nuevoHilo, NULL, manejadorDeNuevaConexion, conexion)){
+		if(pthread_create(&nuevoHilo, NULL, *manejadorDeNuevaConexion, conexion)){
 			//Si ocurre esto es porque tuvo un problema creando el hilo
 			close_conection(conexion);
 		}
@@ -153,11 +153,11 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(Conex
 	}
 }
 
-void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message), void* (*manejadorDeNuevaConexion)(Conexion*)){
+void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*), void* (*manejadorDeNuevaConexion)(Conexion*)){
 	//Por si me mandan un socket con problemas
-	if(socket == -1) return;
+	if(socketListener == -1) return;
 
-	t_list conexiones = list_create();
+	t_list *conexiones = list_create();
 	int activity;
 	fd_set readfds;
 
@@ -168,7 +168,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 		FD_SET(socketListener, &readfds);
 
 		for(int i = 0; i < list_size(conexiones); i++){
-			FD_SET( ((Conexion*) list_get(i))->socket , &readfds);
+			FD_SET( ((Conexion*) list_get(conexiones, i))->socket , &readfds);
 		}
 
 		//Esperamos que ocurra algo con alguna de las conexiones (inclusive con el socket de escucha)
@@ -188,7 +188,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 			socklen_t addrSize = sizeof(conexion->addr);
 
 			//Eacepto esta nueva conexion
-			int nuevoSocket = accept(socket, conexion->addr, &addrSize);
+			int nuevoSocket = accept(socketListener, conexion->addr, &addrSize);
 			conexion->socket = nuevoSocket;
 
 			//Pregunto si salio todo bien
@@ -203,17 +203,17 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 
 		//Recorremos preguntando por cada conexion si ocurrio algun evento
 		for(int i = 0; i < list_size(conexiones); i++){
-			if(FD_ISSET( ((Conexion*) list_get(i))->socket , &readfds )){//Ocurrio algo con este socket
+			if(FD_ISSET( ((Conexion*) list_get(conexiones, i))->socket , &readfds )){//Ocurrio algo con este socket
 				//Deberia verificar primero si el evento ocurrido fue una desconexion
 
 				//Recibo el mensaje
 				Message *msg = malloc(sizeof(Message));
-				if(await_msg( ((Conexion*) list_get(i))->socket, msg) == -1){
+				if(await_msg( ((Conexion*) list_get(conexiones, i))->socket, msg) == -1){
 					continue;
 				}
 
 				//Llamo a la funcion que se encarga de manejar este nuevo mensaje
-				if( manejadorDeEvento(((Conexion*) list_get(i)), msg) == -1){
+				if( manejadorDeEvento(((Conexion*) list_get(conexiones, i)), msg) == -1){
 					//Significa que por alguna razon quiere que cierre la conexion
 					list_destroy_and_destroy_elements(conexiones, close_conection);
 				}
@@ -223,11 +223,11 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 	}
 }
 
-void close_conection(Conexion *conexion){
+void close_conection(void *conexion){
 	if(conexion != NULL){
-		if(conexion->socket != -1) close(conexion->socket);
-		if(conexion->addr != NULL) free(conexion->addr);
-		free(conexion);
+		if(((Conexion*)conexion)->socket != -1) close(((Conexion*)conexion)->socket);
+		if(((Conexion*)conexion)->addr != NULL) free(((Conexion*)conexion)->addr);
+		free(((Conexion*)conexion));
 	}
 	return;
 }

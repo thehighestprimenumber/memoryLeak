@@ -62,9 +62,9 @@ int connect_to_server(char * ip, char * serverPort);
 int send_msg(int socket, Message msg);
 int await_msg(int socket, Message *msg);
 int create_listener(char * ip, char * serverPort);
-void start_listening_threads(int socket, void*(*manejadorDeNuevaConexion)(Conexion*), void* (*manejadorDeNuevaConexion)(Conexion*));
+void start_listening_threads(int socket, void*(*manejadorDeNuevaConexion)(void*));//(void*) -> recibira un (Conexion*)
 //el manejador de mensajes de start_listening_select debe devolver -1 si desea cerrar ese socket
-void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message), void* (*manejadorDeNuevaConexion)(Conexion*));
-void close_conection(Conexion *conexion);
+void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*), void* (*manejadorDeNuevaConexion)(Conexion*));
+void close_conection(void *conexion);
 
 #endif
