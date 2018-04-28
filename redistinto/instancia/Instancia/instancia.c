@@ -17,15 +17,16 @@ int main(){
 	 printf("No se pudo conectar con el coordinador");
 	 return -1;
 	}
-	printf("Se pudo conectar con el coordinador");
+	//printf("Se pudo conectar con el coordinador");
 	Message* msg= (Message*) malloc(sizeof(Message));
-	msg->contenido = (char*) malloc(sizeof(char)*strlen("Hola coordinador"));
-	msg->contenido = "Hola coordinador";
+	msg->contenido = (char*) malloc(strlen("Holaquetal coordinador"));
+	msg->contenido = "Holaquetal coordinador";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
 	msg->header->id = INSTANCIA;
 	msg->header->size = sizeof(msg);
 
 
 	send_msg(socket_coordinador, (*msg));
+	//printf("Se envio el mensaje");
 	return 0;
 }

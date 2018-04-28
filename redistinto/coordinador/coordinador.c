@@ -1,6 +1,9 @@
 # include "coordinador.h"
 # include "configuracion.h"
 
+extern int iniciar();
+
+
 //mensajes a enviar al planificador
 bool esta_bloqueada(char* clave){
 	return false;
@@ -23,8 +26,7 @@ int main() {
 	cargar_configuracion();
 	log_debug(logger_coordinador, "\nretardo: %d\ncantidad_entradas: %d\ntamanio_entrada: %d\npuerto_escucha: %s\nalgoritmo: %s\n",
 			coordinador.retardo, coordinador.cantidad_entradas, coordinador.tamanio_entrada, coordinador.puerto_escucha, algoritmo_coordinador_nombres[coordinador.algoritmo]);
-	iniciar();
-	/*t_operacion op = { .clave = "k1054", .valor = "54 alumnos", .tipo = 1 };
+	t_operacion op = { .clave = "k1054", .valor = "54 alumnos", .tipo = 1 };
 	proceso_esi esi = { .identificador = 1 };
 	coordinador.tabla_instancias = list_create();
 	crear_instancia(1);
@@ -33,7 +35,8 @@ int main() {
 	ultima_instancia_usada=0;
 	enum resultado_coord resultado = procesarOperacion(op, esi);
 	resultado = procesarOperacion(op, esi);
-	informar_resultado_al_planificador(resultado);*/
+	informar_resultado_al_planificador(resultado);
+	iniciar();
 }
 
 enum resultado_coord procesarOperacion(t_operacion op_a_realizar, proceso_esi solicitante) {

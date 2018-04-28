@@ -1,8 +1,8 @@
 #include "./conexiones.h"
 #include "./coordinador.h"
-#include <socket.h>
 
-#define ERROR_DE_CONEXION "-1"
+
+#define ERROR_DE_CONEXION -1
 
 
  extern int send_msg(int socket, Message msg);
@@ -12,18 +12,25 @@
 //el manejador de mensajes de start_listening_select debe devolver -1 si desea cerrar ese socket
  extern void close_conection(void *conexion);
 
-int recibir_mensaje(Conexion* con){
-	printf("tienes un email");
+void* recibir_mensaje(void* con){
+	Conexion* conexion = (Conexion*) con;
+	Message msg;
+	printf("voy a recibir algo");
+	await_msg(conexion->socket, &msg);
+	enum tipoId recipiente =  msg.header->id;
+	char * request = malloc(msg.header->size);
+			strcpy(request, (char *) msg.contenido);
+
+	log_info(logger_coordinador, "recibi mensaje de %d: %s", recipiente, request);
+	return NULL;
 }
 int iniciar(){
-//	Message *msg;
+	log_info(logger_coordinador, "iniciado");
 
-//	int socket_fd = create_listener(IP, PUERTO_COORDINADOR);
-//		if (socket_fd <0) return ERROR_DE_CONEXION;
+	int socket_fd = create_listener(IP, PUERTO_COORDINADOR);
+		if (socket_fd <0) return ERROR_DE_CONEXION;
 
-//	start_listening_threads(socket_fd, recibir_mensaje);
-//
-//	aways_msg(socket_fd, msg);
+	start_listening_threads(socket_fd, *recibir_mensaje);
 
 	return 1;
 }
