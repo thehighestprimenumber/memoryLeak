@@ -21,7 +21,7 @@
 //Enums
 
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
-typedef enum{ACK, IDEJMPLO1, ESI, PLANIFICADOR, INSTANCIA} tipoId;
+typedef enum tipoId {ACK, DESCONEXION, ESI, PLANIFICADOR, INSTANCIA} tipoId;
 
 typedef enum {
 	HANDSHAKE = 1

@@ -63,7 +63,10 @@ int await_msg(int socket, Message *msg) {
 	int result_recv = recv(socket, header, sizeof(ContentHeader), MSG_WAITALL);
 
 	//En caso de error al recibir devuelvo -1
-	if(result_recv == -1) return -1;
+	if(result_recv == -1){
+		free(header);
+		return -1;
+	}
 
 	//Preparo el espacio necesario para recibir el contenido (tamaño variable)
 	void *contenido = malloc(header->size);
@@ -72,7 +75,11 @@ int await_msg(int socket, Message *msg) {
 	result_recv = recv(socket, contenido, header->size, MSG_WAITALL);
 
 	//En caso de error al recibir devuelvo -1
-	if(result_recv == -1) return -1;
+	if(result_recv == -1){
+		free(header);
+		free(contenido);
+		return -1;
+	}
 
 	//En caso que todo salgo correcto relleno el msg y devuelvo 1 para informar la operacion satisfactoria
 	msg->header = header;
@@ -187,7 +194,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 			//Calcula el espacio de la direccion de la nueva conexion
 			socklen_t addrSize = sizeof(conexion->addr);
 
-			//Eacepto esta nueva conexion
+			//Acepto esta nueva conexion
 			int nuevoSocket = accept(socketListener, conexion->addr, &addrSize);
 			conexion->socket = nuevoSocket;
 
@@ -205,15 +212,17 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 		for(int i = 0; i < list_size(conexiones); i++){
 			if(FD_ISSET( ((Conexion*) list_get(conexiones, i))->socket , &readfds )){//Ocurrio algo con este socket
 				//Deberia verificar primero si el evento ocurrido fue una desconexion
-
 				//Recibo el mensaje
 				Message *msg = malloc(sizeof(Message));
 				if(await_msg( ((Conexion*) list_get(conexiones, i))->socket, msg) == -1){
+					msg->header = malloc(sizeof(ContentHeader));
+					msg->header->id = DESCONEXION;
+					msg->header->size = 0;
+					msg->contenido = NULL;
+					manejadorDeEvento(((Conexion*) list_get(conexiones, i)), msg);
+					list_destroy_and_destroy_elements(conexiones, close_conection);
 					continue;
-				}
-
-				//Llamo a la funcion que se encarga de manejar este nuevo mensaje
-				if( manejadorDeEvento(((Conexion*) list_get(conexiones, i)), msg) == -1){
+				}else if( manejadorDeEvento(((Conexion*) list_get(conexiones, i)), msg) == -1){//Llamo a la funcion que se encarga de manejar este nuevo mensaje
 					//Significa que por alguna razon quiere que cierre la conexion
 					list_destroy_and_destroy_elements(conexiones, close_conection);
 				}
@@ -361,92 +370,3 @@ void destruir_paquete(t_paquete un_paquete){
 	}
 
 }
-
-//int enviar_paquete(void *buffer,int tamanoBuffer, int *pSocket,int remitente, int protocolo){
-//	/* Envia el paquete serializado (encabezado + buffer recibido) */
-//	int tamanoPaquete;
-//	struct header encabezado;
-//	int resultado, desplazamiento;
-//	char* pChar;
-//
-//	encabezado.id_remitente = remitente;
-//	encabezado.protocolo = protocolo; // Aca va a ir algo que represente lo que queremos hacer
-//	encabezado.cantBytes = tamanoBuffer;
-//
-//	tamanoPaquete = tamanoBuffer + sizeof(encabezado);
-//	void *paquete = malloc (tamanoPaquete);
-//
-//	pChar = (char*)paquete;
-//	desplazamiento = 0;
-//
-//	memcpy(pChar, &encabezado, sizeof(encabezado));
-//	desplazamiento += sizeof(encabezado);
-//	if ((buffer != NULL) && (tamanoBuffer > 0)){ // Si el buffer no es nulo
-//		memcpy((pChar + desplazamiento),(char*)buffer,tamanoBuffer);
-//	}
-//
-//	resultado = send(*pSocket, paquete, tamanoPaquete, MSG_NOSIGNAL);
-//	if (resultado != tamanoPaquete){
-//		free (paquete);
-//		perror("error: send\n");
-//		return -1;
-//	}
-//
-//	free (paquete);
-//	return resultado;
-//
-//}
-//
-//t_paquete recibir_paquete(int* pSocket){
-//
-//	int id; 				// El remitente del mensaje
-//	int loQueQuieroHacer; 	// Protocolo a definir
-//	int tam;
-//	void * pBuffer;
-//	t_paquete unPaquete;
-//	int resultado;
-//
-//	resultado = recv(*pSocket, &id, sizeof(int), MSG_WAITALL);
-//	if (resultado <= 0){
-//		unPaquete.protocolo = resultado;
-//		printf ("Problema con el Cliente: ");
-//		cerrarSocket(pSocket);
-//		return unPaquete;
-//	}
-//
-//	recv(*pSocket, &loQueQuieroHacer, sizeof(int), MSG_WAITALL);
-//	recv(*pSocket, &tam, sizeof(int), MSG_WAITALL);
-//	if (tam >0){
-//		pBuffer = malloc(tam);
-//		recv(*pSocket, (void*) pBuffer,tam, MSG_WAITALL);
-//	}
-//	else{
-//		pBuffer = NULL;
-//	}
-//
-//	// Armo el paquete
-//	unPaquete.id_remitente = id;
-//	unPaquete.protocolo = loQueQuieroHacer;
-//	unPaquete.cantBytes = tam;
-//	unPaquete.pBuffer = pBuffer;
-//
-//	return unPaquete;
-//
-//}
-//
-//int pedir_handshake(int* pSocket, int remitente){
-//
-//	int rv;
-//	rv = enviarPaquete(NULL,0,pSocket, remitente, HANDSHAKE);
-//	return rv;
-//
-//}
-//
-//void destruir_paquete(t_paquete un_paquete){
-//
-//	if (un_paquete.pBuffer != NULL){
-//		free (un_paquete.pBuffer);
-//	}
-//
-//}
-
