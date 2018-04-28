@@ -27,7 +27,7 @@
 		<link>
 			<name>socket</name>
 			<type>2</type>
-			<location>/home/utnso/workspace/tp-2018-1c-Memory-leak/redistinto/socket</location>
+			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/socket</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

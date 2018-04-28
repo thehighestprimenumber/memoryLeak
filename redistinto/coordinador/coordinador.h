@@ -12,6 +12,7 @@
 #include "../esi/esi.h"
 #include "../operacion/operacion.h"
 #include "tabla_instancias.h"
+#include "./conexiones.h"
 
 void configurar_logger();
 void salir(int return_nr);
