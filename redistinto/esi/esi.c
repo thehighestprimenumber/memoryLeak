@@ -5,7 +5,7 @@ int main(int argc,char *argv[]) {
 	// Levantamos configuracion
 	char* ruta_configuracion = "/home/utnso/workspace/tp-2018-1c-Memory-leak/redistinto/src/configESI.txt";
 	esi_configuracion* configuracion = leer_configuracion_esi(ruta_configuracion);
-	esi_configuracion* pConfig = &configuracion;
+	esi_configuracion* pConfig = (esi_configuracion*)&configuracion;
 
 	// Levantamos el archivo de log y guardamos IP y Puerto
 	log_esi = log_create("log_esi.log", "ESI", true, LOG_LEVEL_TRACE);
@@ -42,7 +42,7 @@ esi_configuracion* leer_configuracion_esi(char *ruta_config) {
 	datos->planificador_puerto = config_get_string_value(config, "puerto_planificador");
 	datos->planificador_ip = config_get_string_value(config,"IP_planificador");
 
-	config_destroy(ruta_config);
+	config_destroy(config);
 
 	return datos;
 

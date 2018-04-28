@@ -65,4 +65,15 @@ int create_listener(char * ip, char * serverPort);
 void start_listening(int socket, void*(*manejadorDeConexion)(Conexion*));
 void close_conection(Conexion *conexion);
 
+//Funciones socket instancia y esi
+//int start_listening(int socket, t_list *conexiones);
+//int send_msg(int socket, Message* msg);
+void close_listener(Conexion *conexion);
+void delete_conection(t_list *conexiones,int index);
+Conexion* get_conection(t_list *conexiones,int index);
+
+int pedir_handshake(int* pSocket, int remitente);
+void destruir_paquete(t_paquete un_paquete);
+t_paquete recibir_paquete(int* pSocket);
+
 #endif

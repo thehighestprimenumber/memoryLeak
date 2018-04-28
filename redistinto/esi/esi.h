@@ -9,7 +9,7 @@
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/log.h>
-#include "sockets/socket.h"
+#include "../socket/socket.h"
 #include <stdlib.h>
 
 t_log * log_esi;
@@ -26,5 +26,6 @@ typedef struct {
 
 esi_configuracion* leer_configuracion_esi(char *ruta_config);
 void conectar_a_planificador(esi_configuracion* pConfig);
+void conectar_a_coordinador(esi_configuracion* pConfig);
 
 #endif

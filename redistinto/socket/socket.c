@@ -140,7 +140,7 @@ void start_listening(int socket, void* (*manejadorDeConexion)(Conexion*)){
 
 		pthread_t nuevoHilo;
 
-		if(pthread_create(&nuevoHilo, NULL, manejadorDeConexion, conexion)){
+		if(pthread_create(&nuevoHilo, NULL, (void*)&manejadorDeConexion, conexion)){
 			//Tuvimos un problema
 		}
 
@@ -153,4 +153,134 @@ void close_conection(Conexion *conexion){
 	free(conexion->addr);
 	free(conexion);
 	return;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+//FUNCIONES SOCKET INSTANCIA
+//////////////////////////////////////////////////////////////////////////////////
+/*int start_listening(int socket, t_list *conexiones){
+	while(1){
+		Conexion *conexion = malloc(sizeof(Conexion));
+		socklen_t addrSize = sizeof(conexion->addr);
+		int nuevoSocket;
+		if(accept(nuevoSocket, &(conexion->addr), &addrSize) == -1) return -1;
+		conexion->socket = nuevoSocket;
+		//Deberia pedir permiso al semaforo para acceder a la lista
+		list_add(conexiones, conexion);
+		//
+	}
+	return 0;
+
+}*/
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+//Funciones carpeta Sockets de ESI
+/////////////////////////////////////////////////////////////////////////////////////
+void close_listener(Conexion *conexion){
+	close(conexion->socket);
+	//freeaddrinfo(conexion->addr);
+	free(conexion);
+	return;
+}
+
+void delete_conection(t_list *conexiones,int index){
+	//Deberia pedir permiso al semaforo para acceder a la lista
+	list_remove_and_destroy_element(conexiones, index, (void*)close_listener);
+	//
+}
+
+Conexion* get_conection(t_list *conexiones,int index){
+	//Deberia pedir permiso al semaforo para acceder a la lista
+	return (Conexion*) list_get(conexiones, index);
+	//
+}
+
+int enviar_paquete(void *buffer,int tamanoBuffer, int *pSocket,int remitente, int protocolo){
+	/* Envia el paquete serializado (encabezado + buffer recibido) */
+	int tamanoPaquete;
+	t_paquete encabezado;
+	int resultado, desplazamiento;
+	char* pChar;
+
+	encabezado.id_remitente = remitente;
+	encabezado.protocolo = protocolo; // Aca va a ir algo que represente lo que queremos hacer
+	encabezado.cantBytes = tamanoBuffer;
+
+	tamanoPaquete = tamanoBuffer + sizeof(encabezado);
+	void *paquete = malloc (tamanoPaquete);
+
+	pChar = (char*)paquete;
+	desplazamiento = 0;
+
+	memcpy(pChar, &encabezado, sizeof(encabezado));
+	desplazamiento += sizeof(encabezado);
+	if ((buffer != NULL) && (tamanoBuffer > 0)){ // Si el buffer no es nulo
+		memcpy((pChar + desplazamiento),(char*)buffer,tamanoBuffer);
+	}
+
+	resultado = send(*pSocket, paquete, tamanoPaquete, MSG_NOSIGNAL);
+	if (resultado != tamanoPaquete){
+		free (paquete);
+		perror("error: send\n");
+		return -1;
+	}
+
+	free (paquete);
+	return resultado;
+
+}
+
+t_paquete recibir_paquete(int* pSocket){
+
+	int id; 				// El remitente del mensaje
+	int loQueQuieroHacer; 	// Protocolo a definir
+	int tam;
+	void * pBuffer;
+	t_paquete unPaquete;
+	int resultado;
+
+	resultado = recv(*pSocket, &id, sizeof(int), MSG_WAITALL);
+	if (resultado <= 0){
+		unPaquete.protocolo = resultado;
+		printf ("Problema con el Cliente: ");
+		close(*pSocket);
+		//cerrarSocket(pSocket);
+		return unPaquete;
+	}
+
+	recv(*pSocket, &loQueQuieroHacer, sizeof(int), MSG_WAITALL);
+	recv(*pSocket, &tam, sizeof(int), MSG_WAITALL);
+	if (tam >0){
+		pBuffer = malloc(tam);
+		recv(*pSocket, (void*) pBuffer,tam, MSG_WAITALL);
+	}
+	else{
+		pBuffer = NULL;
+	}
+
+	// Armo el paquete
+	unPaquete.id_remitente = id;
+	unPaquete.protocolo = loQueQuieroHacer;
+	unPaquete.cantBytes = tam;
+	unPaquete.pBuffer = pBuffer;
+
+	return unPaquete;
+
+}
+
+int pedir_handshake(int* pSocket, int remitente){
+
+	int rv;
+	rv = enviar_paquete(NULL,0,pSocket, remitente, HANDSHAKE);
+	return rv;
+
+}
+
+void destruir_paquete(t_paquete un_paquete){
+
+	if (un_paquete.pBuffer != NULL){
+		free (un_paquete.pBuffer);
+	}
+
 }

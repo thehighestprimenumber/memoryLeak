@@ -20,6 +20,6 @@ int main(){
 	msg->header->size = sizeof(msg);
 
 
-	send_msg(socket_coordinador, msg);
+	send_msg(socket_coordinador, (*msg));
 	return 0;
 }
