@@ -10,6 +10,7 @@
 
 #include <commons/collections/list.h>
 #include <commons/config.h>
+#include <commons/txt.h>
 #include <commons/log.h>
 
 t_log * log_inst;

@@ -4,8 +4,8 @@ int connect_to_server(char * ip, char * serverPort) {
 	//Nos aseguramos que no nos hayan mandado punteros vacios
 	if(ip == NULL || serverPort == NULL) return -1;
 
-	struct addrinfo *server_info;
 	struct addrinfo hints;
+	struct addrinfo *server_info;
 
 	memset(&hints, 0, sizeof(hints));//Preparamos el espacio para hints
 

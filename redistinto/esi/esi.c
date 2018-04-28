@@ -4,22 +4,22 @@ int main(int argc,char *argv[]) {
 
 	// Levantamos configuracion
 	char* ruta_configuracion = "/home/utnso/workspace/tp-2018-1c-Memory-leak/redistinto/src/configESI.txt";
-	esi_configuracion* configuracion = leer_configuracion_esi(ruta_configuracion);
+	esi_configuracion configuracion = leer_configuracion_esi(ruta_configuracion);
 	esi_configuracion* pConfig = (esi_configuracion*)&configuracion;
 
 	// Levantamos el archivo de log y guardamos IP y Puerto
 	log_esi = log_create("log_esi.log", "ESI", true, LOG_LEVEL_TRACE);
 	log_trace(log_esi,"Inicia el proceso ESI");
-	log_trace(log_esi,"El puerto del coordinador es: %s",configuracion->coordinador_puerto);
-	log_trace(log_esi,"La ip del coordinador es: %s",configuracion->coordinador_ip);
-	log_trace(log_esi,"El puerto del planificador es: %s",configuracion->coordinador_puerto);
-	log_trace(log_esi,"La ip del planificador es: %s",configuracion->coordinador_ip);
+	log_trace(log_esi,"El puerto del coordinador es: %s",pConfig->coordinador_puerto);
+	log_trace(log_esi,"La ip del coordinador es: %s",pConfig->coordinador_ip);
+	log_trace(log_esi,"El puerto del planificador es: %s",pConfig->coordinador_puerto);
+	log_trace(log_esi,"La ip del planificador es: %s",pConfig->coordinador_ip);
 
 	printf("Inicia el proceso ESI\n");
-	printf("El puerto del coordinador es: %s\n",configuracion->coordinador_puerto);
-	printf("La ip del coordinador es: %s\n",configuracion->coordinador_ip);
-	printf("El puerto del plnificador es: %s\n",configuracion->planificador_puerto);
-	printf("La ip del planificador es: %s\n",configuracion->planificador_ip);
+	printf("El puerto del coordinador es: %s\n",pConfig->coordinador_puerto);
+	printf("La ip del coordinador es: %s\n",pConfig->coordinador_ip);
+	printf("El puerto del plnificador es: %s\n",pConfig->planificador_puerto);
+	printf("La ip del planificador es: %s\n",pConfig->planificador_ip);
 
 	// Nos conectamos y pedimos handshake al planificador, este nos asigna un identificador
 	conectar_a_planificador(pConfig);
@@ -32,15 +32,40 @@ int main(int argc,char *argv[]) {
 
 // Funciones de inicialización
 
-esi_configuracion* leer_configuracion_esi(char *ruta_config) {
+esi_configuracion leer_configuracion_esi(char *ruta_config) {
 
 	t_config* config = config_create(ruta_config);
-	esi_configuracion* datos = (esi_configuracion*)malloc(sizeof(esi_configuracion));
+	//esi_configuracion datos = (esi_configuracion)malloc(sizeof(esi_configuracion));
+	esi_configuracion datos;
 
-	datos->coordinador_puerto = config_get_string_value(config, "puerto_coordinador");
-	datos->coordinador_ip = config_get_string_value(config,"IP_coordinador");
-	datos->planificador_puerto = config_get_string_value(config, "puerto_planificador");
-	datos->planificador_ip = config_get_string_value(config,"IP_planificador");
+	//datos.coordinador_puerto = config_get_string_value(config, "puerto_coordinador");
+	//datos.coordinador_ip = config_get_string_value(config,"IP_coordinador");
+	//datos.planificador_puerto = config_get_string_value(config, "puerto_planificador");
+	//datos.planificador_ip = config_get_string_value(config,"IP_planificador");
+
+	if (config_has_property(config, puerto_coordinador)) {
+		char* puertoCoord= config_get_string_value(config,puerto_coordinador);
+		datos.coordinador_puerto = malloc(strlen(puertoCoord) + 1);
+		memcpy(datos.coordinador_puerto,puertoCoord,strlen(puertoCoord) + 1);
+	}
+
+	if (config_has_property(config, IP_coordinador)) {
+		char* ipCoord = config_get_string_value(config,IP_coordinador);
+		datos.coordinador_ip = malloc(strlen(ipCoord) + 1);
+		memcpy(datos.coordinador_ip,ipCoord,strlen(ipCoord) + 1);
+		}
+
+	if (config_has_property(config, puerto_planificador)) {
+		char* puertoPlanif = config_get_string_value(config,puerto_planificador);
+		datos.planificador_puerto = malloc(strlen(puertoPlanif) + 1);
+		memcpy(datos.planificador_puerto,puertoPlanif,strlen(puertoPlanif) + 1);
+	}
+
+	if (config_has_property(config, IP_planificador)) {
+		char* ipPlanif = config_get_string_value(config,IP_planificador);
+		datos.planificador_ip = malloc(strlen(ipPlanif) + 1);
+		memcpy(datos.planificador_ip,ipPlanif,strlen(ipPlanif) + 1);
+	}
 
 	config_destroy(config);
 

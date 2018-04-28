@@ -1,4 +1,0 @@
-IP_coordinador="127.0.0.3"
-puerto_coordinador=8086
-IP_planificador="127.0.0.2"
-puerto_planificador=8085

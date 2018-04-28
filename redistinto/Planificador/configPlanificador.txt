@@ -1,6 +1,6 @@
 puerto=8085
 algoritmo=HRRN
 estimacion=10
-IP_coordinador=127.0.0.3
+IP_coordinador=127.0.0.1
 puerto_coordinador=8086
 claves_bloqueadas=clave1,clave4,clave6

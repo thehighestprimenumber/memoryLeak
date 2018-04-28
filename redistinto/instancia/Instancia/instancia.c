@@ -3,7 +3,8 @@
 #include "handlerCoordinador.h"
 
 int main(){
-	t_config* config = config_create("configuracionInstancia.txt");
+	t_config* config;
+	config = config_create("./configInstancia.txt");
 	char* ip = leer_propiedad_string(config, "IP_coordinador");
 	char* puerto = leer_propiedad_string(config, "puerto_coordinador");
 	int socket_coordinador = conectar_a_coordinador(ip, puerto);

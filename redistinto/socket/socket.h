@@ -3,12 +3,12 @@
 #define REDISTINTO_SOCKET_H_
 
 //Includes
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <unistd.h>
-#include <string.h>
 #include <commons/collections/list.h>
 #include <pthread.h>
 

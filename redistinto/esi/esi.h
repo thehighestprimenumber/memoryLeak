@@ -24,7 +24,7 @@ typedef struct {
 	char* planificador_puerto;
 } esi_configuracion;
 
-esi_configuracion* leer_configuracion_esi(char *ruta_config);
+esi_configuracion leer_configuracion_esi(char *ruta_config);
 void conectar_a_planificador(esi_configuracion* pConfig);
 void conectar_a_coordinador(esi_configuracion* pConfig);
 
