@@ -1,6 +1,7 @@
 # include "coordinador.h"
 # include "configuracion.h"
 
+extern int iniciar();
 //mensajes a enviar al planificador
 bool esta_bloqueada(char* clave){
 	return false;
@@ -17,13 +18,23 @@ int enviar_solicitud_a_instancia(t_operacion operacion, mock_instancia * instanc
 	return OK;
 }
 
+int recibir_conexion(Conexion* con){
+	printf("tienes un email");
+}
+
 int main() {
-	logger_coordinador = log_create("./log_de_operaciones.log", "log_operaciones", true, LOG_LEVEL_DEBUG);
+/*	logger_coordinador = log_create("./log_de_operaciones.log", "log_operaciones", true, LOG_LEVEL_DEBUG);
 	log_debug(logger_coordinador, "cargando configuracion\n");
 	cargar_configuracion();
 	log_debug(logger_coordinador, "\nretardo: %d\ncantidad_entradas: %d\ntamanio_entrada: %d\npuerto_escucha: %s\nalgoritmo: %s\n",
-			coordinador.retardo, coordinador.cantidad_entradas, coordinador.tamanio_entrada, coordinador.puerto_escucha, algoritmo_coordinador_nombres[coordinador.algoritmo]);
-	iniciar();
+			coordinador.retardo, coordinador.cantidad_entradas, coordinador.tamanio_entrada, coordinador.puerto_escucha, algoritmo_coordinador_nombres[coordinador.algoritmo]);*/
+	Message msg;
+	int socket_fd = create_listener(IP, PUERTO_COORDINADOR);
+			if (socket_fd <0) return -1;
+			printf(socket_fd);
+		start_listening_threads(socket_fd, recibir_conexion);
+
+		//await_msg(socket_fd, msg);
 	/*t_operacion op = { .clave = "k1054", .valor = "54 alumnos", .tipo = 1 };
 	proceso_esi esi = { .identificador = 1 };
 	coordinador.tabla_instancias = list_create();

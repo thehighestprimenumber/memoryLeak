@@ -1,6 +1,6 @@
 #include "./conexiones.h"
 #include "./coordinador.h"
-#include <socket.h>
+
 
 #define ERROR_DE_CONEXION "-1"
 
@@ -15,15 +15,17 @@
 int recibir_mensaje(Conexion* con){
 	printf("tienes un email");
 }
+
 int iniciar(){
-//	Message *msg;
+	printf("inicio server");
+	Message *msg;
 
-//	int socket_fd = create_listener(IP, PUERTO_COORDINADOR);
-//		if (socket_fd <0) return ERROR_DE_CONEXION;
+	int socket_fd = create_listener(IP, PUERTO_COORDINADOR);
+		if (socket_fd <0) return ERROR_DE_CONEXION;
 
-//	start_listening_threads(socket_fd, recibir_mensaje);
-//
-//	aways_msg(socket_fd, msg);
+	start_listening_threads(socket_fd, recibir_mensaje);
+
+	await_msg(socket_fd, msg);
 
 	return 1;
 }
