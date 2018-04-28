@@ -7,6 +7,7 @@
 # include "coordinador.h"
 
 char* ruta_arch_config = "./config_coordinador.txt";
+char* ruta_arch_config_debug = "../config_coordinador.txt";
 
 int leer_propiedad_int (t_config *configuracion, char* propiedad){
 	if (config_has_property(configuracion, propiedad)){
@@ -34,6 +35,10 @@ void leer_propiedad_algoritmo (t_config *configuracion){
 int cargar_configuracion(){
 	t_config* configuracion;
 	configuracion = config_create(ruta_arch_config);
+
+	if (configuracion == NULL)
+		configuracion = config_create(ruta_arch_config_debug);
+
 	coordinador.retardo = leer_propiedad_int(configuracion, m_retardo);
 	coordinador.cantidad_entradas = leer_propiedad_int(configuracion, m_cantidad_entradas);
 	coordinador.tamanio_entrada = leer_propiedad_int(configuracion, m_tamanio_entrada);

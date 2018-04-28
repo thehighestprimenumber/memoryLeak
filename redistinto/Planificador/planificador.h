@@ -64,6 +64,7 @@ t_planificador planificador;
 int socket_coordinador;
 
 char* configTxt = "./configPlanificador.txt";
+char* configTxtDebug = "../configPlanificador.txt";
 //char* configTxt = "/home/utnso/tp/configPlanificador.txt";
 
 void inicializar_logger();

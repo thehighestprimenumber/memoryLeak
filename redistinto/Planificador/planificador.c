@@ -42,6 +42,9 @@ void estructura_planificador() {
 
 	configuracion = config_create(configTxt);
 
+	if (configuracion == NULL)
+		configuracion = config_create(configTxtDebug);
+
 	puerto_planif_read(configuracion);
 	algoritmo_read(configuracion);
 	estimacion_read(configuracion);

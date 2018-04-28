@@ -3,8 +3,11 @@
 int main(int argc,char *argv[]) {
 
 	// Levantamos configuracion
-	char* ruta_configuracion = "/home/utnso/workspace/tp-2018-1c-Memory-leak/redistinto/src/configESI.txt";
-	esi_configuracion configuracion = leer_configuracion_esi(ruta_configuracion);
+	//char* ruta_configuracion = "/home/utnso/workspace/tp-2018-1c-Memory-leak/redistinto/src/configESI.txt";
+	char* ruta_configuracion = "./configESI.txt";
+	char* ruta_configuracion_debug = "../configESI.txt";
+
+	esi_configuracion configuracion = leer_configuracion_esi(ruta_configuracion,ruta_configuracion_debug);
 	esi_configuracion* pConfig = (esi_configuracion*)&configuracion;
 
 	// Levantamos el archivo de log y guardamos IP y Puerto
@@ -32,7 +35,7 @@ int main(int argc,char *argv[]) {
 
 // Funciones de inicialización
 
-esi_configuracion leer_configuracion_esi(char *ruta_config) {
+esi_configuracion leer_configuracion_esi(char *ruta_config, char* ruta_config_debug) {
 
 	t_config* config = config_create(ruta_config);
 	//esi_configuracion datos = (esi_configuracion)malloc(sizeof(esi_configuracion));
@@ -42,6 +45,9 @@ esi_configuracion leer_configuracion_esi(char *ruta_config) {
 	//datos.coordinador_ip = config_get_string_value(config,"IP_coordinador");
 	//datos.planificador_puerto = config_get_string_value(config, "puerto_planificador");
 	//datos.planificador_ip = config_get_string_value(config,"IP_planificador");
+
+	if (config == NULL)
+		config = config_create(ruta_config_debug);
 
 	if (config_has_property(config, puerto_coordinador)) {
 		char* puertoCoord= config_get_string_value(config,puerto_coordinador);
