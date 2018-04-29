@@ -15,13 +15,13 @@
 void* recibir_mensaje(void* con){
 	Conexion* conexion = (Conexion*) con;
 	Message msg;
-	printf("voy a recibir algo");
 	await_msg(conexion->socket, &msg);
 	enum tipoId recipiente =  msg.header->id;
 	char * request = malloc(msg.header->size);
 			strcpy(request, (char *) msg.contenido);
 
 	log_info(logger_coordinador, "recibi mensaje de %d: %s", recipiente, request);
+	//TODO parsear mensaje y hablar con el planificador y la instancia
 	return NULL;
 }
 int iniciar(){
