@@ -1,8 +1,6 @@
 #ifndef COORDINADOR_H
 #define COORDINADOR_H
 
-#define NULL 0
-
 #include <stdbool.h>
 #include <commons/log.h>
 #include <stdio.h>
@@ -14,14 +12,15 @@
 #include "tabla_instancias.h"
 #include "./conexiones.h"
 
+#define OK 0
+#define ERROR -20
+#define NO_HAY_INSTANCIAS -21
+#define CLAVE_BLOQUEADA -22
+
 void configurar_logger();
 void salir(int return_nr);
 
 t_log* logger_coordinador;
-
-enum resultado_coord {
-	OK, ERROR, NO_HAY_INSTANCIAS, CLAVE_BLOQUEADA
-};
 
 enum algoritmo_coordinador {
 	EQUITATIVE_LOAD, LEAST_SPACE_USED, KEY_EXPLICIT
@@ -47,8 +46,8 @@ typedef struct {
 char* arch_config;
 t_log * log_operaciones;
 
-enum resultado_coord procesarOperacion(t_operacion op_a_realizar, proceso_esi solicitante);
+int procesarOperacion(t_operacion op_a_realizar, proceso_esi solicitante);
 
-enum resultado_coord abrirCoordinador();
+int abrirCoordinador();
 
 #endif

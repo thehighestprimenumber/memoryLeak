@@ -49,7 +49,7 @@ int send_msg(int socket, Message msg) {
 	free(buffer);
 
 	if(resultado < 1) return -1;
-	else return 1;
+	else return 1; //TODO devolver resultado
 }
 
 int await_msg(int socket, Message *msg) {
@@ -149,6 +149,9 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void 
 			continue;//Continuo esperando una nueva conexion
 		}
 
+		if(nuevoSocket ==0){
+			printf(" socket = 0");
+		}
 		//Genero un nuevo hilo
 		pthread_t nuevoHilo;
 

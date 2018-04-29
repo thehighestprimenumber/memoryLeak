@@ -12,7 +12,7 @@ bool bloquear_clave(char* clave){
 	return OK;
 }
 
-bool informar_resultado_al_planificador(enum resultado_coord resultado){return true;}
+bool informar_resultado_al_planificador(int resultado){return true;}
 
 //mensajes a enviar a una instancia
 int enviar_solicitud_a_instancia(t_operacion operacion, mock_instancia * instancia){
@@ -33,13 +33,12 @@ int main() {
 	crear_instancia(2);
 	crear_instancia(3);
 	ultima_instancia_usada=0;
-	enum resultado_coord resultado = procesarOperacion(op, esi);
-	resultado = procesarOperacion(op, esi);
+	int resultado = procesarOperacion(op, esi);
 	informar_resultado_al_planificador(resultado);
 	iniciar();
 }
 
-enum resultado_coord procesarOperacion(t_operacion op_a_realizar, proceso_esi solicitante) {
+int procesarOperacion(t_operacion op_a_realizar, proceso_esi solicitante) {
 	char* clave = op_a_realizar.clave;
 	log_info(logger_coordinador, "procesando solicitud: %s %s %s de ESI# %d", tipo_operacion_nombres[op_a_realizar.tipo], clave,
 			op_a_realizar.valor, solicitante.identificador);

@@ -16,9 +16,9 @@ typedef struct {
 
 int ultima_instancia_usada;
 
-enum resultado_coord eliminar_instancia(int id_instancia);
+int eliminar_instancia(int id_instancia);
 
-enum resultado_coord crear_instancia();
+int crear_instancia();
 
 mock_instancia * seleccionar_instancia(char* clave);
 
