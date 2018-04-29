@@ -34,12 +34,12 @@ int main(){
 		log_debug(log_inst, "esperando mensaje");
 		int resultado = await_msg(socket_coordinador, &msg);
 		log_debug(log_inst, "llego un mensaje. parseando...");
-		if (resultado<0){ //TODO cambiarlo a 0 - default posix
-			//loguear strerror(resultado);
-			//continue;
-			return ERROR_DE_RECEPCION;
+		if (resultado<0){
+			log_debug(log_inst, "error de recepcion");
+			continue;
+			//return ERROR_DE_RECEPCION;
 		}
-		//TOOD parsear mensaje y hacer algo.
+		//TODO parsear mensaje y hacer algo.
 		char * request = malloc(msg.header->size);
 			strcpy(request, (char *) msg.contenido);
 		log_debug(log_inst, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???

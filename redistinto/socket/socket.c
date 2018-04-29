@@ -30,7 +30,9 @@ int connect_to_server(char * ip, char * serverPort) {
 		return server_socket;
 	}
 }
-
+/*
+ * devuelve la cantidad de bits leidos
+ */
 int send_msg(int socket, Message msg) {
 	//Verifico la existencia del socket y que el mensaje posea contenido
 	if(socket == -1 || msg.contenido == NULL || msg.header == NULL) return -1;
@@ -48,8 +50,7 @@ int send_msg(int socket, Message msg) {
 
 	free(buffer);
 
-	if(resultado < 1) return -1;
-	else return 1; //TODO devolver resultado
+	return resultado;
 }
 
 int await_msg(int socket, Message *msg) {
@@ -81,10 +82,10 @@ int await_msg(int socket, Message *msg) {
 		return -1;
 	}
 
-	//En caso que todo salgo correcto relleno el msg y devuelvo 1 para informar la operacion satisfactoria
+	//En caso que t odo salgo correcto relleno el msg y devuelvo 1 para informar la operacion satisfactoria
 	msg->header = header;
 	msg->contenido = contenido;
-	return 1;
+	return result_recv;
 }
 
 int create_listener(char * ip, char * serverPort){
@@ -143,15 +144,12 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void 
 
 		conexion->socket = nuevoSocket;
 
-		//Pregunto si salio todo bien
+		//Pregunto si salio t odo bien
 		if(nuevoSocket == -1){
 			close_conection(conexion);
 			continue;//Continuo esperando una nueva conexion
 		}
 
-		if(nuevoSocket ==0){
-			printf(" socket = 0");
-		}
 		//Genero un nuevo hilo
 		pthread_t nuevoHilo;
 
@@ -201,7 +199,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 			int nuevoSocket = accept(socketListener, conexion->addr, &addrSize);
 			conexion->socket = nuevoSocket;
 
-			//Pregunto si salio todo bien
+			//Pregunto si salio t odo bien
 			if(nuevoSocket == -1) close_conection(conexion);
 
 			//Añado la conexion a la lista

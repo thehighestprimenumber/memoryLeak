@@ -24,7 +24,7 @@ int enviar_mensaje(int socket, char* mensaje){
 			return ERROR_DE_ENVIO;
 		}
 	log_info(logger_coordinador, "se envio el mensaje desde el coordinador mensaje a %d: %s", socket, msg->contenido);
-	return OK; //TODO
+	return OK;
 }
 
 void* recibir_mensaje(void* con){

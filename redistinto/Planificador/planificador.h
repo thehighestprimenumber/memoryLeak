@@ -33,7 +33,6 @@ int pidConsola;
 typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
 
 typedef struct {
-       //operacion* operacion, TODO crear struct
 	   int puerto_planif;
 	   	char* algoritmo_planif;
 	   	int estimacion_inicial;
