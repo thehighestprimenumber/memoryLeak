@@ -81,7 +81,6 @@ void ip_coordinador_read(t_config* configuracion);
 void puerto_coordinador_read(t_config* configuracion);
 void clavesBloqueadas_read(t_config* configuracion);
 void liberar_split(char** array);
-
 void conectar_a_coordinador(t_planificador* pConfig);
 
 //Firmas de las funciones que irian más adelante
