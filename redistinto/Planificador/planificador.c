@@ -3,30 +3,32 @@
 int main(void) {
 	inicializar_logger();
 
+	log_info(log_planificador, "\nCargando configuración");
 	estructura_planificador();
 
-	printf("\nPuerto planificador: %d", planificador.puerto_planif);
-	printf("\nAlgoritmo planificador: %s", planificador.algoritmo_planif);
-	printf("\nEstimación: %d", planificador.estimacion_inicial);
-	printf("\nIP Coordinador: %s", planificador.IP_coordinador);
-	printf("\nPuerto Coordinador: %d",planificador.puerto_coordinador);
+	log_info(log_planificador,"\nPuerto planificador: %s", planificador.puerto_planif);
+	log_info(log_planificador,"\nAlgoritmo planificador: %s", planificador.algoritmo_planif);
+	log_info(log_planificador,"\nEstimación: %d", planificador.estimacion_inicial);
+	log_info(log_planificador,"\nIP Coordinador: %s", planificador.IP_coordinador);
+	log_info(log_planificador,"\nPuerto Coordinador: %s",planificador.puerto_coordinador);
 
-	list_destroy(planificador.clavesBloqueadas);
+	//conectar a coordinador
+	t_planificador* pConfig = (t_planificador*)&planificador;
+	conectar_a_coordinador(pConfig);
 
-	printf("\nInicio de la consola\n");
+	log_info(log_planificador,"\nInicio de la consola\n");
 
 	pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
 
 	if (pidConsola < 0) {
-		printf("Error al intentar abrir la consola");
+		log_error(log_planificador,"Error al intentar abrir la consola");
 		exit_proceso(-1);
 	}
 
 	pthread_join(threadConsola,NULL);
 
-	//abrir_consola();
-
-	printf("\nProceso finalizado");
+	log_info(log_planificador,"\nProceso finalizado");
+	list_destroy(planificador.clavesBloqueadas);
 
 	exit_proceso(0);
 }
@@ -57,7 +59,9 @@ void estructura_planificador() {
 
 void puerto_planif_read(t_config* configuracion) {
 	if (config_has_property(configuracion, puerto_planificador)) {
-		planificador.puerto_planif = config_get_int_value(configuracion,puerto_planificador);
+		char* puertoPlanif = config_get_string_value(configuracion,puerto_planificador);
+		planificador.puerto_planif = malloc(strlen(puertoPlanif) + 1);
+		memcpy(planificador.puerto_planif,puertoPlanif,strlen(puertoPlanif) + 1);
 	}
 }
 
@@ -87,7 +91,9 @@ void ip_coordinador_read(t_config* configuracion) {
 
 void puerto_coordinador_read(t_config* configuracion) {
 	if (config_has_property(configuracion, puertoCoord_planificador)) {
-		planificador.puerto_coordinador = config_get_int_value(configuracion,puertoCoord_planificador);
+		char* puertoCoord = config_get_string_value(configuracion,puertoCoord_planificador);
+		planificador.puerto_coordinador = malloc(strlen(puertoCoord) + 1);
+		memcpy(planificador.puerto_coordinador,puertoCoord,strlen(puertoCoord) + 1);
 	}
 }
 
@@ -103,6 +109,28 @@ void clavesBloqueadas_read(t_config* configuracion) {
 	}
 
 	liberar_split(claves);
+}
+
+void conectar_a_coordinador(t_planificador* pConfig) {
+	int pidCoordinador = connect_to_server(pConfig->IP_coordinador,pConfig->puerto_coordinador);
+	//Verifico conexion con el coordinador
+	if (pidCoordinador < 0) {
+		log_error(log_planificador, "Fallo conexión Planificador con el Coordinador");
+		exit(EXIT_FAILURE);
+	} else {
+		log_info(log_planificador, "Planificador se conecto con el Coordinador");
+	}
+
+	//printf("Se pudo conectar con el coordinador");
+	Message* msg= (Message*) malloc(sizeof(Message));
+	msg->contenido = (char*) malloc(strlen("Envio mensaje al Coordinador"));
+	msg->contenido = "Envio mensaje al Coordinador";
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	msg->header->id = PLANIFICADOR;
+	msg->header->size = sizeof(msg);
+
+	send_msg(pidCoordinador, (*msg));
+		//printf("Se envio el mensaje");
 }
 
 void exit_proceso(int retorno) {
