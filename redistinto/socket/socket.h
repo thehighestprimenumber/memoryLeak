@@ -17,11 +17,16 @@
 #define PUERTO_COORDINADOR "8086"
 #define PUERTO_PLANIFICADOR "8002"
 
+#define ERROR_DE_CONEXION -10
+#define ERROR_DE_ENVIO -11
+#define ERROR_DE_RECEPCION -12
+
+#define socket_OK 0
 
 //Enums
 
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
-typedef enum tipoId {ACK, DESCONEXION, ESI, PLANIFICADOR, INSTANCIA} tipoId;
+typedef enum tipoId {ACK, DESCONEXION, ESI, PLANIFICADOR, INSTANCIA, COORDINADOR} tipoId;
 
 typedef enum {
 	HANDSHAKE = 1

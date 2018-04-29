@@ -35,8 +35,8 @@ int pidCoordinador;
 typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
 
 typedef struct {
-       //operacion* operacion, TODO crear struct
-	   char* puerto_planif;
+        //operacion* operacion, TODO crear struct
+	    char* puerto_planif;
 	   	char* algoritmo_planif;
 	   	int estimacion_inicial;
 	   	char* IP_coordinador;

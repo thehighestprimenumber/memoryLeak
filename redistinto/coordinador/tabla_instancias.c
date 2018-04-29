@@ -11,7 +11,7 @@ mock_instancia * seleccionar_instancia(char* clave){
 	return instancia;
 }
 
-enum resultado_coord crear_instancia(int id){
+int crear_instancia(int id){
 	mock_instancia * instancia = malloc(sizeof(instancia));
 									instancia->id=id;
 	fila_tabla_instancias * fila = malloc(sizeof(fila_tabla_instancias));
