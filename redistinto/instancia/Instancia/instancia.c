@@ -23,7 +23,7 @@ int main(){
 	msg->contenido = (char*) malloc(strlen("Holaquetal coordinador"));
 	msg->contenido = "Holaquetal coordinador";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
-	msg->header->id = INSTANCIA;
+	msg->header->remitente = INSTANCIA;
 	msg->header->size = strlen(msg->contenido);
 
 
