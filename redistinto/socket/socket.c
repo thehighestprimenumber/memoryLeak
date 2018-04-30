@@ -161,7 +161,8 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void 
 	}
 }
 
-void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*), void* (*manejadorDeNuevaConexion)(Conexion*)){
+void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*), void* (*manejadorDeNuevaConexion)(void*)){
+//void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*), void* (*manejadorDeNuevaConexion)(Conexion*)){
 	//Por si me mandan un socket con problemas
 	if(socketListener == -1) return;
 

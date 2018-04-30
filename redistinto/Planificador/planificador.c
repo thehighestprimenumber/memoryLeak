@@ -37,6 +37,71 @@ void inicializar_logger() {
 	log_planificador = log_create("/home/utnso/tp/Planificador.log", "Planificador: ", true, LOG_LEVEL_INFO);
 }
 
+int iniciar(){
+	log_info(log_planificador, "Iniciando proceso planificador");
+
+	int socket_fd = create_listener(IP,planificador.puerto_planif);
+	if (socket_fd <0) return ERROR_DE_CONEXION;
+
+	start_listening_select(socket_fd, *realizar_evento, *recibir_mensaje);
+	//start_listening_threads(socket_fd, *recibir_mensaje);
+
+	return 0;
+}
+
+void* recibir_mensaje(void* con){
+	Conexion* conexion = (Conexion*) con;
+	Message msg;
+	int res = await_msg(conexion->socket, &msg);
+	if (res<0) {
+				log_info(log_planificador, "error al recibir un ensaje de %d", socket);
+				return (void*)ERROR_DE_RECEPCION;
+			}
+	enum tipoId recipiente =  msg.header->id;
+	char * request = malloc(msg.header->size);
+			strcpy(request, (char *) msg.contenido);
+
+	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
+	//TODO parsear mensaje y hablar con los esi
+	return (void*)enviar_mensaje(conexion->socket, "Hola soy el planificador");
+}
+
+int realizar_evento(Conexion* con, Message* msj){
+	Conexion* conexion = (Conexion*) con;
+	Message msg;
+	int res = await_msg(conexion->socket, &msg);
+	if (res<0) {
+				log_info(log_planificador, "error al recibir un ensaje de %d", socket);
+				return ERROR_DE_RECEPCION;
+			}
+	enum tipoId recipiente =  msg.header->id;
+	char * request = malloc(msg.header->size);
+			strcpy(request, (char *) msg.contenido);
+
+	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
+	//TODO parsear mensaje y hablar con el planificador y la instancia
+	return enviar_mensaje(conexion->socket, "Hola soy el coordinador");
+}
+
+int enviar_mensaje(int socket, char* mensaje){
+	Message* msg= (Message*) malloc(sizeof(Message));
+	msg->contenido = (char*) malloc(strlen(mensaje));
+	msg->contenido = mensaje;
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	msg->header->id = COORDINADOR;
+	msg->header->size = strlen(msg->contenido);
+
+	sleep(5);
+	log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
+	int res = send_msg(socket, (*msg));
+		if (res<0) {
+			log_info(log_planificador, "error al enviar mensaje a %d", socket);
+			return ERROR_DE_ENVIO;
+		}
+	log_info(log_planificador, "se envio el mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
+	return OK;
+}
+
 void estructura_planificador() {
 	t_config* configuracion;
 
@@ -123,14 +188,15 @@ void conectar_a_coordinador(t_planificador* pConfig) {
 
 	//printf("Se pudo conectar con el coordinador");
 	Message* msg= (Message*) malloc(sizeof(Message));
-	msg->contenido = (char*) malloc(strlen("Envio mensaje al Coordinador"));
-	msg->contenido = "Envio mensaje al Coordinador";
+	msg->contenido = (char*) malloc(strlen("Envio mensaje al Coordinador desde Planificador"));
+	msg->contenido = "Envio mensaje al Coordinador desde Planificador";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
 	msg->header->id = PLANIFICADOR;
-	msg->header->size = sizeof(msg);
+	msg->header->size = strlen(msg->contenido);
 
 	send_msg(pidCoordinador, (*msg));
 		//printf("Se envio el mensaje");
+	log_info(log_planificador, "Planificador envio un mensaje: %s", (*msg).contenido);
 }
 
 void exit_proceso(int retorno) {
