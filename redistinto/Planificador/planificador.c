@@ -16,17 +16,17 @@ int main(void) {
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	conectar_a_coordinador(pConfig);
 
-	log_info(log_planificador,"\nInicio de la consola\n");
+	//log_info(log_planificador,"\nInicio de la consola\n");
 
 	//Abrir Consola
-	pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
+	//pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
 
-	if (pidConsola < 0) {
-		log_error(log_planificador,"Error al intentar abrir la consola");
-		exit_proceso(-1);
-	}
+	//if (pidConsola < 0) {
+	//	log_error(log_planificador,"Error al intentar abrir la consola");
+	//	exit_proceso(-1);
+	//}
 
-	pthread_join(threadConsola,NULL);
+	//pthread_join(threadConsola,NULL);
 
 	//Escuchar conexiones ESI
 	iniciar();
@@ -47,13 +47,15 @@ int iniciar(){
 	int socket_fd = create_listener(IP,planificador.puerto_planif);
 	if (socket_fd <0) return ERROR_DE_CONEXION;
 
-	start_listening_select(socket_fd, NULL, *recibir_mensaje);
+	start_listening_select(socket_fd, *realizar_evento, *recibir_mensaje);
 	//start_listening_threads(socket_fd, *recibir_mensaje);
 
 	return 0;
 }
 
 void* recibir_mensaje(void* con){
+	printf("Comenzando....");
+
 	Conexion* conexion = (Conexion*) con;
 	Message msg;
 	int res = await_msg(conexion->socket, &msg);
@@ -65,26 +67,29 @@ void* recibir_mensaje(void* con){
 	char * request = malloc(msg.header->size);
 	strcpy(request, (char *) msg.contenido);
 
-	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
+	//log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
+	printf("Hola mundo");
 	//TODO parsear mensaje y hablar con los esi
 	return (void*)enviar_mensaje(conexion->socket, "Hola soy el planificador");
 }
 
-int realizar_evento(Conexion* con, Message* msj){
-	Conexion* conexion = (Conexion*) con;
-	Message msg;
-	int res = await_msg(conexion->socket, &msg);
-	if (res<0) {
-				log_info(log_planificador, "error al recibir un mensaje de %d", socket);
-				return ERROR_DE_RECEPCION;
-			}
-	enum tipoId recipiente =  msg.header->id;
-	char * request = malloc(msg.header->size);
-			strcpy(request, (char *) msg.contenido);
+int realizar_evento(Conexion* con, Message* msg){
+	//Conexion* conexion = (Conexion*) con;
+	//Message msg;
+	//int res = await_msg(conexion->socket, &msg);
+	//if (res<0) {
+	//			log_info(log_planificador, "error al recibir un mensaje de %d", socket);
+	//			return ERROR_DE_RECEPCION;
+	//		}
+	//enum tipoId recipiente =  msg.header->id;
+	//char * request = malloc(msg.header->size);
+	//		strcpy(request, (char *) msg.contenido);
 
-	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
+	//log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
 	//TODO parsear mensaje y hablar con el planificador y la instancia
-	return enviar_mensaje(conexion->socket, "Hola soy el coordinador");
+	//return enviar_mensaje(conexion->socket, "Hola soy el coordinador");
+	printf("Imprimió prueba");
+	return 0;
 }
 
 int enviar_mensaje(int socket, char* mensaje){
@@ -92,7 +97,7 @@ int enviar_mensaje(int socket, char* mensaje){
 	msg->contenido = (char*) malloc(strlen(mensaje));
 	msg->contenido = mensaje;
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
-	msg->header->id = COORDINADOR;
+	msg->header->id = PLANIFICADOR;
 	msg->header->size = strlen(msg->contenido);
 
 	sleep(5);
@@ -198,9 +203,32 @@ void conectar_a_coordinador(t_planificador* pConfig) {
 	msg->header->id = PLANIFICADOR;
 	msg->header->size = strlen(msg->contenido);
 
-	send_msg(pidCoordinador, (*msg));
+	if (send_msg(pidCoordinador, (*msg))<0) return ERROR_DE_ENVIO;
+
+	while (1) {
+		Message msg;
+		log_info(log_planificador, "esperando mensaje");
+		int resultado = await_msg(pidCoordinador, &msg);
+		log_info(log_planificador, "llego un mensaje. parseando...");
+		if (resultado<0){
+			log_debug(log_planificador, "error de recepcion");
+			continue;
+				//return ERROR_DE_RECEPCION;
+		}
+		//TODO parsear mensaje y hacer algo.
+		char * request = malloc(msg.header->size);
+		strcpy(request, (char *) msg.contenido);
+		log_info(log_planificador, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
+		//log_debug(log_inst, "%s", request);
+
+		free(msg.contenido);
+		free(msg.header);
+
+		break;
+	}
+
 		//printf("Se envio el mensaje");
-	log_info(log_planificador, "Planificador envio un mensaje: %s", (*msg).contenido);
+	//log_info(log_planificador, "Planificador envio un mensaje: %s", (*msg).contenido);
 }
 
 void exit_proceso(int retorno) {
