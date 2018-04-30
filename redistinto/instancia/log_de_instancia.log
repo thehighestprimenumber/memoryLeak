@@ -1,0 +1,17 @@
+[DEBUG] 15:56:19:901 log_instancia/(4471:4471): Se pudo conectar con el coordinador
+[DEBUG] 15:58:23:162 log_instancia/(4527:4527): Se pudo conectar con el coordinador
+[DEBUG] 16:00:16:755 log_instancia/(4527:4527): Se envio el mensaje
+[DEBUG] 16:00:34:442 log_instancia/(4527:4527): esperando mensaje
+[DEBUG] 16:00:43:966 log_instancia/(4527:4527): llego un mensaje. parseando...
+[DEBUG] 16:01:04:756 log_instancia/(4527:4527): mensaje recibido: Hola soy el coordinador/(452)
+[DEBUG] 16:01:27:48 log_instancia/(4527:4527): esperando mensaje
+[DEBUG] 16:23:51:723 log_instancia/(4932:4932): No se pudo conectar con el coordinador
+[DEBUG] 16:25:17:313 log_instancia/(5024:5024): No se pudo conectar con el coordinador
+[DEBUG] 16:33:05:914 log_instancia/(5263:5263): No se pudo conectar con el coordinador
+[DEBUG] 16:34:12:857 log_instancia/(5306:5306): No se pudo conectar con el coordinador
+[DEBUG] 16:35:50:466 log_instancia/(5438:5438): Se pudo conectar con el coordinador
+[DEBUG] 16:35:56:625 log_instancia/(5438:5438): Se envio el mensaje
+[DEBUG] 16:35:57:118 log_instancia/(5438:5438): esperando mensaje
+[DEBUG] 16:36:03:59 log_instancia/(5438:5438): llego un mensaje. parseando...
+[DEBUG] 16:36:09:371 log_instancia/(5438:5438): mensaje recibido: Hola soy el coordinador/(543)
+[DEBUG] 16:36:12:985 log_instancia/(5438:5438): esperando mensaje
