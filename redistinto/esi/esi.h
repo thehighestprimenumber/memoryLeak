@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 t_log * log_esi;
-int cliente_planificador;
+int socket_planificador;
 int cliente_coordinador;
 int identificador;
 

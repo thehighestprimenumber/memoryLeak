@@ -18,6 +18,7 @@ int main(void) {
 
 	log_info(log_planificador,"\nInicio de la consola\n");
 
+	//Abrir Consola
 	pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
 
 	if (pidConsola < 0) {
@@ -26,6 +27,9 @@ int main(void) {
 	}
 
 	pthread_join(threadConsola,NULL);
+
+	//Escuchar conexiones ESI
+	iniciar();
 
 	log_info(log_planificador,"\nProceso finalizado");
 	list_destroy(planificador.clavesBloqueadas);
@@ -43,7 +47,7 @@ int iniciar(){
 	int socket_fd = create_listener(IP,planificador.puerto_planif);
 	if (socket_fd <0) return ERROR_DE_CONEXION;
 
-	start_listening_select(socket_fd, *realizar_evento, *recibir_mensaje);
+	start_listening_select(socket_fd, NULL, *recibir_mensaje);
 	//start_listening_threads(socket_fd, *recibir_mensaje);
 
 	return 0;
@@ -59,7 +63,7 @@ void* recibir_mensaje(void* con){
 			}
 	enum tipoId recipiente =  msg.header->id;
 	char * request = malloc(msg.header->size);
-			strcpy(request, (char *) msg.contenido);
+	strcpy(request, (char *) msg.contenido);
 
 	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
 	//TODO parsear mensaje y hablar con los esi
@@ -71,7 +75,7 @@ int realizar_evento(Conexion* con, Message* msj){
 	Message msg;
 	int res = await_msg(conexion->socket, &msg);
 	if (res<0) {
-				log_info(log_planificador, "error al recibir un ensaje de %d", socket);
+				log_info(log_planificador, "error al recibir un mensaje de %d", socket);
 				return ERROR_DE_RECEPCION;
 			}
 	enum tipoId recipiente =  msg.header->id;

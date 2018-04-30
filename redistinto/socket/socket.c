@@ -24,7 +24,7 @@ int connect_to_server(char * ip, char * serverPort) {
 	freeaddrinfo(server_info);//Liberamos addrinfo
 
 	//verificamos errores y devolvemos acorde
-	if(retorno != 0 || server_socket == -1){
+	if(retorno < 0 || server_socket == -1){
 		return -1;
 	}else{
 		return server_socket;
