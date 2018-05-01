@@ -16,15 +16,15 @@ int main(void) {
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	conectar_a_coordinador(pConfig);
 
-	//log_info(log_planificador,"\nInicio de la consola\n");
+	log_info(log_planificador,"\nInicio de la consola\n");
 
 	//Abrir Consola
-	//pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
+	pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
 
-	//if (pidConsola < 0) {
-	//	log_error(log_planificador,"Error al intentar abrir la consola");
-	//	exit_proceso(-1);
-	//}
+	if (pidConsola < 0) {
+		log_error(log_planificador,"Error al intentar abrir la consola");
+		exit_proceso(-1);
+	}
 
 	//pthread_join(threadConsola,NULL);
 
@@ -69,7 +69,11 @@ void* recibir_mensaje(void* con){
 		log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
 
 		if (msg.header->tipo_mensaje==TEST)
+		{
+			free(msg.contenido);
+			free(msg.header);
 			return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el coordinador"));
+		}
 
 		free(msg.contenido);
 		free(msg.header);
@@ -111,6 +115,10 @@ int enviar_mensaje(int socket, char* mensaje){
 			return ERROR_DE_ENVIO;
 		}
 	log_info(log_planificador, "se envio el mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
+
+	free(msg->header);
+	free(msg);
+
 	return OK;
 }
 

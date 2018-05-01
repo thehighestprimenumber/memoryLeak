@@ -31,7 +31,7 @@ int main(int argc,char *argv[]) {
 	log_info(log_esi,"La ip del planificador es: %s\n",pConfig->planificador_ip);
 
 	// Nos conectamos y pedimos handshake al planificador, este nos asigna un identificador
-	//conectar_a_planificador(pConfig);
+	conectar_a_planificador(pConfig);
 
 	// Nos conectamos y pedimos handshake al coordinador
 	//conectar_a_coordinador(pConfig);

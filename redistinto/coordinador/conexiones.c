@@ -5,7 +5,8 @@
 int enviar_mensaje(int socket, char* mensaje){
 	Message* msg= (Message*) malloc(sizeof(Message));
 	msg->contenido = (char*) malloc(strlen(mensaje));
-	msg->contenido = mensaje;
+	strncpy(msg->contenido,mensaje,strlen(mensaje));
+	//msg->contenido = mensaje;
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
 	msg->header->remitente = COORDINADOR;
 	msg->header->size = strlen(msg->contenido);
@@ -34,7 +35,7 @@ void* recibir_mensaje(void* con){
 				return string_itoa(ERROR_DE_RECEPCION);
 			}
 	enum tipoRemitente recipiente =  msg.header->remitente;
-	char * request = malloc(msg.header->size);
+	char * request = malloc((msg.header->size) + sizeof(char));
 			strcpy(request, (char *) msg.contenido);
 
 	log_info(logger_coordinador, "recibi mensaje de %d: %s", recipiente, request);
@@ -42,13 +43,17 @@ void* recibir_mensaje(void* con){
 		t_operacion* operacion = malloc(sizeof(t_operacion));
 		desempaquetar_operacion ((char*) msg.contenido, operacion);
 		res = (int) procesarSolicitudDeEsi(*operacion, conexion->socket);
-		free(operacion);
+		//free(operacion);
 		free(operacion->valor);
 		free(operacion->clave);
 	}
 
 	if (msg.header->tipo_mensaje==TEST)
+	{
+		free(msg.contenido);
+		free(msg.header);
 		return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el coordinador"));
+	}
 
 	free(msg.contenido);
 	free(msg.header);
