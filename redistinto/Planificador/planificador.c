@@ -55,29 +55,28 @@ int iniciar(){
 
 void* recibir_mensaje(void* con){
 	Conexion* conexion = (Conexion*) con;
-		Message msg;
-		int res = await_msg(conexion->socket, &msg);
-		if (res<0) {
-			log_info(log_planificador, "error al recibir un ensaje de %d", socket);
-			return string_itoa(ERROR_DE_RECEPCION);
-		}
+	Message msg;
+	int res = await_msg(conexion->socket, &msg);
+	if (res<0) {
+				log_info(log_planificador, "error al recibir un ensaje de %d", socket);
+				return string_itoa(ERROR_DE_RECEPCION);
+			}
+	enum tipoRemitente recipiente =  msg.header->remitente;
+	char * request = malloc((msg.header->size));
+			strcpy(request, (char *) msg.contenido);
 
-		enum tipoRemitente recipiente =  msg.header->remitente;
-		char * request = malloc(msg.header->size);
-				strcpy(request, (char *) msg.contenido);
+	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
 
-		log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
-
-		if (msg.header->tipo_mensaje==TEST)
-		{
-			free(msg.contenido);
-			free(msg.header);
-			return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el coordinador"));
-		}
-
+	if (msg.header->tipo_mensaje==TEST)
+	{
 		free(msg.contenido);
 		free(msg.header);
-		return ERROR;
+		return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el planificador"));
+	}
+
+	free(msg.contenido);
+	free(msg.header);
+	return ERROR;
 }
 
 int realizar_evento(Conexion* con, Message* msg){
@@ -102,9 +101,10 @@ int realizar_evento(Conexion* con, Message* msg){
 int enviar_mensaje(int socket, char* mensaje){
 	Message* msg= (Message*) malloc(sizeof(Message));
 	msg->contenido = (char*) malloc(strlen(mensaje));
-	msg->contenido = mensaje;
+	strncpy(msg->contenido,mensaje,strlen(mensaje));
+	//msg->contenido = mensaje;
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
-	msg->header->remitente= PLANIFICADOR;
+	msg->header->remitente = PLANIFICADOR;
 	msg->header->size = strlen(msg->contenido);
 
 	sleep(5);
@@ -115,7 +115,7 @@ int enviar_mensaje(int socket, char* mensaje){
 			return ERROR_DE_ENVIO;
 		}
 	log_info(log_planificador, "se envio el mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
-
+	free(msg->contenido);
 	free(msg->header);
 	free(msg);
 
@@ -209,7 +209,7 @@ void conectar_a_coordinador(t_planificador* pConfig) {
 	//printf("Se pudo conectar con el coordinador");
 	Message* msg= (Message*) malloc(sizeof(Message));
 	msg->contenido = (char*) malloc(strlen("Envio mensaje al Coordinador desde Planificador"));
-	msg->contenido = "Envio mensaje al Coordinador desde Planificador";
+	strcpy(msg->contenido,"Envio mensaje al Coordinador desde Planificador");
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
 	msg->header->remitente = PLANIFICADOR;
 	msg->header->tipo_mensaje = TEST;
@@ -229,7 +229,8 @@ void conectar_a_coordinador(t_planificador* pConfig) {
 		}
 		//TODO parsear mensaje y hacer algo.
 		char * request = malloc(msg.header->size);
-		strcpy(request, (char *) msg.contenido);
+		strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
+
 		log_info(log_planificador, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
 		//log_debug(log_inst, "%s", request);
 

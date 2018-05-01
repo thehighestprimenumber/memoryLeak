@@ -58,12 +58,12 @@ void conectar_a_planificador(esi_configuracion* pConfig) {
 		log_info(log_esi, "ESI se conecto con el Planificador");
 	}
 
-	//printf("Se pudo conectar con el coordinador");
 	Message* msg= (Message*) malloc(sizeof(Message));
 	msg->contenido = (char*) malloc(strlen("Envio mensaje al Planificador desde ESI"));
 	msg->contenido = "Envio mensaje al Planificador desde ESI";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
 	msg->header->remitente = ESI;
+	msg->header->tipo_mensaje = TEST;
 	msg->header->size = strlen(msg->contenido);
 
 	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");

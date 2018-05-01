@@ -35,7 +35,7 @@ void* recibir_mensaje(void* con){
 				return string_itoa(ERROR_DE_RECEPCION);
 			}
 	enum tipoRemitente recipiente =  msg.header->remitente;
-	char * request = malloc((msg.header->size) + sizeof(char));
+	char * request = malloc((msg.header->size));
 			strcpy(request, (char *) msg.contenido);
 
 	log_info(logger_coordinador, "recibi mensaje de %d: %s", recipiente, request);
