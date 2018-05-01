@@ -8,8 +8,6 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include socket/Debug/subdir.mk
--include socket/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -24,19 +22,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: esi
+all: operacion
 
 # Tool invocations
-esi: $(OBJS) $(USER_OBJS)
+operacion: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc  -o "esi" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc  -o "operacion" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) esi
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) operacion
 	-@echo ' '
 
 .PHONY: all clean dependents

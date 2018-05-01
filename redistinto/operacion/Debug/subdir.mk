@@ -4,27 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-/home/utnso/tp-2018-1c-Memory-leak/redistinto/socket/operacion.c \
-/home/utnso/tp-2018-1c-Memory-leak/redistinto/socket/socket.c 
+../operacion.c 
 
 OBJS += \
-./socket/operacion.o \
-./socket/socket.o 
+./operacion.o 
 
 C_DEPS += \
-./socket/operacion.d \
-./socket/socket.d 
+./operacion.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-socket/operacion.o: /home/utnso/tp-2018-1c-Memory-leak/redistinto/socket/operacion.c
-	@echo 'Building file: $<'
-	@echo 'Invoking: GCC C Compiler'
-	gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
-	@echo 'Finished building: $<'
-	@echo ' '
-
-socket/socket.o: /home/utnso/tp-2018-1c-Memory-leak/redistinto/socket/socket.c
+%.o: ../%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
 	gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"

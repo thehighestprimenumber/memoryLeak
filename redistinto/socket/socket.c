@@ -76,7 +76,7 @@ int await_msg(int socket, Message *msg) {
 	result_recv = recv(socket, contenido, header->size, MSG_WAITALL);
 
 	//En caso de error al recibir devuelvo -1
-	if(result_recv == -1){
+	if(result_recv < 1){
 		free(header);
 		free(contenido);
 		return -1;
@@ -161,8 +161,7 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void 
 	}
 }
 
-void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*), void* (*manejadorDeNuevaConexion)(void*)){
-//void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*), void* (*manejadorDeNuevaConexion)(Conexion*)){
+void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*)){
 	//Por si me mandan un socket con problemas
 	if(socketListener == -1) return;
 
@@ -208,8 +207,18 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 			//Añado la conexion a la lista
 			list_add(conexiones, conexion);
 
+			//Creamos un nuevo mensaje para avisar de la nueva conexion
+			Message *msg = malloc(sizeof(Message));
+			msg->header = malloc(sizeof(ContentHeader));
+			msg->header->remitente = DESCONOCIDO;
+			msg->header->tipo_mensaje = CONEXION;
+			msg->header->size = 0;
+			msg->contenido = NULL;
+
 			//Llamo a la funcion encargada de manejar las nuevas conexiones
-			manejadorDeNuevaConexion(conexion);
+			manejadorDeEvento(conexion, msg);
+			free_msg(msg);
+
 		}
 
 		//Recorremos preguntando por cada conexion si ocurrio algun evento
@@ -220,6 +229,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 				Message *msg = malloc(sizeof(Message));
 				if(await_msg( ((Conexion*) list_get(conexiones, i))->socket, msg) == -1){
 					msg->header = malloc(sizeof(ContentHeader));
+					msg->header->remitente = DESCONOCIDO;
 					msg->header->tipo_mensaje = DESCONEXION;
 					msg->header->size = 0;
 					msg->contenido = NULL;
@@ -230,6 +240,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 					//Significa que por alguna razon quiere que cierre la conexion
 					list_destroy_and_destroy_elements(conexiones, close_conection);
 				}
+				free_msg(msg);
 			}
 		}
 
@@ -244,6 +255,15 @@ void close_conection(void *conexion){
 	}
 	return;
 }
+
+void free_msg(Message *msg){
+	if(msg != NULL){
+		if(msg->header != NULL) free(msg->header);
+		if(msg->contenido != NULL) free(msg->contenido);
+		free(msg);
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //FUNCIONES SOCKET INSTANCIA
