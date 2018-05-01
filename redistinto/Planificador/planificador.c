@@ -54,23 +54,26 @@ int iniciar(){
 }
 
 void* recibir_mensaje(void* con){
-	printf("Comenzando....");
-
 	Conexion* conexion = (Conexion*) con;
-	Message msg;
-	int res = await_msg(conexion->socket, &msg);
-	if (res<0) {
-				log_info(log_planificador, "error al recibir un ensaje de %d", socket);
-				return (void*)ERROR_DE_RECEPCION;
-			}
-	enum tipoId recipiente =  msg.header->id;
-	char * request = malloc(msg.header->size);
-	strcpy(request, (char *) msg.contenido);
+		Message msg;
+		int res = await_msg(conexion->socket, &msg);
+		if (res<0) {
+			log_info(log_planificador, "error al recibir un ensaje de %d", socket);
+			return string_itoa(ERROR_DE_RECEPCION);
+		}
 
-	//log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
-	printf("Hola mundo");
-	//TODO parsear mensaje y hablar con los esi
-	return (void*)enviar_mensaje(conexion->socket, "Hola soy el planificador");
+		enum tipoRemitente recipiente =  msg.header->remitente;
+		char * request = malloc(msg.header->size);
+				strcpy(request, (char *) msg.contenido);
+
+		log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
+
+		if (msg.header->tipo_mensaje==TEST)
+			return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el coordinador"));
+
+		free(msg.contenido);
+		free(msg.header);
+		return ERROR;
 }
 
 int realizar_evento(Conexion* con, Message* msg){
@@ -97,7 +100,7 @@ int enviar_mensaje(int socket, char* mensaje){
 	msg->contenido = (char*) malloc(strlen(mensaje));
 	msg->contenido = mensaje;
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
-	msg->header->id = PLANIFICADOR;
+	msg->header->remitente= PLANIFICADOR;
 	msg->header->size = strlen(msg->contenido);
 
 	sleep(5);
@@ -200,10 +203,11 @@ void conectar_a_coordinador(t_planificador* pConfig) {
 	msg->contenido = (char*) malloc(strlen("Envio mensaje al Coordinador desde Planificador"));
 	msg->contenido = "Envio mensaje al Coordinador desde Planificador";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
-	msg->header->id = PLANIFICADOR;
+	msg->header->remitente = PLANIFICADOR;
+	msg->header->tipo_mensaje = TEST;
 	msg->header->size = strlen(msg->contenido);
 
-	if (send_msg(pidCoordinador, (*msg))<0) return ERROR_DE_ENVIO;
+	if (send_msg(pidCoordinador, (*msg))<0) log_debug(log_planificador, "Error al enviar el mensaje");
 
 	while (1) {
 		Message msg;

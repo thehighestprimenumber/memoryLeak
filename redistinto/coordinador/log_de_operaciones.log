@@ -1010,3 +1010,121 @@ algoritmo: EQUITATIVE_LOAD
 [INFO] 15:28:29:851 log_operaciones/(3793:3980): recibi mensaje de 4: Holaquetal coordinador
 [INFO] 15:28:37:388 log_operaciones/(3793:3980): se va a enviar mensaje desde el coordinador mensaje a 8: Hola soy el coordinador
 [INFO] 15:28:37:388 log_operaciones/(3793:3980): se envio el mensaje desde el coordinador mensaje a 8: Hola soy el coordinador
+[DEBUG] 14:40:05:205 log_operaciones/(3493:3493): cargando configuracion
+
+[DEBUG] 14:40:05:219 log_operaciones/(3493:3493): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 14:40:05:221 log_operaciones/(3493:3493): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 14:40:05:221 log_operaciones/(3493:3493): usando instancia#1
+[INFO] 14:40:05:221 log_operaciones/(3493:3493): resultado: 0
+[INFO] 14:40:05:221 log_operaciones/(3493:3493): iniciando
+[DEBUG] 14:43:18:953 log_operaciones/(3555:3555): cargando configuracion
+
+[DEBUG] 15:28:57:904 log_operaciones/(3555:3555): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 15:35:20:916 log_operaciones/(3555:3555): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 15:35:20:916 log_operaciones/(3555:3555): usando instancia#1
+[INFO] 15:35:20:916 log_operaciones/(3555:3555): resultado: 0
+[INFO] 15:36:34:129 log_operaciones/(3555:3555): iniciando
+[INFO] 15:56:30:21 log_operaciones/(3555:4485): recibi mensaje de 4: Holaquetal coordinador
+[INFO] 15:56:35:22 log_operaciones/(3555:4485): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 15:56:35:23 log_operaciones/(3555:4485): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 15:58:55:457 log_operaciones/(3555:4545): recibi mensaje de 4: Holaquetal coordinador
+[INFO] 15:59:00:458 log_operaciones/(3555:4545): se va a enviar mensaje desde el coordinador mensaje a 6: Hola soy el coordinador
+[INFO] 15:59:00:459 log_operaciones/(3555:4545): se envio el mensaje desde el coordinador mensaje a 6: Hola soy el coordinador
+[DEBUG] 16:34:46:186 log_operaciones/(5349:5349): cargando configuracion
+
+[DEBUG] 16:34:48:558 log_operaciones/(5349:5349): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 16:34:56:381 log_operaciones/(5349:5349): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 16:34:56:381 log_operaciones/(5349:5349): usando instancia#1
+[INFO] 16:34:56:381 log_operaciones/(5349:5349): resultado: 0
+[INFO] 16:34:59:926 log_operaciones/(5349:5349): iniciando
+[INFO] 16:35:56:109 log_operaciones/(5349:5452): recibi mensaje de 4: Holaquetal coordinador
+[INFO] 16:36:01:110 log_operaciones/(5349:5452): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 16:36:01:111 log_operaciones/(5349:5452): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[DEBUG] 16:45:51:339 log_operaciones/(5500:5500): cargando configuracion
+
+[DEBUG] 16:45:54:605 log_operaciones/(5500:5500): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 16:45:59:269 log_operaciones/(5500:5500): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 16:45:59:269 log_operaciones/(5500:5500): usando instancia#1
+[INFO] 16:45:59:269 log_operaciones/(5500:5500): resultado: 0
+[INFO] 16:46:00:550 log_operaciones/(5500:5500): iniciando
+[INFO] 16:54:43:564 log_operaciones/(5500:5846): recibi mensaje de 0: 
+[INFO] 16:54:48:565 log_operaciones/(5500:5846): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 16:54:48:565 log_operaciones/(5500:5846): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[DEBUG] 17:36:17:749 log_operaciones/(6613:6613): cargando configuracion
+
+[DEBUG] 17:36:18:226 log_operaciones/(6613:6613): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 17:36:20:44 log_operaciones/(6613:6613): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 17:36:20:44 log_operaciones/(6613:6613): usando instancia#1
+[INFO] 17:36:20:44 log_operaciones/(6613:6613): resultado: 0
+[INFO] 17:36:21:992 log_operaciones/(6613:6613): iniciando
+[INFO] 17:58:45:946 log_operaciones/(6613:6768): recibi mensaje de 0: 
+[INFO] 17:58:50:947 log_operaciones/(6613:6768): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 17:58:50:949 log_operaciones/(6613:6768): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[DEBUG] 18:03:50:532 log_operaciones/(7131:7131): cargando configuracion
+
+[DEBUG] 18:03:51:6 log_operaciones/(7131:7131): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 18:03:52:921 log_operaciones/(7131:7131): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 18:03:52:921 log_operaciones/(7131:7131): usando instancia#1
+[INFO] 18:03:52:921 log_operaciones/(7131:7131): resultado: 0
+[INFO] 18:03:54:205 log_operaciones/(7131:7131): iniciando
+[INFO] 18:04:16:213 log_operaciones/(7131:7219): recibi mensaje de 0: 
+[INFO] 18:04:21:214 log_operaciones/(7131:7219): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 18:04:21:214 log_operaciones/(7131:7219): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[DEBUG] 18:35:30:598 log_operaciones/(7675:7675): cargando configuracion
+
+[DEBUG] 18:35:31:94 log_operaciones/(7675:7675): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 18:35:32:302 log_operaciones/(7675:7675): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 18:35:32:302 log_operaciones/(7675:7675): usando instancia#1
+[INFO] 18:35:32:302 log_operaciones/(7675:7675): resultado: 0
+[INFO] 18:35:33:611 log_operaciones/(7675:7675): iniciando
+[INFO] 18:35:58:49 log_operaciones/(7675:7751): recibi mensaje de 4: Holaquetal coordinador
+[INFO] 18:36:03:50 log_operaciones/(7675:7751): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 18:36:03:51 log_operaciones/(7675:7751): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 18:40:44:915 log_operaciones/(7675:7892): recibi mensaje de 2: Hola coordinador
+[INFO] 18:40:49:915 log_operaciones/(7675:7892): se va a enviar mensaje desde el coordinador mensaje a 6: Hola soy el coordinador
+[INFO] 18:40:49:915 log_operaciones/(7675:7892): se envio el mensaje desde el coordinador mensaje a 6: Hola soy el coordinador
+[INFO] 18:45:24:438 log_operaciones/(7675:7989): recibi mensaje de 2: Hola coordinador
+[INFO] 18:45:29:440 log_operaciones/(7675:7989): se va a enviar mensaje desde el coordinador mensaje a 7: Hola soy el coordinador
+[INFO] 18:45:29:440 log_operaciones/(7675:7989): se envio el mensaje desde el coordinador mensaje a 7: Hola soy el coordinador

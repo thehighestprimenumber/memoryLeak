@@ -4,22 +4,20 @@
 #include <commons/collections/list.h>
 #include "coordinador.h"
 
-
 typedef struct {
-	int id;
-} mock_instancia;
-
-typedef struct {
-	mock_instancia * instancia;
+	int socket_inst;
 	t_list* claves;
+	int esta_activa;
 } fila_tabla_instancias;
 
 int ultima_instancia_usada;
 
-int eliminar_instancia(int id_instancia);
+int desactivar_instancia(int id_instancia);
 
-int crear_instancia();
+int activar_instancia(int socket_instancia);
 
-mock_instancia * seleccionar_instancia(char* clave);
+void cambiar_estado_instancia(int id_instancia, int esta_activa);
+
+void seleccionar_instancia(char* clave, fila_tabla_instancias *  instancia);
 
 #endif

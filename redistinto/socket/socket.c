@@ -220,7 +220,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 				Message *msg = malloc(sizeof(Message));
 				if(await_msg( ((Conexion*) list_get(conexiones, i))->socket, msg) == -1){
 					msg->header = malloc(sizeof(ContentHeader));
-					msg->header->id = DESCONEXION;
+					msg->header->tipo_mensaje = DESCONEXION;
 					msg->header->size = 0;
 					msg->contenido = NULL;
 					manejadorDeEvento(((Conexion*) list_get(conexiones, i)), msg);

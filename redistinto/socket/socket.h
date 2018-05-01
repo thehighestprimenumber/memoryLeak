@@ -26,7 +26,9 @@
 //Enums
 
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
-typedef enum tipoId {ACK, DESCONEXION, ESI, PLANIFICADOR, INSTANCIA, COORDINADOR} tipoId;
+typedef enum tipoRemitente {ESI, PLANIFICADOR, INSTANCIA, COORDINADOR} tipoRemitente;
+
+typedef enum tipoMensaje {ACK, DESCONEXION, OPERACION, TEST} tipoMensaje;
 
 typedef enum {
 	HANDSHAKE = 1
@@ -45,7 +47,8 @@ typedef struct {
 
 //Estructura del header
 typedef struct {
-	tipoId id;
+	tipoRemitente remitente;
+	tipoMensaje tipo_mensaje;
 	int size;
 } __attribute__((packed)) ContentHeader;
 

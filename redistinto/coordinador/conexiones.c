@@ -1,19 +1,13 @@
 #include "./conexiones.h"
 #include "./coordinador.h"
 
- extern int send_msg(int socket, Message msg);
- extern int await_msg(int socket, Message *msg);
- extern int create_listener(char * ip, char * serverPort);
- extern  void start_listening_threads(int socket, void*(*manejadorDeNuevaConexion)(void*));//(void*) -> recibira un (Conexion*)
-//el manejador de mensajes de start_listening_select debe devolver -1 si desea cerrar ese socket
- extern void close_conection(void *conexion);
 
 int enviar_mensaje(int socket, char* mensaje){
 	Message* msg= (Message*) malloc(sizeof(Message));
 	msg->contenido = (char*) malloc(strlen(mensaje));
 	msg->contenido = mensaje;
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
-	msg->header->id = COORDINADOR;
+	msg->header->remitente = COORDINADOR;
 	msg->header->size = strlen(msg->contenido);
 
 	sleep(5);
@@ -24,6 +18,10 @@ int enviar_mensaje(int socket, char* mensaje){
 			return ERROR_DE_ENVIO;
 		}
 	log_info(logger_coordinador, "se envio el mensaje desde el coordinador mensaje a %d: %s", socket, msg->contenido);
+	free(msg->contenido);
+	free(msg->header);
+	free(msg);
+
 	return OK;
 }
 
@@ -33,19 +31,32 @@ void* recibir_mensaje(void* con){
 	int res = await_msg(conexion->socket, &msg);
 	if (res<0) {
 				log_info(logger_coordinador, "error al recibir un ensaje de %d", socket);
-				return ERROR_DE_RECEPCION;
+				return string_itoa(ERROR_DE_RECEPCION);
 			}
-	enum tipoId recipiente =  msg.header->id;
+	enum tipoRemitente recipiente =  msg.header->remitente;
 	char * request = malloc(msg.header->size);
 			strcpy(request, (char *) msg.contenido);
 
 	log_info(logger_coordinador, "recibi mensaje de %d: %s", recipiente, request);
-	//TODO parsear mensaje y hablar con el planificador y la instancia
-	return enviar_mensaje(conexion->socket, "Hola soy el coordinador");
+	if (msg.header->remitente == ESI) {
+		t_operacion* operacion = malloc(sizeof(t_operacion));
+		desempaquetar_operacion ((char*) msg.contenido, operacion);
+		res = (int) procesarSolicitudDeEsi(*operacion, conexion->socket);
+		free(operacion);
+		free(operacion->valor);
+		free(operacion->clave);
+	}
+
+	if (msg.header->tipo_mensaje==TEST)
+		return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el coordinador"));
+
+	free(msg.contenido);
+	free(msg.header);
+	return ERROR;
 }
 
 
-int iniciar(){
+int iniciar_servicio(){
 	log_info(logger_coordinador, "iniciando");
 
 	int socket_fd = create_listener(IP, PUERTO_COORDINADOR);

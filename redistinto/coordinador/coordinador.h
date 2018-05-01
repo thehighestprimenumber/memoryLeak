@@ -7,8 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <commons/collections/list.h>
+#include <commons/string.h>
 #include "../esi/esi.h"
-#include "../operacion/operacion.h"
+#include "../socket/operacion.h"
 #include "tabla_instancias.h"
 #include "./conexiones.h"
 
@@ -46,8 +47,7 @@ typedef struct {
 char* arch_config;
 t_log * log_operaciones;
 
-int procesarOperacion(t_operacion op_a_realizar, proceso_esi solicitante);
+int procesarSolicitudDeEsi(t_operacion op_a_realizar, int socket_solicitante);
 
-int abrirCoordinador();
 
 #endif
