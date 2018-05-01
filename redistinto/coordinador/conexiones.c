@@ -39,6 +39,14 @@ void* recibir_mensaje(void* con){
 			strcpy(request, (char *) msg.contenido);
 
 	log_info(logger_coordinador, "recibi mensaje de %d: %s", recipiente, request);
+
+	if (msg.header->tipo_mensaje==TEST)
+	{
+		free(msg.contenido);
+		free(msg.header);
+		return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el coordinador"));
+	}
+
 	if (msg.header->remitente == ESI) {
 		t_operacion* operacion = malloc(sizeof(t_operacion));
 		desempaquetar_operacion ((char*) msg.contenido, operacion);
@@ -46,13 +54,6 @@ void* recibir_mensaje(void* con){
 		//free(operacion);
 		free(operacion->valor);
 		free(operacion->clave);
-	}
-
-	if (msg.header->tipo_mensaje==TEST)
-	{
-		free(msg.contenido);
-		free(msg.header);
-		return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el coordinador"));
 	}
 
 	free(msg.contenido);

@@ -31,10 +31,10 @@ int main(int argc,char *argv[]) {
 	log_info(log_esi,"La ip del planificador es: %s\n",pConfig->planificador_ip);
 
 	// Nos conectamos y pedimos handshake al planificador, este nos asigna un identificador
-	conectar_a_planificador(pConfig);
+	//conectar_a_planificador(pConfig);
 
 	// Nos conectamos y pedimos handshake al coordinador
-	//conectar_a_coordinador(pConfig);
+	conectar_a_coordinador(pConfig);
 
 	return EXIT_SUCCESS;
 }
@@ -104,6 +104,7 @@ void conectar_a_coordinador(esi_configuracion* pConfig) {
 	msg->contenido = "Hola coordinador";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
 	msg->header->remitente = ESI;
+	msg->header->tipo_mensaje = TEST;
 	msg->header->size = strlen(msg->contenido);
 
 	if (send_msg(resultado, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
