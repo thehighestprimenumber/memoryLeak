@@ -86,7 +86,8 @@ void conectar_a_coordinador(esi_configuracion* pConfig) {
 	msg->contenido = (char*) malloc(strlen("Hola coordinador"));
 	msg->contenido = "Hola coordinador";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
-	msg->header->id = ESI;
+	msg->header->remitente = ESI;
+	msg->header->tipo_mensaje = TEST;
 	msg->header->size = strlen(msg->contenido);
 
 	if (send_msg(resultado, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
