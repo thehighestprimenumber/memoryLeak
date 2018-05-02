@@ -24,6 +24,9 @@
 #include "consola.h"
 #include "../socket/socket.h"
 
+#define OK 0
+#define ERROR -20
+
 char* arch_config;
 
 t_log * log_planificador;
@@ -63,6 +66,8 @@ typedef struct {
 
 t_planificador planificador;
 
+extern int iniciar();
+
 int socket_coordinador;
 int identificador;
 
@@ -82,6 +87,9 @@ void puerto_coordinador_read(t_config* configuracion);
 void clavesBloqueadas_read(t_config* configuracion);
 void liberar_split(char** array);
 void conectar_a_coordinador(t_planificador* pConfig);
+int recibir_mensaje(Conexion* con,Message* msj);
+int realizar_evento(Conexion* con, Message* msj);
+int enviar_mensaje(int socket, char* mensaje);
 
 //Firmas de las funciones que irian más adelante
 int abrirPlanificador(); //Abre la conexión del planificador y sus conexiones

@@ -24,7 +24,7 @@ int connect_to_server(char * ip, char * serverPort) {
 	freeaddrinfo(server_info);//Liberamos addrinfo
 
 	//verificamos errores y devolvemos acorde
-	if(retorno != 0 || server_socket == -1){
+	if(retorno < 0 || server_socket == -1){
 		return -1;
 	}else{
 		return server_socket;
@@ -166,11 +166,12 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 	if(socketListener == -1) return;
 
 	t_list *conexiones = list_create();
-	int activity;
+	int activity, fdMax;
 	fd_set readfds;
+	fdMax = socketListener;
+	//Aca socket 0 para consola (agregar a la lista conexiones)
 
 	while(1){
-
 		//Vacio el set e incluyo al socket de escucha
 		FD_ZERO(&readfds);
 		FD_SET(socketListener, &readfds);
@@ -180,7 +181,8 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 		}
 
 		//Esperamos que ocurra algo con alguna de las conexiones (inclusive con el socket de escucha)
-		activity = select( list_size(conexiones) + 1 , &readfds , NULL , NULL , NULL);
+		//activity = select( list_size(conexiones) + 1 , &readfds , NULL , NULL , NULL);
+		activity = select( fdMax + 1, &readfds, NULL, NULL, NULL);
 
 		if (activity < 0) {
 			//Ocurrio un error #lpm
@@ -215,7 +217,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 
 			//Llamo a la funcion encargada de manejar las nuevas conexiones
 			manejadorDeEvento(conexion, msg);
-			free_msg(msg);
+			//free_msg(msg);
 
 		}
 

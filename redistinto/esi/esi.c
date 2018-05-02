@@ -25,17 +25,17 @@ int main(int argc,char *argv[]) {
 	log_trace(log_esi,"El puerto del planificador es: %s",pConfig->planificador_puerto);
 	log_trace(log_esi,"La ip del planificador es: %s",pConfig->planificador_ip);
 
-	/*printf("Inicia el proceso ESI\n");
-	printf("El puerto del coordinador es: %s\n",pConfig->coordinador_puerto);
-	printf("La ip del coordinador es: %s\n",pConfig->coordinador_ip);
-	printf("El puerto del plnificador es: %s\n",pConfig->planificador_puerto);
-	printf("La ip del planificador es: %s\n",pConfig->planificador_ip);*/
+	log_info(log_esi,"Inicia el proceso ESI\n");
+	log_info(log_esi,"El puerto del coordinador es: %s\n",pConfig->coordinador_puerto);
+	log_info(log_esi,"La ip del coordinador es: %s\n",pConfig->coordinador_ip);
+	log_info(log_esi,"El puerto del plnificador es: %s\n",pConfig->planificador_puerto);
+	log_info(log_esi,"La ip del planificador es: %s\n",pConfig->planificador_ip);
 
 	// Nos conectamos y pedimos handshake al planificador, este nos asigna un identificador
-	//conectar_a_planificador(pConfig);
+	conectar_a_planificador(pConfig);
 
 	// Nos conectamos y pedimos handshake al coordinador
-	conectar_a_coordinador(pConfig);
+	//conectar_a_coordinador(pConfig);
 
 	return EXIT_SUCCESS;
 }
@@ -50,26 +50,43 @@ char* leer_propiedad_string (t_config *configuracion, char* propiedad){
 }
 
 void conectar_a_planificador(esi_configuracion* pConfig) {
-
-	t_paquete paquete;
-
-	int resultado = connect_to_server(pConfig->planificador_ip,pConfig->planificador_puerto);
+	socket_planificador = connect_to_server(pConfig->planificador_ip,pConfig->planificador_puerto);
 	//Verifico conexion con el planificador
-	if (resultado != 0) {
-		log_error(log_esi, "Fallo conexion con el Planificador");
+	if (socket_planificador < 0) {
+		log_error(log_esi, "Fallo conexion esi con el Planificador");
 		exit(EXIT_FAILURE);
 	} else {
 		log_info(log_esi, "ESI se conecto con el Planificador");
 	}
 
-	/*pedir_handshake(&cliente_planificador, ESI);
+	Message* msg= (Message*) malloc(sizeof(Message));
+	msg->contenido = (char*) malloc(strlen("Envio mensaje al Planificador desde ESI"));
+	msg->contenido = "Envio mensaje al Planificador desde ESI";
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	msg->header->remitente = ESI;
+	msg->header->tipo_mensaje = TEST;
+	msg->header->size = strlen(msg->contenido);
 
-	paquete = recibir_paquete(&cliente_planificador);*/
+	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
+	log_debug(log_esi, "Se envio el mensaje");
+	while (1) {
+		Message msg;
+		log_debug(log_esi, "esperando mensaje");
+		int resultado = await_msg(socket_planificador, &msg);
+		log_debug(log_esi, "llego un mensaje. parseando...");
+		if (resultado<0){
+			log_debug(log_esi, "error de recepcion");
+			continue;
+			//return ERROR_DE_RECEPCION;
+		}
+		//TODO parsear mensaje y hacer algo.
+		char * request = malloc(msg.header->size);
+		strcpy(request, (char *) msg.contenido);
+		log_debug(log_esi, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
+		//log_debug(log_inst, "%s", request);
+	}
 
-	memcpy(&identificador,(int*)paquete.pBuffer, sizeof(int));
-	printf("El planificador asigno el id:%d a este ESI.\n", identificador);
-	log_trace(log_esi,"EL planificador asigno el id:%d a este ESI.", identificador);
-	destruir_paquete(paquete);
+	free_msg(msg);
 }
 
 void conectar_a_coordinador(esi_configuracion* pConfig) {

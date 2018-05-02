@@ -71,9 +71,11 @@ int send_msg(int socket, Message msg);
 int await_msg(int socket, Message *msg);
 int create_listener(char * ip, char * serverPort);
 void start_listening_threads(int socket, void*(*manejadorDeNuevaConexion)(void*));//(void*) -> recibira un (Conexion*)
+
 //el manejador de eventos de start_listening_select debe devolver -1 si desea cerrar ese socket
 void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*));
 void free_msg(Message *msg);
+
 void close_conection(void *conexion);
 
 //Funciones socket instancia y esi

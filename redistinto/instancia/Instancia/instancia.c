@@ -24,6 +24,7 @@ int main(){
 	msg->contenido = "Holaquetal coordinador";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
 	msg->header->remitente = INSTANCIA;
+	msg->header->tipo_mensaje = TEST;
 	msg->header->size = strlen(msg->contenido);
 
 
