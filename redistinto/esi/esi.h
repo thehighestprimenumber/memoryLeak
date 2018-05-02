@@ -25,5 +25,6 @@ typedef struct {
 char* leer_propiedad_string (t_config *configuracion, char* propiedad);
 void conectar_a_planificador(esi_configuracion* pConfig);
 void conectar_a_coordinador(esi_configuracion* pConfig);
+int interpretar(int argc, char **argv);
 
 #endif

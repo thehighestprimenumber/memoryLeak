@@ -117,3 +117,13 @@ algoritmo: EQUITATIVE_LOAD
 [INFO] 23:29:01:29 log_operaciones/(6604:6661): recibi mensaje de 1: Hola coordinador
 [INFO] 23:29:06:30 log_operaciones/(6604:6661): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
 [INFO] 23:29:06:30 log_operaciones/(6604:6661): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[DEBUG] 13:07:25:551 log_operaciones/(4348:4348): cargando configuracion
+
+[DEBUG] 13:07:25:554 log_operaciones/(4348:4348): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 13:07:25:555 log_operaciones/(4348:4348): iniciando
