@@ -53,7 +53,30 @@ int iniciar(){
 	return 0;
 }
 
-void* recibir_mensaje(void* con){
+int recibir_mensaje(Conexion* conexion, Message* msg){
+	int res = await_msg(conexion->socket, msg);
+	if (res<0) {
+		log_info(log_planificador, "error al recibir un ensaje de %d", socket);
+		return ERROR_DE_RECEPCION;
+		//return string_itoa(ERROR_DE_RECEPCION);
+	}
+
+	enum tipoRemitente recipiente = msg->header->remitente;
+	char * request = malloc((msg->header->size));
+	strcpy(request, (char *) msg->contenido);
+
+	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
+
+	if (msg->header->tipo_mensaje==TEST)
+	{
+		return enviar_mensaje(conexion->socket, "Hola soy el planificador");
+		//return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el planificador"));
+	}
+
+	return ERROR;
+}
+
+/*void* recibir_mensaje(void* con){
 	Conexion* conexion = (Conexion*) con;
 	Message msg;
 	int res = await_msg(conexion->socket, &msg);
@@ -77,7 +100,7 @@ void* recibir_mensaje(void* con){
 	free(msg.contenido);
 	free(msg.header);
 	return ERROR;
-}
+}*/
 
 int enviar_mensaje(int socket, char* mensaje){
 	Message* msg= (Message*) malloc(sizeof(Message));
@@ -96,9 +119,10 @@ int enviar_mensaje(int socket, char* mensaje){
 			return ERROR_DE_ENVIO;
 		}
 	log_info(log_planificador, "se envio el mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
-	free(msg->contenido);
-	free(msg->header);
-	free(msg);
+	free_msg(msg);
+	//free(msg->contenido);
+	//free(msg->header);
+	//free(msg);
 
 	return OK;
 }

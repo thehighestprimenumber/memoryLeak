@@ -217,7 +217,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 
 			//Llamo a la funcion encargada de manejar las nuevas conexiones
 			manejadorDeEvento(conexion, msg);
-			free_msg(msg);
+			//free_msg(msg);
 
 		}
 

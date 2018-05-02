@@ -31,10 +31,10 @@ int main(int argc,char *argv[]) {
 	log_info(log_esi,"La ip del planificador es: %s\n",pConfig->planificador_ip);
 
 	// Nos conectamos y pedimos handshake al planificador, este nos asigna un identificador
-	//conectar_a_planificador(pConfig);
+	conectar_a_planificador(pConfig);
 
 	// Nos conectamos y pedimos handshake al coordinador
-	conectar_a_coordinador(pConfig);
+	//conectar_a_coordinador(pConfig);
 
 	return EXIT_SUCCESS;
 }
@@ -83,9 +83,9 @@ void conectar_a_planificador(esi_configuracion* pConfig) {
 		strcpy(request, (char *) msg.contenido);
 		log_debug(log_esi, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
 		//log_debug(log_inst, "%s", request);
-		break;
 	}
 
+	free_msg(msg);
 }
 
 void conectar_a_coordinador(esi_configuracion* pConfig) {
