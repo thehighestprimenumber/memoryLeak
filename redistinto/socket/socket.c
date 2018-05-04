@@ -217,7 +217,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 
 			//Llamo a la funcion encargada de manejar las nuevas conexiones
 			manejadorDeEvento(conexion, msg);
-			//free_msg(msg);
+			free_msg(&msg);
 
 		}
 
@@ -240,7 +240,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 					//Significa que por alguna razon quiere que cierre la conexion
 					list_destroy_and_destroy_elements(conexiones, close_conection);
 				}
-				free_msg(msg);
+				free_msg(&msg);
 			}
 		}
 
@@ -251,16 +251,16 @@ void close_conection(void *conexion){
 	if(conexion != NULL){
 		if(((Conexion*)conexion)->socket != -1) close(((Conexion*)conexion)->socket);
 		if(((Conexion*)conexion)->addr != NULL) free(((Conexion*)conexion)->addr);
-		free(((Conexion*)conexion));
+		free(conexion);
 	}
 	return;
 }
 
-void free_msg(Message *msg){
-	if(msg != NULL){
-		if(msg->header != NULL) free(msg->header);
-		if(msg->contenido != NULL) free(msg->contenido);
-		free(msg);
+void free_msg(Message **msg){
+	if(msg != NULL && (*msg) != NULL){
+		if((*msg)->header != NULL) free_memory(&((*msg)->header));
+		if((*msg)->contenido != NULL) free_memory(&((*msg)->contenido));
+		free_memory(msg);
 	}
 }
 

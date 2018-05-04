@@ -214,12 +214,12 @@ void conectar_a_coordinador(t_planificador* pConfig) {
 	//printf("Se pudo conectar con el coordinador");
 	Message* msg= (Message*) malloc(sizeof(Message));
 
-	msg->contenido = (char*) malloc(strlen("Envio mensaje al Coordinador desde Planificador\0") + 1);
+	msg->contenido = (char*) malloc(strlen("Envio mensaje al Coordinador desde Planificador") + 1);
 	strcpy(msg->contenido,"Envio mensaje al Coordinador desde Planificador");
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
 	msg->header->remitente = PLANIFICADOR;
 	msg->header->tipo_mensaje = TEST;
-	msg->header->size = strlen(msg->contenido);
+	msg->header->size = strlen(msg->contenido)+1;
 
 	if (send_msg(pidCoordinador, (*msg))<0) log_debug(log_planificador, "Error al enviar el mensaje");
 

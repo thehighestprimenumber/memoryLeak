@@ -9,7 +9,7 @@ int enviar_mensaje(int socket, char* mensaje){
 	//msg->contenido = mensaje;
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
 	msg->header->remitente = COORDINADOR;
-	msg->header->size = strlen(msg->contenido);
+	msg->header->size = strlen(msg->contenido)+1;
 
 	sleep(5);
 	log_info(logger_coordinador, "se va a enviar mensaje desde el coordinador mensaje a %d: %s", socket, msg->contenido);

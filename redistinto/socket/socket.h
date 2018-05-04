@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <commons/collections/list.h>
 #include <pthread.h>
+#include "common.h"
 
 //Defines
 #define IP "127.0.0.1"//todas estaran dentro de la maquina
@@ -74,7 +75,7 @@ void start_listening_threads(int socket, void*(*manejadorDeNuevaConexion)(void*)
 
 //el manejador de eventos de start_listening_select debe devolver -1 si desea cerrar ese socket
 void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*));
-void free_msg(Message *msg);
+void free_msg(Message **msg);
 
 void close_conection(void *conexion);
 
