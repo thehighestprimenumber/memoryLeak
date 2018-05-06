@@ -63,7 +63,8 @@ int recibir_mensaje(Conexion* conexion, Message* msg){
 
 	enum tipoRemitente recipiente = msg->header->remitente;
 	char * request = malloc((msg->header->size));
-	strcpy(request, (char *) msg->contenido);
+	strncpy(request, (char *) msg->contenido, strlen(msg->contenido) + 1);
+	//strcpy(request, (char *) msg->contenido);
 
 	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
 
@@ -104,14 +105,18 @@ int recibir_mensaje(Conexion* conexion, Message* msg){
 
 int enviar_mensaje(int socket, char* mensaje){
 	Message* msg= (Message*) malloc(sizeof(Message));
-	msg->contenido = (char*) malloc(strlen(mensaje));
-	strncpy(msg->contenido,mensaje,strlen(mensaje));
-	//msg->contenido = mensaje;
-	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
-	msg->header->remitente = PLANIFICADOR;
-	msg->header->size = strlen(msg->contenido);
+	//msg->contenido = (char*) malloc(strlen(mensaje));
+	//strncpy(msg->contenido,mensaje,strlen(mensaje));
+	msg->contenido = (char*) malloc(strlen(mensaje) + 1);
+	strcpy(msg->contenido,mensaje);
 
-	sleep(5);
+	//msg->contenido = mensaje;
+	//msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
+	msg->header->remitente = PLANIFICADOR;
+	msg->header->size = strlen(msg->contenido) + 1;
+
+	sleep(1);
 	log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
 	int res = send_msg(socket, (*msg));
 		if (res<0) {
@@ -119,7 +124,7 @@ int enviar_mensaje(int socket, char* mensaje){
 			return ERROR_DE_ENVIO;
 		}
 	log_info(log_planificador, "se envio el mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
-	free_msg(msg);
+	free_msg(&msg);
 	//free(msg->contenido);
 	//free(msg->header);
 	//free(msg);

@@ -20,12 +20,13 @@ int main(){
 	}
 	log_debug(log_inst, "Se pudo conectar con el coordinador");
 	Message* msg= (Message*) malloc(sizeof(Message));
-	msg->contenido = (char*) malloc(strlen("Holaquetal coordinador"));
-	msg->contenido = "Holaquetal coordinador";
-	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	msg->contenido = (char*) malloc(strlen("Holaquetal coordinador") + 1);
+	strcpy(msg->contenido,"Holaquetal coordinador");
+	//msg->contenido = "Holaquetal coordinador";
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
 	msg->header->remitente = INSTANCIA;
 	msg->header->tipo_mensaje = TEST;
-	msg->header->size = strlen(msg->contenido);
+	msg->header->size = strlen(msg->contenido)+1;
 
 
 	if (send_msg(socket_coordinador, (*msg))<0) return ERROR_DE_ENVIO;
@@ -42,7 +43,8 @@ int main(){
 		}
 		//TODO parsear mensaje y hacer algo.
 		char * request = malloc(msg.header->size);
-			strcpy(request, (char *) msg.contenido);
+		strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
+		//strcpy(request, (char *) msg.contenido);
 		log_debug(log_inst, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
 		//log_debug(log_inst, "%s", request);
 

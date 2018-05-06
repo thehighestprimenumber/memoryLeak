@@ -31,8 +31,23 @@ int main(int argc,char *argv[]) {
 	log_info(log_esi,"El puerto del plnificador es: %s\n",pConfig->planificador_puerto);
 	log_info(log_esi,"La ip del planificador es: %s\n",pConfig->planificador_ip);
 
+	pidplanificador = pthread_create(&threadPlanificador, NULL, (void*)&conectar_a_planificador, (void*) pConfig);
+	if (pidplanificador < 0) {
+			log_error(log_esi,"Error al intentar conectar al planificador");
+			exit(EXIT_FAILURE);
+		}
+
+	pidcoordinador = pthread_create(&threadCoordinador, NULL, (void*)&conectar_a_coordinador, (void*) pConfig);
+	if (pidcoordinador < 0) {
+		log_error(log_esi,"Error al intentar conectar al coordinador");
+		exit(EXIT_FAILURE);
+	}
+
+	pthread_join(threadPlanificador,NULL);
+	pthread_join(threadCoordinador,NULL);
+
 	// Nos conectamos y pedimos handshake al planificador, este nos asigna un identificador
-	conectar_a_planificador(pConfig);
+	//conectar_a_planificador(pConfig);
 
 	// Nos conectamos y pedimos handshake al coordinador
 	//conectar_a_coordinador(pConfig);
@@ -60,12 +75,13 @@ void conectar_a_planificador(esi_configuracion* pConfig) {
 	}
 
 	Message* msg= (Message*) malloc(sizeof(Message));
-	msg->contenido = (char*) malloc(strlen("Envio mensaje al Planificador desde ESI"));
-	msg->contenido = "Envio mensaje al Planificador desde ESI";
-	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	msg->contenido = (char*) malloc(strlen("Envio mensaje al Planificador desde ESI") +1);
+	strcpy(msg->contenido,"Envio mensaje al Planificador desde ESI");
+	//msg->contenido = "Envio mensaje al Planificador desde ESI";
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
 	msg->header->remitente = ESI;
 	msg->header->tipo_mensaje = TEST;
-	msg->header->size = strlen(msg->contenido);
+	msg->header->size = strlen(msg->contenido)+1;
 
 	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
 	log_debug(log_esi, "Se envio el mensaje");
@@ -76,17 +92,20 @@ void conectar_a_planificador(esi_configuracion* pConfig) {
 		log_debug(log_esi, "llego un mensaje. parseando...");
 		if (resultado<0){
 			log_debug(log_esi, "error de recepcion");
-			continue;
-			//return ERROR_DE_RECEPCION;
+			//continue;
+			return ERROR_DE_RECEPCION;
 		}
 		//TODO parsear mensaje y hacer algo.
 		char * request = malloc(msg.header->size);
-		strcpy(request, (char *) msg.contenido);
+		strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
+		//strcpy(request, (char *) msg.contenido);
 		log_debug(log_esi, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
 		//log_debug(log_inst, "%s", request);
+
+
 	}
 
-	free_msg(msg);
+	free_msg(&msg);
 }
 
 void conectar_a_coordinador(esi_configuracion* pConfig) {
@@ -101,12 +120,13 @@ void conectar_a_coordinador(esi_configuracion* pConfig) {
 	}
 
 	Message* msg= (Message*) malloc(sizeof(Message));
-	msg->contenido = (char*) malloc(strlen("Hola coordinador"));
-	msg->contenido = "Hola coordinador";
-	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	msg->contenido = (char*) malloc(strlen("Hola coordinador")+1);
+	strcpy(msg->contenido,"Hola coordinador");
+	//msg->contenido = "Hola coordinador";
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
 	msg->header->remitente = ESI;
 	msg->header->tipo_mensaje = TEST;
-	msg->header->size = strlen(msg->contenido);
+	msg->header->size = strlen(msg->contenido) + 1;
 
 	if (send_msg(resultado, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
 	log_debug(log_esi, "Se envio el mensaje");
@@ -122,7 +142,8 @@ void conectar_a_coordinador(esi_configuracion* pConfig) {
 		}
 
 	char * request = malloc(msg.header->size);
-	strcpy(request, (char *) msg.contenido);
+	strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
+	//strcpy(request, (char *) msg.contenido);
 	log_debug(log_esi, "mensaje recibido: %s", request);
 	//log_debug(log_inst, "%s", request);
 
