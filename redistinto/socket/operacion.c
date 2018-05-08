@@ -1,7 +1,5 @@
 #include "operacion.h"
 
-#include <commons/string.h>
-#include <string.h>
 #define TAMANIO_INT 4 //se podria definir un tipo de dato...
 
 char* empaquetar_operacion(t_operacion* operacion){
@@ -41,4 +39,24 @@ t_operacion* desempaquetar_operacion(char* contenido_mensaje, t_operacion* opera
 			strcpy(contenido_mensaje+desplazamiento, operacion->valor);
 
 		return operacion;
+}
+
+Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente){
+	if(texto == NULL || length < 1) return NULL;
+	Message *msg = malloc(sizeof(Message));
+	msg->header = malloc(sizeof(ContentHeader));
+	msg->header->remitente = remitente;
+	msg->header->tipo_mensaje = TEXTO;
+	msg->header->size = length+1;
+	msg->contenido = malloc(length+1);
+	memcpy(msg->contenido, texto, length);
+	( (char*) msg->contenido )[length] = '\0';
+	return msg;
+}
+
+char* desempaquetar_texto(Message* msg){
+	if(msg == NULL || msg->header == NULL || msg->header->tipo_mensaje != TEXTO || msg->header->size < 1 || msg->contenido ==  NULL) return NULL;
+	char* texto = malloc(msg->header->size);
+	memcpy(texto, msg->contenido, msg->header->size);
+	return texto;
 }

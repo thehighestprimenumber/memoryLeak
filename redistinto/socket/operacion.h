@@ -2,7 +2,9 @@
 #define OPERACION_H
 
 #include <stdlib.h>
-
+#include <commons/string.h>
+#include <string.h>
+#include "socket.h"
 
 enum tipo_operacion {
 	GET, SET, STORE
@@ -22,5 +24,7 @@ typedef struct {
 
 char* empaquetar_operacion(t_operacion*);
 t_operacion* desempaquetar_operacion(char* , t_operacion* );
+Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente);
+char* desempaquetar_texto(Message* msg);
 
 #endif
