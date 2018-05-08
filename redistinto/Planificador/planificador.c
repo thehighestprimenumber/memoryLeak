@@ -29,6 +29,7 @@ int main(void) {
 	//pthread_join(threadConsola,NULL);
 
 	//Escuchar conexiones ESI
+	algorimoEnUso = FIFO;
 	iniciar();
 
 	log_info(log_planificador,"\nProceso finalizado");
@@ -47,34 +48,28 @@ int iniciar(){
 	int socket_fd = create_listener(IP,planificador.puerto_planif);
 	if (socket_fd <0) return ERROR_DE_CONEXION;
 
-	start_listening_select(socket_fd, *recibir_mensaje);
+	start_listening_select(socket_fd, *manejador_de_eventos);
 	//start_listening_threads(socket_fd, *recibir_mensaje);
 
 	return 0;
 }
 
-int recibir_mensaje(Conexion* conexion, Message* msg){
-	int res = await_msg(conexion->socket, msg);
-	if (res<0) {
-		log_info(log_planificador, "error al recibir un ensaje de %d", socket);
-		return ERROR_DE_RECEPCION;
-		//return string_itoa(ERROR_DE_RECEPCION);
+int manejador_de_eventos(Conexion* conexion, Message* msg){
+
+	switch(msg->header->tipo_mensaje){
+		case CONEXION:
+			//Suponemos que los  unicos que se conectana nosotros son las ESIs
+			manejar_nueva_esi(conexion);
+			return 0;
+		case DESCONEXION:
+			return manejar_mensaje_esi(conexion, msg);
+		case TEXTO:
+			//Por ahora es texto, en un futuro alguna estructura mas compleja
+			return manejar_mensaje_esi(conexion, msg);
+		default:
+			//fuck
+			return 0;
 	}
-
-	enum tipoRemitente recipiente = msg->header->remitente;
-	char * request = malloc((msg->header->size));
-	strncpy(request, (char *) msg->contenido, strlen(msg->contenido) + 1);
-	//strcpy(request, (char *) msg->contenido);
-
-	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
-
-	if (msg->header->tipo_mensaje==TEST)
-	{
-		return enviar_mensaje(conexion->socket, "Hola soy el planificador");
-		//return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el planificador"));
-	}
-
-	return ERROR;
 }
 
 /*void* recibir_mensaje(void* con){
