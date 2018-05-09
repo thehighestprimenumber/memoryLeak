@@ -11,6 +11,12 @@ int main(void) {
 	log_info(log_planificador,"\nEstimación: %d", planificador.estimacion_inicial);
 	log_info(log_planificador,"\nIP Coordinador: %s", planificador.IP_coordinador);
 	log_info(log_planificador,"\nPuerto Coordinador: %s",planificador.puerto_coordinador);
+	log_info(log_planificador,"\nAlfa Planificación: %d", planificador.alfaPlanificacion);
+
+	//Crear listas de procesos
+	cola_ready = list_create();
+	cola_blocked = list_create();
+	cola_finished = list_create();
 
 	//conectar a coordinador
 	t_planificador* pConfig = (t_planificador*)&planificador;
@@ -53,7 +59,7 @@ int iniciar(){
 	return 0;
 }
 
-int recibir_mensaje(Conexion* conexion, Message* msg){
+/*int recibir_mensaje(Conexion* conexion, Message* msg){
 	int res = await_msg(conexion->socket, msg);
 	if (res<0) {
 		log_info(log_planificador, "error al recibir un ensaje de %d", socket);
@@ -75,35 +81,118 @@ int recibir_mensaje(Conexion* conexion, Message* msg){
 	}
 
 	return ERROR;
-}
+}*/
 
-/*void* recibir_mensaje(void* con){
-	Conexion* conexion = (Conexion*) con;
-	Message msg;
-	int res = await_msg(conexion->socket, &msg);
+int recibir_mensaje(Conexion* conexion, Message* msg){
+	tipo_mensaje tipo;
+	int esi_seleccionado = 0;
+
+	int res = await_msg(conexion->socket, msg);
 	if (res<0) {
-				log_info(log_planificador, "error al recibir un ensaje de %d", socket);
-				return string_itoa(ERROR_DE_RECEPCION);
-			}
-	enum tipoRemitente recipiente =  msg.header->remitente;
-	char * request = malloc((msg.header->size));
-			strcpy(request, (char *) msg.contenido);
+		log_info(log_planificador, "error al recibir un ensaje de %d", socket);
+		return ERROR_DE_RECEPCION;
+		//return string_itoa(ERROR_DE_RECEPCION);
+	}
+
+	enum tipoRemitente recipiente = msg->header->remitente;
+	char * request = malloc((msg->header->size));
+	strncpy(request, (char *) msg->contenido, strlen(msg->contenido) + 1);
+	//strcpy(request, (char *) msg->contenido);
 
 	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
 
-	if (msg.header->tipo_mensaje==TEST)
+	if (msg->header->tipo_mensaje==TEST)
 	{
-		free(msg.contenido);
-		free(msg.header);
-		return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el planificador"));
+		tipo.enumTipo = TEST;
+
+		return enviar_mensaje(conexion->socket, "Hola soy el planificador",tipo);
+		//return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el planificador"));
+	}
+	else if ((msg->header->remitente==ESI) && (msg->header->tipo_mensaje==CONEXION)) {
+		//Agrego la nueva conexión a lista de preparados
+		agregar_ready(conexion->socket);
+
+		//Verifico si algún esi está corriendo, caso contrario
+		//envio un esi a ejecutarse según el algorimto seleccionado
+		if (esiRunning == 0) {
+			esi_seleccionado = planificar_esis();
+			if (esi_seleccionado > 0) {
+			//Primero confirmo la conexión
+				tipo.enumTipo = CONEXION;
+				int res_conexion = enviar_mensaje(conexion->socket, "Se conectó al planificador correctamente",tipo);
+
+				if (res_conexion < 0) {
+					log_debug(log_planificador,"Falló la conexión con el esi: %d",conexion->socket);
+					exit_proceso(-1);
+				}
+				else
+				{
+					//Envío mensaje para pedirle al esi que ejecute
+					tipo.enumTipo = OPERACION;
+					return enviar_mensaje(esi_seleccionado, "El planificador ordena ejecutar a este esi",tipo);
+				}
+			}
+		}
+
+		tipo.enumTipo = CONEXION;
+
+		//Por último envío mensaje de confirmación al esi que se conecto
+		return enviar_mensaje(conexion->socket, "Se conecto al planificador correctamente",tipo);
+	}
+	else if ((msg->header->remitente==ESI) && (msg->header->tipo_mensaje==DESCONEXION)) {
+		finalizar_esi(conexion->socket);
+
+		esi_seleccionado = planificar_esis();
+
+		if (esi_seleccionado > 0) {
+		//Primero confirmo la desconexión
+			tipo.enumTipo = ACK;
+			int res_conexion = enviar_mensaje(conexion->socket, "Planificador recibió notificación de desconexión",tipo);
+
+			if (res_conexion < 0) {
+				log_debug(log_planificador,"Falló la desconexión con el esi: %d",conexion->socket);
+				exit_proceso(-1);
+			}
+			else
+			{
+				//Envío mensaje para pedirle al esi que ejecute
+				tipo.enumTipo = OPERACION;
+				return enviar_mensaje(esi_seleccionado, "El planificador ordena ejecutar a este esi",tipo);
+			}
+		}
 	}
 
-	free(msg.contenido);
-	free(msg.header);
 	return ERROR;
-}*/
+}
 
-int enviar_mensaje(int socket, char* mensaje){
+int enviar_mensaje(int socket, char* mensaje, tipo_mensaje tipo){
+	Message* msg= (Message*) malloc(sizeof(Message));
+	//msg->contenido = (char*) malloc(strlen(mensaje));
+	//strncpy(msg->contenido,mensaje,strlen(mensaje));
+	msg->contenido = (char*) malloc(strlen(mensaje) + 1);
+	strcpy(msg->contenido,mensaje);
+
+	//msg->contenido = mensaje;
+	//msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
+	msg->header->remitente = PLANIFICADOR;
+	msg->header->size = strlen(msg->contenido) + 1;
+	msg->header->tipo_mensaje = tipo.enumTipo;
+
+	sleep(1);
+	log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
+	int res = send_msg(socket, (*msg));
+		if (res<0) {
+			log_info(log_planificador, "error al enviar mensaje a %d", socket);
+			return ERROR_DE_ENVIO;
+		}
+	log_info(log_planificador, "se envio el mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
+	free_msg(&msg);
+
+	return OK;
+}
+
+/*int enviar_mensaje(int socket, char* mensaje){
 	Message* msg= (Message*) malloc(sizeof(Message));
 	//msg->contenido = (char*) malloc(strlen(mensaje));
 	//strncpy(msg->contenido,mensaje,strlen(mensaje));
@@ -130,7 +219,7 @@ int enviar_mensaje(int socket, char* mensaje){
 	//free(msg);
 
 	return OK;
-}
+}*/
 
 void estructura_planificador() {
 	t_config* configuracion;
@@ -147,6 +236,7 @@ void estructura_planificador() {
 	estimacion_read(configuracion);
 	ip_coordinador_read(configuracion);
 	puerto_coordinador_read(configuracion);
+	alfaPlanificacion_read(configuracion);
 	clavesBloqueadas_read(configuracion);
 
 	config_destroy(configuracion);
@@ -189,6 +279,12 @@ void puerto_coordinador_read(t_config* configuracion) {
 		char* puertoCoord = config_get_string_value(configuracion,puertoCoord_planificador);
 		planificador.puerto_coordinador = malloc(strlen(puertoCoord) + 1);
 		memcpy(planificador.puerto_coordinador,puertoCoord,strlen(puertoCoord) + 1);
+	}
+}
+
+void alfaPlanificacion_read(t_config* configuracion) {
+	if (config_has_property(configuracion, alfa_planificador)) {
+		planificador.alfaPlanificacion = config_get_int_value(configuracion,alfa_planificador);
 	}
 }
 
@@ -254,6 +350,81 @@ void conectar_a_coordinador(t_planificador* pConfig) {
 		//printf("Se envio el mensaje");
 	//log_info(log_planificador, "Planificador envio un mensaje: %s", (*msg).contenido);
 }
+
+void agregar_ready(int idEsi) {
+	struct_ready elemento;
+	elemento.pid = idEsi;
+	list_add(cola_blocked,&elemento);
+	log_debug(log_planificador,"\nSe agrego el esi %d, a la lista de listos",idEsi);
+}
+
+void agregar_blocked(int idEsi, char* clave) {
+	struct_blocked elemento;
+	elemento.pid = idEsi;
+	elemento.clave = (char*)malloc(strlen(clave)+1);
+	strcpy(elemento.clave,clave);
+	list_add(cola_blocked,&elemento);
+	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de bloqueados",idEsi,clave);
+}
+
+void agregar_finished(int idEsi) {
+	struct_finished elemento;
+	elemento.pid = idEsi;
+	list_add(cola_blocked,&elemento);
+	log_debug(log_planificador,"\nSe agrego el esi %d, a la lista de finalizados",idEsi);
+}
+
+struct_ready* seleccionar_esi_ready_fifo() {
+	struct_ready* esi_seleccionado;
+
+	//Si hay esis esperando, selecciona al primero de la lista
+	if (list_size(cola_ready) > 0) {
+		esi_seleccionado = (struct_ready*)list_get(cola_ready, 0);
+		return esi_seleccionado;
+	}
+
+	//Si no encuentro nada retorno null
+	return NULL;
+}
+
+int planificar_esis() {
+	int esiSeleccionado = 0;
+
+	if (strcmp(planificador.algoritmo_planif,"FIFO")) {
+		struct_ready* primer_esi = seleccionar_esi_ready_fifo();
+		if (primer_esi != NULL){
+			//Obtengo el seleccionado para enviar un mensaje, y me lo guardo en variable
+			//global como proceso que está ejecutando
+			esiSeleccionado = primer_esi->pid;
+			esiRunning = esiSeleccionado;
+		}
+	}
+	else if (strcmp(planificador.algoritmo_planif,"SJF-SD")) {
+
+	}
+
+	else if (strcmp(planificador.algoritmo_planif,"SJF-CD")) {
+
+	}
+
+	else if (strcmp(planificador.algoritmo_planif,"HRRN")) {
+
+	}
+
+	else
+	{
+		log_debug(log_planificador,"El algoritmo de planificación %s es inválido",planificador.algoritmo_planif);
+		exit_proceso(-1);
+	}
+
+	return esiSeleccionado;
+}
+
+void finalizar_esi(int socket_esi) {
+	agregar_finished(socket_esi);
+	esiRunning = 0;
+}
+
 
 void exit_proceso(int retorno) {
   log_destroy(log_planificador);
