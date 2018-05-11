@@ -1,27 +1,28 @@
 #ifndef COORDINADOR_H
 #define COORDINADOR_H
 
-#define NULL 0
-
 #include <stdbool.h>
 #include <commons/log.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <commons/collections/list.h>
+#include <commons/string.h>
 #include "../esi/esi.h"
-#include "../operacion/operacion.h"
+#include "../socket/operacion.h"
 #include "tabla_instancias.h"
 #include "./conexiones.h"
+#include  <signal.h>
+
+#define OK 0
+#define ERROR_COORDINADOR -20
+#define NO_HAY_INSTANCIAS -21
+#define CLAVE_BLOQUEADA -22
 
 void configurar_logger();
 void salir(int return_nr);
 
 t_log* logger_coordinador;
-
-enum resultado_coord {
-	OK, ERROR, NO_HAY_INSTANCIAS, CLAVE_BLOQUEADA
-};
 
 enum algoritmo_coordinador {
 	EQUITATIVE_LOAD, LEAST_SPACE_USED, KEY_EXPLICIT
@@ -47,8 +48,7 @@ typedef struct {
 char* arch_config;
 t_log * log_operaciones;
 
-enum resultado_coord procesarOperacion(t_operacion op_a_realizar, proceso_esi solicitante);
+int procesarSolicitudDeEsi(t_operacion op_a_realizar, int socket_solicitante);
 
-enum resultado_coord abrirCoordinador();
 
 #endif

@@ -5,21 +5,26 @@
 #include "coordinador.h"
 
 
-typedef struct {
-	int id;
-} mock_instancia;
+#define MAX_LEN_INSTANCE_NAME 20
 
 typedef struct {
-	mock_instancia * instancia;
+	int socket_instancia;
 	t_list* claves;
+	int esta_activa;
+	pthread_mutex_t lock;
+	char nombre_instancia[MAX_LEN_INSTANCE_NAME];
 } fila_tabla_instancias;
+
+void free_fila_tabla_instancias(fila_tabla_instancias** fila);
 
 int ultima_instancia_usada;
 
-enum resultado_coord eliminar_instancia(int id_instancia);
+int cambiar_estado_instancia(fila_tabla_instancias* fila, int esta_activa);
 
-enum resultado_coord crear_instancia();
+fila_tabla_instancias* seleccionar_instancia(char* clave);
 
-mock_instancia * seleccionar_instancia(char* clave);
+int registar_instancia(char* nombre_instancia, int socket_instancia);
+
+int desconectar_instancia(char* nombre_instancia);
 
 #endif

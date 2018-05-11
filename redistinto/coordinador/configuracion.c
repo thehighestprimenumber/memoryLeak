@@ -18,7 +18,7 @@ int leer_propiedad_int (t_config *configuracion, char* propiedad){
 
 void leer_propiedad_puerto_escucha (t_config *configuracion){
 	if (config_has_property(configuracion, m_puerto_escucha)){
-		coordinador.puerto_escucha = malloc(sizeof(config_get_string_value(configuracion,m_puerto_escucha)));
+		coordinador.puerto_escucha = malloc(strlen(config_get_string_value(configuracion,m_puerto_escucha)) + 1);
 		strcpy(coordinador.puerto_escucha, config_get_string_value(configuracion,m_puerto_escucha));
 	}
 }

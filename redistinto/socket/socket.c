@@ -24,13 +24,15 @@ int connect_to_server(char * ip, char * serverPort) {
 	freeaddrinfo(server_info);//Liberamos addrinfo
 
 	//verificamos errores y devolvemos acorde
-	if(retorno != 0 || server_socket == -1){
+	if(retorno < 0 || server_socket == -1){
 		return -1;
 	}else{
 		return server_socket;
 	}
 }
-
+/*
+ * devuelve la cantidad de bits leidos
+ */
 int send_msg(int socket, Message msg) {
 	//Verifico la existencia del socket y que el mensaje posea contenido
 	if(socket == -1 || msg.contenido == NULL || msg.header == NULL) return -1;
@@ -48,8 +50,7 @@ int send_msg(int socket, Message msg) {
 
 	free(buffer);
 
-	if(resultado < 1) return -1;
-	else return 1;
+	return resultado;
 }
 
 int await_msg(int socket, Message *msg) {
@@ -69,22 +70,22 @@ int await_msg(int socket, Message *msg) {
 	}
 
 	//Preparo el espacio necesario para recibir el contenido (tamaño variable)
-	void *contenido = malloc(header->size);
+	void *contenido = malloc(header->size+1);
 
 	//Recibo el contenido
 	result_recv = recv(socket, contenido, header->size, MSG_WAITALL);
 
 	//En caso de error al recibir devuelvo -1
-	if(result_recv == -1){
+	if(result_recv < 1){
 		free(header);
 		free(contenido);
 		return -1;
 	}
 
-	//En caso que todo salgo correcto relleno el msg y devuelvo 1 para informar la operacion satisfactoria
+	//En caso que t odo salgo correcto relleno el msg y devuelvo 1 para informar la operacion satisfactoria
 	msg->header = header;
 	msg->contenido = contenido;
-	return 1;
+	return result_recv;
 }
 
 int create_listener(char * ip, char * serverPort){
@@ -143,7 +144,7 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void 
 
 		conexion->socket = nuevoSocket;
 
-		//Pregunto si salio todo bien
+		//Pregunto si salio t odo bien
 		if(nuevoSocket == -1){
 			close_conection(conexion);
 			continue;//Continuo esperando una nueva conexion
@@ -160,16 +161,17 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void 
 	}
 }
 
-void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*), void* (*manejadorDeNuevaConexion)(Conexion*)){
+void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*)){
 	//Por si me mandan un socket con problemas
 	if(socketListener == -1) return;
 
 	t_list *conexiones = list_create();
-	int activity;
+	int activity, fdMax;
 	fd_set readfds;
+	fdMax = socketListener;
+	//Aca socket 0 para consola (agregar a la lista conexiones)
 
 	while(1){
-
 		//Vacio el set e incluyo al socket de escucha
 		FD_ZERO(&readfds);
 		FD_SET(socketListener, &readfds);
@@ -179,7 +181,8 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 		}
 
 		//Esperamos que ocurra algo con alguna de las conexiones (inclusive con el socket de escucha)
-		activity = select( list_size(conexiones) + 1 , &readfds , NULL , NULL , NULL);
+		//activity = select( list_size(conexiones) + 1 , &readfds , NULL , NULL , NULL);
+		activity = select( fdMax + 1, &readfds, NULL, NULL, NULL);
 
 		if (activity < 0) {
 			//Ocurrio un error #lpm
@@ -198,14 +201,24 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 			int nuevoSocket = accept(socketListener, conexion->addr, &addrSize);
 			conexion->socket = nuevoSocket;
 
-			//Pregunto si salio todo bien
+			//Pregunto si salio t odo bien
 			if(nuevoSocket == -1) close_conection(conexion);
 
 			//Añado la conexion a la lista
 			list_add(conexiones, conexion);
 
+			//Creamos un nuevo mensaje para avisar de la nueva conexion
+			Message *msg = malloc(sizeof(Message));
+			msg->header = malloc(sizeof(ContentHeader));
+			msg->header->remitente = DESCONOCIDO;
+			msg->header->tipo_mensaje = CONEXION;
+			msg->header->size = 0;
+			msg->contenido = NULL;
+
 			//Llamo a la funcion encargada de manejar las nuevas conexiones
-			manejadorDeNuevaConexion(conexion);
+			manejadorDeEvento(conexion, msg);
+			free_msg(&msg);
+
 		}
 
 		//Recorremos preguntando por cada conexion si ocurrio algun evento
@@ -216,7 +229,8 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 				Message *msg = malloc(sizeof(Message));
 				if(await_msg( ((Conexion*) list_get(conexiones, i))->socket, msg) == -1){
 					msg->header = malloc(sizeof(ContentHeader));
-					msg->header->id = DESCONEXION;
+					msg->header->remitente = DESCONOCIDO;
+					msg->header->tipo_mensaje = DESCONEXION;
 					msg->header->size = 0;
 					msg->contenido = NULL;
 					manejadorDeEvento(((Conexion*) list_get(conexiones, i)), msg);
@@ -226,6 +240,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 					//Significa que por alguna razon quiere que cierre la conexion
 					list_destroy_and_destroy_elements(conexiones, close_conection);
 				}
+				free_msg(&msg);
 			}
 		}
 
@@ -236,10 +251,19 @@ void close_conection(void *conexion){
 	if(conexion != NULL){
 		if(((Conexion*)conexion)->socket != -1) close(((Conexion*)conexion)->socket);
 		if(((Conexion*)conexion)->addr != NULL) free(((Conexion*)conexion)->addr);
-		free(((Conexion*)conexion));
+		free(conexion);
 	}
 	return;
 }
+
+void free_msg(Message **msg){
+	if(msg != NULL && (*msg) != NULL){
+		if((*msg)->header != NULL) free_memory(&((*msg)->header));
+		if((*msg)->contenido != NULL) free_memory(&((*msg)->contenido)); //FIXME si es una operacion hay que liberar las estructuras internas.
+		free_memory(msg);
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //FUNCIONES SOCKET INSTANCIA
