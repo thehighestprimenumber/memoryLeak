@@ -28,8 +28,10 @@ t_operacion* desempaquetar_operacion(char* contenido_mensaje, t_operacion* opera
 		memcpy(&operacion->tipo, contenido_mensaje, TAMANIO_INT);
 			desplazamiento+=TAMANIO_INT;
 
+
 		strcpy(contenido_mensaje+desplazamiento, operacion->clave);
 			desplazamiento+=TAMANIO_CLAVE;
+
 
 		memcpy(&operacion->long_valor, contenido_mensaje+desplazamiento, TAMANIO_INT);
 						desplazamiento+=TAMANIO_INT;
@@ -39,9 +41,30 @@ t_operacion* desempaquetar_operacion(char* contenido_mensaje, t_operacion* opera
 		return operacion;
 }
 
+
 void free_operacion(t_operacion ** operacion){
 	if(operacion != NULL && (*operacion) != NULL){
 			if( (*operacion)->valor != NULL) free((*operacion)->valor);
 			free(*operacion);
 	}
+
+Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente){
+	if(texto == NULL || length < 1) return NULL;
+	Message *msg = malloc(sizeof(Message));
+	msg->header = malloc(sizeof(ContentHeader));
+	msg->header->remitente = remitente;
+	msg->header->tipo_mensaje = TEXTO;
+	msg->header->size = length+1;
+	msg->contenido = malloc(length+1);
+	memcpy(msg->contenido, texto, length);
+	( (char*) msg->contenido )[length] = '\0';
+	return msg;
+}
+
+char* desempaquetar_texto(Message* msg){
+	if(msg == NULL || msg->header == NULL || msg->header->tipo_mensaje != TEXTO || msg->header->size < 1 || msg->contenido ==  NULL) return NULL;
+	char* texto = malloc(msg->header->size);
+	memcpy(texto, msg->contenido, msg->header->size);
+	return texto;
+
 }

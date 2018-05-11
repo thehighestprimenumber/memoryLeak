@@ -47,13 +47,15 @@ int iniciar(){
 	int socket_fd = create_listener(IP,planificador.puerto_planif);
 	if (socket_fd <0) return ERROR_DE_CONEXION;
 
-	start_listening_select(socket_fd, *recibir_conexion);
+start_listening_select(socket_fd, *recibir_mensaje);
+
 	//start_listening_threads(socket_fd, *recibir_mensaje);
 
 	return 0;
 }
 
-int recibir_conexion(Conexion* conexion, Message* msg){
+int recibir_mensaje(Conexion* conexion, Message* msg){
+
 	int res = await_msg(conexion->socket, msg);
 	if (res<0) {
 		log_info(log_planificador, "error al recibir un ensaje de %d", socket);
@@ -63,7 +65,10 @@ int recibir_conexion(Conexion* conexion, Message* msg){
 
 	enum tipoRemitente recipiente = msg->header->remitente;
 	char * request = malloc((msg->header->size));
-	strcpy(request, (char *) msg->contenido);
+
+	strncpy(request, (char *) msg->contenido, strlen(msg->contenido) + 1);
+	//strcpy(request, (char *) msg->contenido);
+
 
 	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
 
@@ -73,7 +78,8 @@ int recibir_conexion(Conexion* conexion, Message* msg){
 		//return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el planificador"));
 	}
 
-	return ERROR_COORDINADOR;
+	return ERROR;
+
 }
 
 /*void* recibir_mensaje(void* con){
@@ -104,12 +110,18 @@ int recibir_conexion(Conexion* conexion, Message* msg){
 
 int enviar_mensaje(int socket, char* mensaje){
 	Message* msg= (Message*) malloc(sizeof(Message));
-	msg->contenido = (char*) malloc(strlen(mensaje));
-	strncpy(msg->contenido,mensaje,strlen(mensaje));
+	//msg->contenido = (char*) malloc(strlen(mensaje));
+	//strncpy(msg->contenido,mensaje,strlen(mensaje));
+	msg->contenido = (char*) malloc(strlen(mensaje) + 1);
+	strcpy(msg->contenido,mensaje);
+
 	//msg->contenido = mensaje;
-	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	//msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
 	msg->header->remitente = PLANIFICADOR;
-	msg->header->size = strlen(msg->contenido);
+	msg->header->size = strlen(msg->contenido) + 1;
+
+	sleep(1);
 
 	log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
 	int res = send_msg(socket, (*msg));

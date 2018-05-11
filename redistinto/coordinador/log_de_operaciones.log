@@ -1,367 +1,125 @@
-[INFO] 11:47:35:271 log_operaciones/(17233:17233): cargando configuracion
-[DEBUG] 11:48:03:321 log_operaciones/(17275:17275): cargando configuracion
-[DEBUG] 11:48:03:334 log_operaciones/(17275:17275): retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
+[DEBUG] 22:42:00:792 log_operaciones/(5324:5324): cargando configuracion
 
-[DEBUG] 11:49:05:45 log_operaciones/(17324:17324): cargando configuracion
-
-[DEBUG] 11:49:05:56 log_operaciones/(17324:17324): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[DEBUG] 11:52:46:245 log_operaciones/(17483:17483): cargando configuracion
-
-[DEBUG] 11:52:46:256 log_operaciones/(17483:17483): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[DEBUG] 12:07:30:134 log_operaciones/(18140:18140): cargando configuracion
-
-[DEBUG] 12:07:30:144 log_operaciones/(18140:18140): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[DEBUG] 12:21:41:960 log_operaciones/(18814:18814): cargando configuracion
-
-[DEBUG] 12:21:41:968 log_operaciones/(18814:18814): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[DEBUG] 12:22:17:119 log_operaciones/(18855:18855): cargando configuracion
-
-[DEBUG] 12:22:17:127 log_operaciones/(18855:18855): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[INFO] 12:22:17:135 log_operaciones/(18855:18855): solicitud: recibida:
-[DEBUG] 12:22:27:289 log_operaciones/(18888:18888): cargando configuracion
-
-[DEBUG] 12:22:27:295 log_operaciones/(18888:18888): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[INFO] 12:22:27:295 log_operaciones/(18888:18888): solicitud: recibida:
-[INFO] 12:22:27:295 log_operaciones/(18888:18888): solicitud: 1 k1054 54 alumnos
-
-[DEBUG] 12:51:28:92 log_operaciones/(20241:20241): cargando configuracion
-
-[DEBUG] 12:51:28:99 log_operaciones/(20241:20241): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[INFO] 12:51:28:99 log_operaciones/(20241:20241): solicitud: recibida:
-[INFO] 12:51:28:99 log_operaciones/(20241:20241): solicitud: SET k1054 54 alumnos
-
-[DEBUG] 12:52:18:107 log_operaciones/(20332:20332): cargando configuracion
-
-[DEBUG] 12:52:18:120 log_operaciones/(20332:20332): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[INFO] 12:52:18:120 log_operaciones/(20332:20332): solicitud: SET k1054 54 alumnos
-
-[DEBUG] 12:52:54:948 log_operaciones/(20413:20413): cargando configuracion
-
-[DEBUG] 12:52:54:949 log_operaciones/(20413:20413): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[INFO] 12:52:54:949 log_operaciones/(20413:20413): solicitud: SET k1054 54 alumnos
-
-[DEBUG] 12:56:05:541 log_operaciones/(20589:20589): cargando configuracion
-
-[DEBUG] 12:56:05:552 log_operaciones/(20589:20589): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[INFO] 12:56:05:552 log_operaciones/(20589:20589): solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 17:29:59:599 log_operaciones/(3420:3420): cargando configuracion
-
-[DEBUG] 17:29:59:606 log_operaciones/(3420:3420): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[INFO] 17:29:59:606 log_operaciones/(3420:3420): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 17:37:56:417 log_operaciones/(3796:3796): cargando configuracion
-
-[DEBUG] 17:37:56:418 log_operaciones/(3796:3796): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[INFO] 17:37:56:418 log_operaciones/(3796:3796): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:14:46:828 log_operaciones/(5080:5080): cargando configuracion
-
-[DEBUG] 18:14:46:832 log_operaciones/(5080:5080): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[INFO] 18:14:46:832 log_operaciones/(5080:5080): procesando solicitud: SET (null) 54 alumnos de ESI# 1
-[DEBUG] 18:15:33:718 log_operaciones/(5130:5130): cargando configuracion
-
-[DEBUG] 18:15:33:719 log_operaciones/(5130:5130): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: 1
-
-[INFO] 18:15:33:719 log_operaciones/(5130:5130): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:17:03:37 log_operaciones/(5226:5226): cargando configuracion
-
-[DEBUG] 18:17:03:42 log_operaciones/(5226:5226): 
-retardo: 1
-cantidad_entradas: 0
-tamanio_entrada: 0
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[INFO] 18:17:03:45 log_operaciones/(5226:5226): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:17:48:858 log_operaciones/(5245:5245): cargando configuracion
-
-[DEBUG] 18:17:48:859 log_operaciones/(5245:5245): 
-retardo: 1
-cantidad_entradas: 10
-tamanio_entrada: 100
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[INFO] 18:17:48:859 log_operaciones/(5245:5245): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:33:03:220 log_operaciones/(5688:5688): cargando configuracion
-
-[DEBUG] 18:33:03:220 log_operaciones/(5688:5688): 
-retardo: 1
-cantidad_entradas: 10
-tamanio_entrada: 100
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[INFO] 18:33:17:36 log_operaciones/(5688:5688): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:34:09:93 log_operaciones/(5744:5744): cargando configuracion
-
-[DEBUG] 18:34:09:93 log_operaciones/(5744:5744): 
-retardo: 1
-cantidad_entradas: 10
-tamanio_entrada: 100
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[INFO] 18:34:10:549 log_operaciones/(5744:5744): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:35:11:150 log_operaciones/(5819:5819): cargando configuracion
-
-[DEBUG] 18:35:11:150 log_operaciones/(5819:5819): 
-retardo: 1
-cantidad_entradas: 10
-tamanio_entrada: 100
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[INFO] 18:35:16:313 log_operaciones/(5819:5819): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:36:15:285 log_operaciones/(5872:5872): cargando configuracion
-
-[DEBUG] 18:36:15:285 log_operaciones/(5872:5872): 
-retardo: 1
-cantidad_entradas: 10
-tamanio_entrada: 100
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[INFO] 18:36:16:827 log_operaciones/(5872:5872): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:37:20:405 log_operaciones/(5977:5977): cargando configuracion
-
-[DEBUG] 18:37:20:405 log_operaciones/(5977:5977): 
-retardo: 1
-cantidad_entradas: 10
-tamanio_entrada: 100
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[DEBUG] 18:37:37:72 log_operaciones/(6012:6012): cargando configuracion
-
-[DEBUG] 18:37:37:72 log_operaciones/(6012:6012): 
-retardo: 1
-cantidad_entradas: 10
-tamanio_entrada: 100
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[DEBUG] 18:38:03:624 log_operaciones/(6063:6063): cargando configuracion
-
-[DEBUG] 18:38:03:624 log_operaciones/(6063:6063): 
-retardo: 1
-cantidad_entradas: 10
-tamanio_entrada: 100
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[DEBUG] 18:39:48:46 log_operaciones/(6141:6141): cargando configuracion
-
-[DEBUG] 18:39:48:61 log_operaciones/(6141:6141): 
-retardo: 1
-cantidad_entradas: 10
-tamanio_entrada: 100
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[DEBUG] 18:42:13:844 log_operaciones/(6246:6246): cargando configuracion
-
-[DEBUG] 18:42:13:845 log_operaciones/(6246:6246): 
-retardo: 1
-cantidad_entradas: 10
-tamanio_entrada: 100
-puerto_escucha: un puerto
-algoritmo: LEAST_SPACE_USED
-
-[INFO] 18:42:13:845 log_operaciones/(6246:6246): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:42:13:845 log_operaciones/(6246:6246): usando instancia#1
-[INFO] 18:42:13:845 log_operaciones/(6246:6246): resultado: 0
-[DEBUG] 18:58:57:288 log_operaciones/(6833:6833): cargando configuracion
-
-[DEBUG] 18:58:57:288 log_operaciones/(6833:6833): 
+[DEBUG] 22:42:00:793 log_operaciones/(5324:5324): 
 retardo: 1
 cantidad_entradas: 10
 tamanio_entrada: 100
 puerto_escucha: un puerto
 algoritmo: EQUITATIVE_LOAD
 
-[INFO] 18:58:57:288 log_operaciones/(6833:6833): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:58:57:288 log_operaciones/(6833:6833): usando instancia#1
-[INFO] 18:58:57:289 log_operaciones/(6833:6833): resultado: 0
-[INFO] 18:58:57:289 log_operaciones/(6833:6833): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 18:58:57:289 log_operaciones/(6833:6833): usando instancia#1
-[INFO] 18:58:57:289 log_operaciones/(6833:6833): resultado: 0
-[DEBUG] 19:17:13:277 log_operaciones/(7685:7685): cargando configuracion
+[INFO] 22:42:00:793 log_operaciones/(5324:5324): iniciando
+[DEBUG] 22:42:25:908 log_operaciones/(5360:5360): cargando configuracion
 
-[DEBUG] 19:17:13:279 log_operaciones/(7685:7685): 
+[DEBUG] 22:42:25:909 log_operaciones/(5360:5360): 
 retardo: 1
 cantidad_entradas: 10
 tamanio_entrada: 100
 puerto_escucha: un puerto
 algoritmo: EQUITATIVE_LOAD
 
-[INFO] 19:17:13:282 log_operaciones/(7685:7685): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:17:13:282 log_operaciones/(7685:7685): usando instancia#1
-[INFO] 19:17:13:282 log_operaciones/(7685:7685): resultado: 0
-[INFO] 19:17:13:282 log_operaciones/(7685:7685): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:17:13:282 log_operaciones/(7685:7685): usando instancia#1
-[INFO] 19:17:13:282 log_operaciones/(7685:7685): resultado: 0
-[DEBUG] 19:17:50:859 log_operaciones/(7725:7725): cargando configuracion
+[INFO] 22:42:25:909 log_operaciones/(5360:5360): iniciando
+[DEBUG] 22:42:36:379 log_operaciones/(5384:5384): cargando configuracion
 
-[DEBUG] 19:17:54:956 log_operaciones/(7725:7725): 
+[DEBUG] 22:42:36:379 log_operaciones/(5384:5384): 
 retardo: 1
 cantidad_entradas: 10
 tamanio_entrada: 100
 puerto_escucha: un puerto
 algoritmo: EQUITATIVE_LOAD
 
-[INFO] 19:18:06:812 log_operaciones/(7725:7725): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:19:03:814 log_operaciones/(7725:7725): usando instancia#1
-[INFO] 19:19:09:436 log_operaciones/(7725:7725): resultado: 0
-[INFO] 19:19:12:739 log_operaciones/(7725:7725): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:20:13:365 log_operaciones/(7810:7810): cargando configuracion
+[INFO] 22:42:36:379 log_operaciones/(5384:5384): iniciando
+[INFO] 22:42:46:984 log_operaciones/(5384:5421): recibi mensaje de 1: Hola coordinador
+[DEBUG] 22:44:09:38 log_operaciones/(5454:5454): cargando configuracion
 
-[DEBUG] 19:20:13:370 log_operaciones/(7810:7810): 
+[DEBUG] 22:44:09:38 log_operaciones/(5454:5454): 
 retardo: 1
 cantidad_entradas: 10
 tamanio_entrada: 100
 puerto_escucha: un puerto
 algoritmo: EQUITATIVE_LOAD
 
-[INFO] 19:20:13:372 log_operaciones/(7810:7810): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:20:13:374 log_operaciones/(7810:7810): usando instancia#2
-[INFO] 19:20:13:374 log_operaciones/(7810:7810): resultado: 0
-[INFO] 19:20:13:374 log_operaciones/(7810:7810): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:20:13:374 log_operaciones/(7810:7810): usando instancia#3
-[INFO] 19:20:13:374 log_operaciones/(7810:7810): resultado: 0
-[DEBUG] 19:22:18:12 log_operaciones/(7945:7945): cargando configuracion
+[INFO] 22:44:10:216 log_operaciones/(5454:5454): iniciando
+[DEBUG] 22:48:39:338 log_operaciones/(5518:5518): cargando configuracion
 
-[DEBUG] 19:22:18:12 log_operaciones/(7945:7945): 
+[DEBUG] 22:48:39:339 log_operaciones/(5518:5518): 
 retardo: 1
 cantidad_entradas: 10
 tamanio_entrada: 100
 puerto_escucha: un puerto
 algoritmo: EQUITATIVE_LOAD
 
-[INFO] 19:22:18:16 log_operaciones/(7945:7945): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:22:18:16 log_operaciones/(7945:7945): usando instancia#2
-[INFO] 19:22:18:16 log_operaciones/(7945:7945): resultado: 0
-[INFO] 19:22:18:16 log_operaciones/(7945:7945): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:22:18:16 log_operaciones/(7945:7945): usando instancia#3
-[INFO] 19:22:18:16 log_operaciones/(7945:7945): resultado: 0
-[DEBUG] 19:22:36:251 log_operaciones/(7972:7972): cargando configuracion
+[INFO] 22:48:40:465 log_operaciones/(5518:5518): iniciando
+[INFO] 22:48:54:679 log_operaciones/(5518:5579): recibi mensaje de 1: Hola coordinador
+[DEBUG] 22:54:40:523 log_operaciones/(5699:5699): cargando configuracion
 
-[DEBUG] 19:22:36:252 log_operaciones/(7972:7972): 
+[DEBUG] 22:54:40:533 log_operaciones/(5699:5699): 
 retardo: 1
 cantidad_entradas: 10
 tamanio_entrada: 100
 puerto_escucha: un puerto
 algoritmo: EQUITATIVE_LOAD
 
-[INFO] 19:22:36:252 log_operaciones/(7972:7972): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:24:23:705 log_operaciones/(7972:7972): usando instancia#2
-[INFO] 19:24:23:705 log_operaciones/(7972:7972): resultado: 0
-[INFO] 19:24:23:705 log_operaciones/(7972:7972): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:24:25:904 log_operaciones/(7972:7972): usando instancia#3
-[INFO] 19:24:25:904 log_operaciones/(7972:7972): resultado: 0
-[DEBUG] 19:24:31:564 log_operaciones/(8042:8042): cargando configuracion
+[INFO] 22:54:41:374 log_operaciones/(5699:5699): iniciando
+[DEBUG] 22:55:04:425 log_operaciones/(5732:5732): cargando configuracion
 
-[DEBUG] 19:24:31:569 log_operaciones/(8042:8042): 
+[DEBUG] 22:55:04:425 log_operaciones/(5732:5732): 
 retardo: 1
 cantidad_entradas: 10
 tamanio_entrada: 100
 puerto_escucha: un puerto
 algoritmo: EQUITATIVE_LOAD
 
-[INFO] 19:24:31:569 log_operaciones/(8042:8042): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:24:31:572 log_operaciones/(8042:8042): usando instancia#1
-[INFO] 19:24:31:572 log_operaciones/(8042:8042): resultado: 0
-[INFO] 19:24:31:572 log_operaciones/(8042:8042): procesando solicitud: SET k1054 54 alumnos de ESI# 1
-[DEBUG] 19:24:31:572 log_operaciones/(8042:8042): usando instancia#2
-[INFO] 19:24:31:572 log_operaciones/(8042:8042): resultado: 0
-[DEBUG] 19:24:54:635 log_operaciones/(8075:8075): cargando configuracion
+[INFO] 22:55:05:272 log_operaciones/(5732:5732): iniciando
+[DEBUG] 22:56:12:952 log_operaciones/(5854:5854): cargando configuracion
 
-[DEBUG] 19:24:54:641 log_operaciones/(8075:8075): 
+[DEBUG] 22:56:12:960 log_operaciones/(5854:5854): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 22:56:14:491 log_operaciones/(5854:5854): iniciando
+[INFO] 22:56:36:238 log_operaciones/(5854:5946): recibi mensaje de 1: Hola coordinador
+[DEBUG] 23:10:33:587 log_operaciones/(6071:6071): cargando configuracion
+
+[DEBUG] 23:10:33:588 log_operaciones/(6071:6071): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 23:10:34:95 log_operaciones/(6071:6071): iniciando
+[INFO] 23:10:48:543 log_operaciones/(6071:6121): recibi mensaje de 1: Hola coordinador
+[DEBUG] 23:23:43:43 log_operaciones/(6312:6312): cargando configuracion
+
+[DEBUG] 23:23:43:50 log_operaciones/(6312:6312): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 23:23:43:719 log_operaciones/(6312:6312): iniciando
+[INFO] 23:23:58:78 log_operaciones/(6312:6367): recibi mensaje de 1: Hola coordinador
+[INFO] 23:28:18:349 log_operaciones/(6312:6564): recibi mensaje de 1: Hola coordinador
+[DEBUG] 23:28:48:106 log_operaciones/(6604:6604): cargando configuracion
+
+[DEBUG] 23:28:48:107 log_operaciones/(6604:6604): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 23:28:48:538 log_operaciones/(6604:6604): iniciando
+[INFO] 23:29:01:29 log_operaciones/(6604:6661): recibi mensaje de 1: Hola coordinador
+[INFO] 23:29:06:30 log_operaciones/(6604:6661): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 23:29:06:30 log_operaciones/(6604:6661): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[DEBUG] 13:07:25:551 log_operaciones/(4348:4348): cargando configuracion
+
+[DEBUG] 13:07:25:554 log_operaciones/(4348:4348): 
 retardo: 1
 cantidad_entradas: 10
 tamanio_entrada: 100

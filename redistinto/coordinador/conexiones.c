@@ -79,6 +79,7 @@ void* recibir_conexion(void* con) {
 	}
 
 	free(conexion);
+
 	return 0;
 }
 

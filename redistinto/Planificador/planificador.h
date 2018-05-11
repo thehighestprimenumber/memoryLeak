@@ -25,7 +25,8 @@
 #include "../socket/socket.h"
 
 #define OK 0
-#define ERROR_COORDINADOR -20
+
+#define ERROR -20
 
 char* arch_config;
 
@@ -87,7 +88,7 @@ void puerto_coordinador_read(t_config* configuracion);
 void clavesBloqueadas_read(t_config* configuracion);
 void liberar_split(char** array);
 void conectar_a_coordinador(t_planificador* pConfig);
-int recibir_conexion(Conexion* con,Message* msj);
+int recibir_mensaje(Conexion* con,Message* msj);
 int realizar_evento(Conexion* con, Message* msj);
 int enviar_mensaje(int socket, char* mensaje);
 

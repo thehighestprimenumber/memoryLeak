@@ -259,7 +259,7 @@ void close_conection(void *conexion){
 void free_msg(Message **msg){
 	if(msg != NULL && (*msg) != NULL){
 		if((*msg)->header != NULL) free_memory(&((*msg)->header));
-		if((*msg)->contenido != NULL) free_memory(&((*msg)->contenido)); //FIXME si es una operacion hay que liberar las estructuras internas.
+		if((*msg)->contenido != NULL) free_memory(&((*msg)->contenido));
 		free_memory(msg);
 	}
 }

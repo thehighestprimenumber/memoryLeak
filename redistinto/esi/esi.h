@@ -19,6 +19,12 @@ int cliente_coordinador;
 
 int identificador;
 
+int pidplanificador;
+int pidcoordinador;
+
+pthread_t threadPlanificador;
+pthread_t threadCoordinador;
+
 typedef struct {
 	char* coordinador_ip;
 	char* coordinador_puerto;

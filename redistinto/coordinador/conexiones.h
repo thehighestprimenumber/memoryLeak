@@ -6,6 +6,7 @@
 #include <unistd.h> // para el sleep
 
 int socket_planificador;
+
 int enviar_mensaje(int socket, tipoMensaje tipo, char* mensaje);
 void* recibir_conexion(void* con);
 int iniciar_servicio();

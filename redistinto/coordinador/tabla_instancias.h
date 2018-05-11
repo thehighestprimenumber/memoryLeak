@@ -4,7 +4,6 @@
 #include <commons/collections/list.h>
 #include "coordinador.h"
 
-
 #define MAX_LEN_INSTANCE_NAME 20
 
 typedef struct {
@@ -13,11 +12,13 @@ typedef struct {
 	int esta_activa;
 	pthread_mutex_t lock;
 	char nombre_instancia[MAX_LEN_INSTANCE_NAME];
+
 } fila_tabla_instancias;
 
 void free_fila_tabla_instancias(fila_tabla_instancias** fila);
 
 int ultima_instancia_usada;
+
 
 int cambiar_estado_instancia(fila_tabla_instancias* fila, int esta_activa);
 

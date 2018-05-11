@@ -1,4 +1,4 @@
-puerto=8085
+puerto=8002
 algoritmo=HRRN
 estimacion=10
 IP_coordinador=127.0.0.1
