@@ -161,35 +161,36 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void 
 	}
 }
 
-void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*)){
+
+void start_listening_select(int socketListener, int socketCoordinador, int (*manejadorDeEvento)(int, Message*)){
 	//Por si me mandan un socket con problemas
-	if(socketListener == -1) return;
+	if(socketListener == -1 || socketCoordinador == -1) return;
 
 	t_list *conexiones = list_create();
-	int activity, fdMax;
+	int activity;
 	fd_set readfds;
-	fdMax = socketListener;
-	//Aca socket 0 para consola (agregar a la lista conexiones)
 
 	while(1){
-		//Vacio el set e incluyo al socket de escucha
+		//Vacio el set e incluyo al socket de escucha y el coordinador
 		FD_ZERO(&readfds);
 		FD_SET(socketListener, &readfds);
+		FD_SET(socketCoordinador, &readfds);
 
+		//Agrego a todas las ESIs
 		for(int i = 0; i < list_size(conexiones); i++){
 			FD_SET( ((Conexion*) list_get(conexiones, i))->socket , &readfds);
 		}
 
 		//Esperamos que ocurra algo con alguna de las conexiones (inclusive con el socket de escucha)
-		//activity = select( list_size(conexiones) + 1 , &readfds , NULL , NULL , NULL);
-		activity = select( fdMax + 1, &readfds, NULL, NULL, NULL);
+		activity = select( list_size(conexiones) + 2 , &readfds , NULL , NULL , NULL);
+		//activity = select( fdMax + 1, &readfds, NULL, NULL, NULL);
 
 		if (activity < 0) {
 			//Ocurrio un error #lpm
 			continue;
 		}
 
-
+		//Checkeamos si ocurrio algo con el socket de escucha
 		if(FD_ISSET(socketListener, &readfds)){
 			Conexion *conexion = malloc(sizeof(Conexion));
 			conexion->addr = malloc(sizeof(struct sockaddr));
@@ -201,7 +202,7 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 			int nuevoSocket = accept(socketListener, conexion->addr, &addrSize);
 			conexion->socket = nuevoSocket;
 
-			//Pregunto si salio t odo bien
+			//Pregunto si salio toodo bien
 			if(nuevoSocket == -1) close_conection(conexion);
 
 			//Añado la conexion a la lista
@@ -216,13 +217,26 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 			msg->contenido = NULL;
 
 			//Llamo a la funcion encargada de manejar las nuevas conexiones
-			manejadorDeEvento(conexion, msg);
+			manejadorDeEvento(conexion->socket, msg);
 			free_msg(&msg);
 
 		}
 
+		//Preguntamos si ocurrio un evento en el coordinador
+		if(FD_ISSET(socketCoordinador, &readfds)){
+			Message *msg = malloc(sizeof(Message));
+			if(await_msg( socketCoordinador, msg) == -1){
+				//Si se cayo la conexion por decision de diseño mato al coordinador
+				exit(EXIT_FAILURE);
+			}else{
+				manejadorDeEvento(socketCoordinador, msg);
+			}
+			free_msg(msg);
+		}
+
 		//Recorremos preguntando por cada conexion si ocurrio algun evento
 		for(int i = 0; i < list_size(conexiones); i++){
+
 			if(FD_ISSET( ((Conexion*) list_get(conexiones, i))->socket , &readfds )){//Ocurrio algo con este socket
 				//Deberia verificar primero si el evento ocurrido fue una desconexion
 				//Recibo el mensaje
@@ -233,11 +247,11 @@ void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexio
 					msg->header->tipo_mensaje = DESCONEXION;
 					msg->header->size = 0;
 					msg->contenido = NULL;
-					manejadorDeEvento(((Conexion*) list_get(conexiones, i)), msg);
+					manejadorDeEvento(((Conexion*) list_get(conexiones, i))->socket, msg);
 					list_destroy_and_destroy_elements(conexiones, close_conection);
 					continue;
-				}else if( manejadorDeEvento(((Conexion*) list_get(conexiones, i)), msg) == -1){//Llamo a la funcion que se encarga de manejar este nuevo mensaje
-					//Significa que por alguna razon quiere que cierre la conexion
+				}else if( manejadorDeEvento(((Conexion*) list_get(conexiones, i))->socket, msg) == -1){//Llamo a la funcion que se encarga de manejar este nuevo mensaje
+					//Si es -1 significa que por alguna razon quiere que cierre la conexion
 					list_destroy_and_destroy_elements(conexiones, close_conection);
 				}
 				free_msg(&msg);

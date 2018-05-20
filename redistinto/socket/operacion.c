@@ -55,7 +55,7 @@ Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remite
 }
 
 char* desempaquetar_texto(Message* msg){
-	if(msg == NULL || msg->header == NULL || msg->header->tipo_mensaje != TEXTO || msg->header->size < 1 || msg->contenido ==  NULL) return NULL;
+	if(msg == NULL || msg->header == NULL || msg->header->size < 1 || msg->contenido ==  NULL) return NULL;
 	char* texto = malloc(msg->header->size);
 	memcpy(texto, msg->contenido, msg->header->size);
 	return texto;

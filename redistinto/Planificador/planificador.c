@@ -14,7 +14,7 @@ int main(void) {
 
 	//conectar a coordinador
 	t_planificador* pConfig = (t_planificador*)&planificador;
-	conectar_a_coordinador(pConfig);
+	int socketCoordinador = conectar_a_coordinador(pConfig);
 
 	log_info(log_planificador,"\nInicio de la consola\n");
 
@@ -30,7 +30,7 @@ int main(void) {
 
 	//Escuchar conexiones ESI
 	algorimoEnUso = FIFO;
-	iniciar();
+	iniciar(socketCoordinador);
 
 	log_info(log_planificador,"\nProceso finalizado");
 	list_destroy(planificador.clavesBloqueadas);
@@ -42,34 +42,64 @@ void inicializar_logger() {
 	log_planificador = log_create("/home/utnso/tp/Planificador.log", "Planificador: ", true, LOG_LEVEL_INFO);
 }
 
-int iniciar(){
+int iniciar(int socketCoordinador){
 	log_info(log_planificador, "Iniciando proceso planificador");
 
 	int socket_fd = create_listener(IP,planificador.puerto_planif);
 	if (socket_fd <0) return ERROR_DE_CONEXION;
 
-	start_listening_select(socket_fd, *manejador_de_eventos);
+	start_listening_select(socket_fd, socketCoordinador, *manejador_de_eventos);
 	//start_listening_threads(socket_fd, *recibir_mensaje);
 
 	return 0;
 }
 
-int manejador_de_eventos(Conexion* conexion, Message* msg){
+int manejador_de_eventos(int socket, Message* msg){
 
-	switch(msg->header->tipo_mensaje){
-		case CONEXION:
-			//Suponemos que los  unicos que se conectana nosotros son las ESIs
-			manejar_nueva_esi(conexion);
-			return 0;
-		case DESCONEXION:
-			return manejar_mensaje_esi(conexion, msg);
-		case TEXTO:
-			//Por ahora es texto, en un futuro alguna estructura mas compleja
-			return manejar_mensaje_esi(conexion, msg);
-		default:
-			//fuck
-			return 0;
-	}
+	//Tengo que detenerme a preguntar en el caso que sea una conexion o desconexion quien es el que me habla
+
+	log_info(log_planificador, "Ocurrio un evento");
+
+	if(msg->header->remitente == ESI){
+		log_info(log_planificador, "Me hablo una ESI");
+		switch(msg->header->tipo_mensaje){
+			case TEXTO:
+				log_info(log_planificador, "Me envio un texto");
+				//Por ahora es texto, en un futuro alguna estructura mas compleja
+				return manejar_mensaje_esi_fifo(socket, msg);
+
+			case CONEXION:
+				log_info(log_planificador, "Se conecto una ESI");
+				//Switcheamos por el algoritmo
+				switch(algorimoEnUso){
+					case FIFO:
+						manejar_nueva_esi_fifo(socket);
+						return 0;
+					default:
+						//fuck
+						return -2;
+				}
+				break;
+
+			case DESCONEXION:
+				switch(algorimoEnUso){
+					case FIFO:
+						manejar_desconexion_esi_fifo(socket);
+						return 0;
+					default:
+						//fuck
+						return -2;
+				}
+				break;
+
+			default:
+				//fuck
+				return 0;
+		}//fin del switch
+	}//fin del if
+	return 0;
+	//Aca deberia haber algo para manejar otro tipo de eventos que no sean de la ESI
+
 }
 
 /*void* recibir_mensaje(void* con){
@@ -201,53 +231,48 @@ void clavesBloqueadas_read(t_config* configuracion) {
 	liberar_split(claves);
 }
 
-void conectar_a_coordinador(t_planificador* pConfig) {
+int conectar_a_coordinador(t_planificador* pConfig) {
 	int pidCoordinador = connect_to_server(pConfig->IP_coordinador,pConfig->puerto_coordinador);
 	//Verifico conexion con el coordinador
 	if (pidCoordinador < 0) {
 		log_error(log_planificador, "Fallo conexión Planificador con el Coordinador");
-		exit(EXIT_FAILURE);
+		return -1;
 	} else {
 		log_info(log_planificador, "Planificador se conecto con el Coordinador");
 	}
 
 	//printf("Se pudo conectar con el coordinador");
-	Message* msg= (Message*) malloc(sizeof(Message));
+	Message* msg= empaquetar_texto("Envio mensaje al Coordinador desde Planificador",
+			strlen("Envio mensaje al Coordinador desde Planificador"),
+			PLANIFICADOR);
 
-	msg->contenido = (char*) malloc(strlen("Envio mensaje al Coordinador desde Planificador") + 1);
-	strcpy(msg->contenido,"Envio mensaje al Coordinador desde Planificador");
-	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
-	msg->header->remitente = PLANIFICADOR;
+	//Para mantener el funcionamiento
 	msg->header->tipo_mensaje = TEST;
-	msg->header->size = strlen(msg->contenido)+1;
 
-	if (send_msg(pidCoordinador, (*msg))<0) log_debug(log_planificador, "Error al enviar el mensaje");
+	//Chequeo que se haya enviado correctamente, registro y lo elimino
+	if (send_msg(pidCoordinador, (*msg))<0) log_debug(log_planificador, "Error al enviar el mensaje hacia el planificador");
+	else log_debug(log_planificador, "Mensaje enviado al coordinador corectamente");
+	free_msg(&msg);
 
-	while (1) {
-		Message msg;
-		log_info(log_planificador, "esperando mensaje");
-		int resultado = await_msg(pidCoordinador, &msg);
-		log_info(log_planificador, "llego un mensaje. parseando...");
-		if (resultado<0){
-			log_debug(log_planificador, "error de recepcion");
-			continue;
-				//return ERROR_DE_RECEPCION;
-		}
-		//TODO parsear mensaje y hacer algo.
-		char * request = malloc(msg.header->size);
-		strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
+	//Espero mensaje de respuesta
+	log_debug(log_planificador, "esperando mensaje");
 
-		log_info(log_planificador, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
-		//log_debug(log_inst, "%s", request);
+	msg = malloc(sizeof(Message));
+	int resultado = await_msg(pidCoordinador, msg);
 
-		free(msg.contenido);
-		free(msg.header);
+	log_info(log_planificador, "llego un mensaje. parseando...");
 
-		break;
+	if (resultado<0){
+		log_debug(log_planificador, "error de recepcion");
+		//return ERROR_DE_RECEPCION;
+	}else{
+		char *respuesta = desempaquetar_texto(msg);
+		log_info(log_planificador, "mensaje recibido: %s", respuesta);
+		free(respuesta);
+		free_msg(&msg);
 	}
 
-		//printf("Se envio el mensaje");
-	//log_info(log_planificador, "Planificador envio un mensaje: %s", (*msg).contenido);
+	return pidCoordinador;
 }
 
 void exit_proceso(int retorno) {
@@ -263,3 +288,8 @@ void liberar_split(char** array){
 	}
 	free(array);
 }
+
+//Funciones dummy para que corra provisionalmente
+void manejar_nueva_esi_fifo(int socket){}
+int manejar_mensaje_esi_fifo(int socket, Message *msg){return 0;}
+void manejar_desconexion_esi_fifo(int socket){}

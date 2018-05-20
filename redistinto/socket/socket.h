@@ -74,7 +74,7 @@ int create_listener(char * ip, char * serverPort);
 void start_listening_threads(int socket, void*(*manejadorDeNuevaConexion)(void*));//(void*) -> recibira un (Conexion*)
 
 //el manejador de eventos de start_listening_select debe devolver -1 si desea cerrar ese socket
-void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*));
+void start_listening_select(int socketListener, int socketCoordinador, int (*manejadorDeEvento)(int, Message*));
 void free_msg(Message **msg);
 
 void close_conection(void *conexion);
