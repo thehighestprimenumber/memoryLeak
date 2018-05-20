@@ -62,6 +62,7 @@ typedef struct {
 //Estructura de conexion
 typedef struct{
 	int socket;
+	tipoRemitente conectado;
 	__SOCKADDR_ARG addr;
 } Conexion;
 

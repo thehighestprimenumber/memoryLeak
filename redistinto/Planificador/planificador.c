@@ -56,7 +56,6 @@ int iniciar(int socketCoordinador){
 
 int manejador_de_eventos(int socket, Message* msg){
 
-	//Tengo que detenerme a preguntar en el caso que sea una conexion o desconexion quien es el que me habla
 
 	log_info(log_planificador, "Ocurrio un evento");
 
@@ -82,6 +81,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				break;
 
 			case DESCONEXION:
+				log_info(log_planificador, "Se desconecto una ESI");
 				switch(algorimoEnUso){
 					case FIFO:
 						manejar_desconexion_esi_fifo(socket);
@@ -96,7 +96,11 @@ int manejador_de_eventos(int socket, Message* msg){
 				//fuck
 				return 0;
 		}//fin del switch
-	}//fin del if
+	}else if(msg->header->remitente == COORDINADOR){
+		//No se que mensajes manda el coordinador...
+	}else if(msg->header->remitente == DESCONOCIDO){
+		log_info(log_planificador, "Ocurrio algo con alguien pero no se quien");
+	}
 	return 0;
 	//Aca deberia haber algo para manejar otro tipo de eventos que no sean de la ESI
 

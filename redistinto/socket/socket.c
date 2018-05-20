@@ -167,7 +167,7 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 	if(socketListener == -1 || socketCoordinador == -1) return;
 
 	t_list *conexiones = list_create();
-	int activity;
+	int activity, fdMax = socketListener > socketCoordinador ? socketListener:socketCoordinador;
 	fd_set readfds;
 
 	while(1){
@@ -182,8 +182,8 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 		}
 
 		//Esperamos que ocurra algo con alguna de las conexiones (inclusive con el socket de escucha)
-		activity = select( list_size(conexiones) + 2 , &readfds , NULL , NULL , NULL);
-		//activity = select( fdMax + 1, &readfds, NULL, NULL, NULL);
+		//activity = select( list_size(conexiones) + 2 , &readfds , NULL , NULL , NULL);
+		activity = select( fdMax + 1, &readfds, NULL, NULL, NULL);
 
 		if (activity < 0) {
 			//Ocurrio un error #lpm
@@ -220,6 +220,9 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 			manejadorDeEvento(conexion->socket, msg);
 			free_msg(&msg);
 
+			//Seteo el nuevo fd maximo
+			fdMax = nuevoSocket > fdMax ? nuevoSocket:fdMax;
+
 		}
 
 		//Preguntamos si ocurrio un evento en el coordinador
@@ -243,16 +246,19 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 				Message *msg = malloc(sizeof(Message));
 				if(await_msg( ((Conexion*) list_get(conexiones, i))->socket, msg) == -1){
 					msg->header = malloc(sizeof(ContentHeader));
-					msg->header->remitente = DESCONOCIDO;
+					msg->header->remitente = ((Conexion*) list_get(conexiones, i))->conectado;
 					msg->header->tipo_mensaje = DESCONEXION;
 					msg->header->size = 0;
 					msg->contenido = NULL;
 					manejadorDeEvento(((Conexion*) list_get(conexiones, i))->socket, msg);
 					list_destroy_and_destroy_elements(conexiones, close_conection);
 					continue;
-				}else if( manejadorDeEvento(((Conexion*) list_get(conexiones, i))->socket, msg) == -1){//Llamo a la funcion que se encarga de manejar este nuevo mensaje
-					//Si es -1 significa que por alguna razon quiere que cierre la conexion
-					list_destroy_and_destroy_elements(conexiones, close_conection);
+				}else{
+					((Conexion*) list_get(conexiones, i))->conectado = msg->header->remitente;
+					if( manejadorDeEvento(((Conexion*) list_get(conexiones, i))->socket, msg) == -1){//Llamo a la funcion que se encarga de manejar este nuevo mensaje
+						//Si es -1 significa que por alguna razon quiere que cierre la conexion
+						list_destroy_and_destroy_elements(conexiones, close_conection);
+					}
 				}
 				free_msg(&msg);
 			}
