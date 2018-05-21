@@ -56,7 +56,7 @@ void* recibir_conexion(void* con) {
 		}
 		switch (msg->header->remitente) {
 			case ESI:
-				res = (int) procesarSolicitudDeEsi(*operacion, conexion->socket);
+				res = (int) procesarSolicitudDeEsi(operacion, conexion->socket);
 				break;
 			case INSTANCIA:
 				switch (msg->header->tipo_mensaje) {

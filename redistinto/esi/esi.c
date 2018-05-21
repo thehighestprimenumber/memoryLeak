@@ -64,7 +64,7 @@ char* leer_propiedad_string (t_config *configuracion, char* propiedad){
 	return "";
 }
 
-void conectar_a_planificador(esi_configuracion* pConfig) {
+int conectar_a_planificador(esi_configuracion* pConfig) {
 	socket_planificador = connect_to_server(pConfig->planificador_ip,pConfig->planificador_puerto);
 	//Verifico conexion con el planificador
 	if (socket_planificador < 0) {
@@ -110,7 +110,7 @@ void conectar_a_planificador(esi_configuracion* pConfig) {
 
 }
 
-void conectar_a_coordinador(esi_configuracion* pConfig) {
+int conectar_a_coordinador(esi_configuracion* pConfig) {
 
 	int resultado = connect_to_server(pConfig->coordinador_ip,pConfig->coordinador_puerto);
 	//Verifico conexion con el coordinador
@@ -142,14 +142,14 @@ void conectar_a_coordinador(esi_configuracion* pConfig) {
 		if (result<0){
 			log_debug(log_esi, "error de recepcion");
 			continue;
-			//return ERROR_DE_RECEPCION;
+			return ERROR_DE_RECEPCION;
 		}
 	char * request = malloc(msg.header->size);
 	strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
 	//strcpy(request, (char *) msg.contenido);
 	log_debug(log_esi, "mensaje recibido: %s", request);
 	//log_debug(log_inst, "%s", request);
-
+	return socket_OK; //TODO que devuelva lo que corresponda
 	}
 }
 

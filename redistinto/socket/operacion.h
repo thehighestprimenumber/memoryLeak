@@ -7,7 +7,7 @@
 #include "socket.h"
 
 enum tipo_operacion {
-	GET, SET, STORE
+	op_GET, op_SET, op_STORE
 };
 
 static char *tipo_operacion_nombres[] = { "GET", "SET", "STORE" };

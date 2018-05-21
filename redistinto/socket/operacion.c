@@ -8,7 +8,7 @@
 char* empaquetar_operacion(t_operacion* operacion){
 	int desplazamiento=0;
 	char* output = malloc(TAMANIO_INT*2+TAMANIO_CLAVE+operacion->long_valor);
-	memcpy(&output, string_itoa(&operacion->tipo), TAMANIO_INT);
+	memcpy(&output, (&operacion->tipo)-0, TAMANIO_INT);
 	desplazamiento+=TAMANIO_INT;
 
 	memcpy(&output+desplazamiento, &operacion->clave, TAMANIO_CLAVE);
@@ -47,6 +47,7 @@ void free_operacion(t_operacion ** operacion){
 			if( (*operacion)->valor != NULL) free((*operacion)->valor);
 			free(*operacion);
 	}
+}
 
 Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente){
 	if(texto == NULL || length < 1) return NULL;

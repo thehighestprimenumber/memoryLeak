@@ -53,7 +53,7 @@ typedef struct {
 char* arch_config;
 t_log * log_operaciones;
 
-int procesarSolicitudDeEsi(t_operacion op_a_realizar, int socket_solicitante);
+int procesarSolicitudDeEsi(t_operacion * op_a_realizar, int socket_solicitante);
 
 
 #endif
