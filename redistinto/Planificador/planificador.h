@@ -29,13 +29,12 @@
 #define ERROR -20
 
 char* arch_config;
-
 t_log * log_planificador;
-
 pthread_t threadConsola;
 int pidConsola;
 int pidCoordinador;
 
+typedef enum algorimoPrioridad {FIFO} algorimoPrioridad;
 typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
 
 typedef struct {
@@ -74,6 +73,7 @@ int identificador;
 
 char* configTxt = "./configPlanificador.txt";
 char* configTxtDebug = "../configPlanificador.txt";
+algorimoPrioridad algorimoEnUso;
 
 void inicializar_logger();
 void exit_proceso();
@@ -87,14 +87,17 @@ void ip_coordinador_read(t_config* configuracion);
 void puerto_coordinador_read(t_config* configuracion);
 void clavesBloqueadas_read(t_config* configuracion);
 void liberar_split(char** array);
-void conectar_a_coordinador(t_planificador* pConfig);
-int recibir_mensaje(Conexion* con,Message* msj);
+int conectar_a_coordinador(t_planificador* pConfig);
+int manejador_de_eventos(int socket, Message* msj);
 int realizar_evento(Conexion* con, Message* msj);
 int enviar_mensaje(int socket, char* mensaje);
 
 //Firmas de las funciones que irian más adelante
 int abrirPlanificador(); //Abre la conexión del planificador y sus conexiones
-int planificar_esis(char* algoritmo); //Replanifica los esis y devuelve el identificador del próximo a ejecutar
+void manejar_nueva_esi_fifo(int socket); //Añade una esi a la lista de prioridades o cola o lo que diga el algoritmo(mirar var global)
+int manejar_mensaje_esi_fifo(int socket, Message *msg); //Se encarga de manejar el dato de la ESI y replanificar al respecto
+void manejar_desconexion_esi_fifo(int socket); //Elimina a la esi segun plantea fifo
 int estimar_rafaga(char* algoritmo); //Estima la duración de la próxima ráfaga usando formula de la media exponencial
+
 
 #endif /* PRUEBA_H_ */
