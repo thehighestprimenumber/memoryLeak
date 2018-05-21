@@ -54,6 +54,7 @@ int iniciar(int socketCoordinador){
 	return 0;
 }
 
+
 int manejador_de_eventos(int socket, Message* msg){
 
 
@@ -146,6 +147,7 @@ int enviar_mensaje(int socket, char* mensaje){
 	msg->header->size = strlen(msg->contenido) + 1;
 
 	sleep(1);
+
 	log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg->contenido);
 	int res = send_msg(socket, (*msg));
 		if (res<0) {

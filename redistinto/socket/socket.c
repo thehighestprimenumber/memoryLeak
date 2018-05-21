@@ -70,7 +70,7 @@ int await_msg(int socket, Message *msg) {
 	}
 
 	//Preparo el espacio necesario para recibir el contenido (tamaño variable)
-	void *contenido = malloc(header->size);
+	void *contenido = malloc(header->size+1);
 
 	//Recibo el contenido
 	result_recv = recv(socket, contenido, header->size, MSG_WAITALL);
@@ -278,7 +278,7 @@ void close_conection(void *conexion){
 
 void free_msg(Message **msg){
 	if(msg != NULL && (*msg) != NULL){
-		if((*msg)->header != NULL) free_memory(&((*msg)->header));
+		if((*msg)->header != NULL) free_memory(&((*msg)->header)); //FIXME
 		if((*msg)->contenido != NULL) free_memory(&((*msg)->contenido));
 		free_memory(msg);
 	}
