@@ -2,14 +2,17 @@
 #include "./coordinador.h"
 
 int enviar_mensaje(int socket, tipoMensaje tipo, char* mensaje) {
-	Message* msg = (Message*) malloc(sizeof(Message));
+	/*Message* msg = (Message*) malloc(sizeof(Message));
 	msg->contenido = (char*) malloc(strlen(mensaje));
 	strncpy(msg->contenido, mensaje, strlen(mensaje));
 	//msg->contenido = mensaje;
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
 	msg->header->tipo_mensaje = tipo;
 	msg->header->remitente = COORDINADOR;
-	msg->header->size = strlen(msg->contenido) + 1;
+	msg->header->size = strlen(msg->contenido) + 1;*/
+
+	Message *msg = empaquetar_texto(mensaje, strlen(mensaje), COORDINADOR);
+	msg->header->tipo_mensaje = tipo;
 
 	sleep(5);
 	log_info(logger_coordinador,
