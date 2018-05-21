@@ -75,7 +75,8 @@ void conectar_a_planificador(esi_configuracion* pConfig) {
 	}
 
 	Message* msg= (Message*) malloc(sizeof(Message));
-	msg->contenido = (char*) malloc(strlen("Envio mensaje al Planificador desde ESI") +1);
+
+  msg->contenido = (char*) malloc(strlen("Envio mensaje al Planificador desde ESI") +1);
 	strcpy(msg->contenido,"Envio mensaje al Planificador desde ESI");
 	//msg->contenido = "Envio mensaje al Planificador desde ESI";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
@@ -92,7 +93,7 @@ void conectar_a_planificador(esi_configuracion* pConfig) {
 		log_debug(log_esi, "llego un mensaje. parseando...");
 		if (resultado<0){
 			log_debug(log_esi, "error de recepcion");
-			//continue;
+     	//continue;
 			return ERROR_DE_RECEPCION;
 		}
 		//TODO parsear mensaje y hacer algo.
@@ -106,6 +107,7 @@ void conectar_a_planificador(esi_configuracion* pConfig) {
 	}
 
 	free_msg(&msg);
+
 }
 
 void conectar_a_coordinador(esi_configuracion* pConfig) {
@@ -120,6 +122,7 @@ void conectar_a_coordinador(esi_configuracion* pConfig) {
 	}
 
 	Message* msg= (Message*) malloc(sizeof(Message));
+
 	msg->contenido = (char*) malloc(strlen("Hola coordinador")+1);
 	strcpy(msg->contenido,"Hola coordinador");
 	//msg->contenido = "Hola coordinador";
@@ -127,6 +130,7 @@ void conectar_a_coordinador(esi_configuracion* pConfig) {
 	msg->header->remitente = ESI;
 	msg->header->tipo_mensaje = TEST;
 	msg->header->size = strlen(msg->contenido) + 1;
+
 
 	if (send_msg(resultado, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
 	log_debug(log_esi, "Se envio el mensaje");
@@ -140,7 +144,6 @@ void conectar_a_coordinador(esi_configuracion* pConfig) {
 			continue;
 			//return ERROR_DE_RECEPCION;
 		}
-
 	char * request = malloc(msg.header->size);
 	strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
 	//strcpy(request, (char *) msg.contenido);

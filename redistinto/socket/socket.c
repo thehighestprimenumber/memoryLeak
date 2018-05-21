@@ -70,7 +70,7 @@ int await_msg(int socket, Message *msg) {
 	}
 
 	//Preparo el espacio necesario para recibir el contenido (tamaño variable)
-	void *contenido = malloc(header->size);
+	void *contenido = malloc(header->size+1);
 
 	//Recibo el contenido
 	result_recv = recv(socket, contenido, header->size, MSG_WAITALL);

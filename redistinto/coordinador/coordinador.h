@@ -12,6 +12,12 @@
 #include "../socket/operacion.h"
 #include "tabla_instancias.h"
 #include "./conexiones.h"
+#include  <signal.h>
+
+#define OK 0
+#define ERROR_COORDINADOR -20
+#define NO_HAY_INSTANCIAS -21
+#define CLAVE_BLOQUEADA -22
 
 #define OK 0
 #define ERROR -20

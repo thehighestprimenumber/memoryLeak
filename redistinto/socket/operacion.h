@@ -14,8 +14,7 @@ static char *tipo_operacion_nombres[] = { "GET", "SET", "STORE" };
 
 typedef struct {
 	enum tipo_operacion tipo;
-	int long_clave;
-	char* clave;
+	char clave[40];
 	int long_valor;
 	char* valor;
 } __attribute__((packed)) t_operacion;
@@ -24,6 +23,8 @@ typedef struct {
 
 char* empaquetar_operacion(t_operacion*);
 t_operacion* desempaquetar_operacion(char* , t_operacion* );
+void free_operacion(t_operacion ** operacion);
+
 Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente);
 char* desempaquetar_texto(Message* msg);
 

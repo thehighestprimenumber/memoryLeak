@@ -25,6 +25,7 @@
 #include "../socket/socket.h"
 
 #define OK 0
+
 #define ERROR -20
 
 char* arch_config;
