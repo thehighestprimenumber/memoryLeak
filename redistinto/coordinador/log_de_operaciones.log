@@ -126,4 +126,27 @@ tamanio_entrada: 100
 puerto_escucha: un puerto
 algoritmo: EQUITATIVE_LOAD
 
-[INFO] 13:07:25:555 log_operaciones/(4348:4348): iniciando
+[INFO] 19:24:54:642 log_operaciones/(8075:8075): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:24:54:642 log_operaciones/(8075:8075): usando instancia#1
+[INFO] 19:24:54:642 log_operaciones/(8075:8075): resultado: 0
+[INFO] 19:24:54:642 log_operaciones/(8075:8075): procesando solicitud: SET k1054 54 alumnos de ESI# 1
+[DEBUG] 19:24:54:642 log_operaciones/(8075:8075): usando instancia#2
+[INFO] 19:24:54:642 log_operaciones/(8075:8075): resultado: 0
+[DEBUG] 12:59:04:181 log_operaciones/(20005:20005): cargando configuracion
+
+[DEBUG] 12:59:04:192 log_operaciones/(20005:20005): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[DEBUG] 13:07:13:839 log_operaciones/(20271:20271): cargando configuracion
+
+[DEBUG] 13:07:13:844 log_operaciones/(20271:20271): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+

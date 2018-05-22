@@ -29,7 +29,7 @@
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
 typedef enum tipoRemitente {DESCONOCIDO, ESI, PLANIFICADOR, INSTANCIA, COORDINADOR} tipoRemitente;
 
-typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, OPERACION, TEST, TEXTO} tipoMensaje;
+typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, OPERACION, TEST, TEXTO, RESULTADO} tipoMensaje;
 
 typedef enum {
 	HANDSHAKE = 1
@@ -62,6 +62,7 @@ typedef struct {
 //Estructura de conexion
 typedef struct{
 	int socket;
+	tipoRemitente conectado;
 	__SOCKADDR_ARG addr;
 } Conexion;
 
@@ -74,7 +75,7 @@ int create_listener(char * ip, char * serverPort);
 void start_listening_threads(int socket, void*(*manejadorDeNuevaConexion)(void*));//(void*) -> recibira un (Conexion*)
 
 //el manejador de eventos de start_listening_select debe devolver -1 si desea cerrar ese socket
-void start_listening_select(int socketListener, int (*manejadorDeEvento)(Conexion*, Message*));
+void start_listening_select(int socketListener, int socketCoordinador, int (*manejadorDeEvento)(int, Message*));
 void free_msg(Message **msg);
 
 void close_conection(void *conexion);

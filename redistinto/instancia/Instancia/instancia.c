@@ -29,6 +29,7 @@ int main(){
 	msg->header->size = strlen(msg->contenido)+1;
 
 
+
 	if (send_msg(socket_coordinador, (*msg))<0) return ERROR_DE_ENVIO;
 	log_debug(log_inst, "Se envio el mensaje");
 	while (1) {
