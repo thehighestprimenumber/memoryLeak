@@ -50,6 +50,7 @@ typedef struct {
 typedef struct {
 	tipoRemitente remitente;
 	tipoMensaje tipo_mensaje;
+	char id_remitente[20];
 	int size;
 } __attribute__((packed)) ContentHeader;
 
