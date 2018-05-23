@@ -150,3 +150,265 @@ tamanio_entrada: 100
 puerto_escucha: un puerto
 algoritmo: EQUITATIVE_LOAD
 
+[DEBUG] 20:32:35:630 log_operaciones/(26634:26634): cargando configuracion
+
+[DEBUG] 20:32:35:630 log_operaciones/(26634:26634): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 20:32:50:382 log_operaciones/(26634:26697): recibi mensaje de 3
+[INFO] 20:32:55:382 log_operaciones/(26634:26697): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 20:32:55:383 log_operaciones/(26634:26697): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[DEBUG] 21:07:04:47 log_operaciones/(28001:28001): cargando configuracion
+
+[DEBUG] 21:07:04:47 log_operaciones/(28001:28001): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 21:07:21:935 log_operaciones/(28001:28037): recibi mensaje de 3
+[INFO] 21:07:26:936 log_operaciones/(28001:28037): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 21:07:26:936 log_operaciones/(28001:28037): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 21:07:31:179 log_operaciones/(28001:28054): RIP socket 6
+[INFO] 21:08:51:376 log_operaciones/(28001:28096): RIP socket 6
+[DEBUG] 21:10:44:926 log_operaciones/(28306:28306): cargando configuracion
+
+[DEBUG] 21:10:44:926 log_operaciones/(28306:28306): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 21:10:48:988 log_operaciones/(28306:28325): recibi mensaje de 3
+[INFO] 21:10:53:988 log_operaciones/(28306:28325): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 21:10:53:990 log_operaciones/(28306:28325): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 21:12:42:254 log_operaciones/(28306:28363): RIP socket 6
+[INFO] 21:13:06:112 log_operaciones/(28306:28476): RIP socket 7
+[INFO] 21:14:05:303 log_operaciones/(28306:28553): RIP socket 6
+[INFO] 21:15:02:135 log_operaciones/(28306:28637): RIP socket 7
+[DEBUG] 21:15:50:574 log_operaciones/(28825:28825): cargando configuracion
+
+[DEBUG] 21:15:50:574 log_operaciones/(28825:28825): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 21:15:55:470 log_operaciones/(28825:28847): recibi mensaje de 3
+[INFO] 21:16:00:471 log_operaciones/(28825:28847): se va a enviar mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 21:16:00:472 log_operaciones/(28825:28847): se envio el mensaje desde el coordinador mensaje a 5: Hola soy el coordinador
+[INFO] 21:16:18:106 log_operaciones/(28825:28887): RIP socket 6
+[INFO] 21:18:00:860 log_operaciones/(28825:28989): RIP socket 7
+[INFO] 21:19:19:348 log_operaciones/(28825:29079): RIP socket 8
+[INFO] 21:19:25:788 log_operaciones/(28825:28944): RIP socket 6
+[INFO] 21:21:51:36 log_operaciones/(28825:29184): RIP socket 6
+[INFO] 21:22:15:199 log_operaciones/(28825:29379): RIP socket 7
+[DEBUG] 22:02:03:85 log_operaciones/(32036:32036): cargando configuracion
+
+[DEBUG] 22:02:03:85 log_operaciones/(32036:32036): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[DEBUG] 23:47:26:53 log_operaciones/(6301:6301): cargando configuracion
+
+[DEBUG] 23:47:26:53 log_operaciones/(6301:6301): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 23:47:52:846 log_operaciones/(6301:6348): recibi mensaje de 1
+[DEBUG] 23:49:46:438 log_operaciones/(6578:6578): cargando configuracion
+
+[DEBUG] 23:49:46:438 log_operaciones/(6578:6578): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[ERROR] 23:49:46:438 log_operaciones/(6578:6578): error al obtener socket
+[DEBUG] 23:50:13:27 log_operaciones/(6683:6683): cargando configuracion
+
+[DEBUG] 23:50:13:28 log_operaciones/(6683:6683): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[ERROR] 23:50:13:28 log_operaciones/(6683:6683): error al obtener socket
+[DEBUG] 23:50:52:668 log_operaciones/(6793:6793): cargando configuracion
+
+[DEBUG] 23:50:52:668 log_operaciones/(6793:6793): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 23:51:12:854 log_operaciones/(6793:6879): recibi mensaje de 1
+[DEBUG] 23:53:26:659 log_operaciones/(6976:6976): cargando configuracion
+
+[DEBUG] 23:53:26:659 log_operaciones/(6976:6976): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 23:53:34:387 log_operaciones/(6976:7022): recibi mensaje de 1
+[DEBUG] 02:16:08:878 log_operaciones/(7965:7965): cargando configuracion
+
+[DEBUG] 02:16:08:879 log_operaciones/(7965:7965): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 02:16:22:687 log_operaciones/(7965:8012): recibi mensaje de 1
+[DEBUG] 02:17:09:478 log_operaciones/(8067:8067): cargando configuracion
+
+[DEBUG] 02:17:09:478 log_operaciones/(8067:8067): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[ERROR] 02:17:09:478 log_operaciones/(8067:8067): error al obtener socket
+[DEBUG] 02:17:19:791 log_operaciones/(8106:8106): cargando configuracion
+
+[DEBUG] 02:17:19:792 log_operaciones/(8106:8106): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[ERROR] 02:17:24:346 log_operaciones/(8106:8106): error al obtener socket
+[DEBUG] 02:18:00:693 log_operaciones/(8225:8225): cargando configuracion
+
+[DEBUG] 02:18:00:694 log_operaciones/(8225:8225): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 02:20:40:848 log_operaciones/(8225:8319): recibi mensaje de 1
+[DEBUG] 02:21:39:138 log_operaciones/(8450:8450): cargando configuracion
+
+[DEBUG] 02:21:39:139 log_operaciones/(8450:8450): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[ERROR] 02:21:39:139 log_operaciones/(8450:8450): error al obtener socket
+[DEBUG] 02:22:00:955 log_operaciones/(8561:8561): cargando configuracion
+
+[DEBUG] 02:22:00:955 log_operaciones/(8561:8561): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 02:24:32:73 log_operaciones/(8561:8651): recibi mensaje de 1
+[DEBUG] 03:00:58:7 log_operaciones/(10881:10881): cargando configuracion
+
+[DEBUG] 03:00:58:8 log_operaciones/(10881:10881): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 03:01:57:367 log_operaciones/(10881:10897): recibi mensaje de 1
+[INFO] 03:02:23:331 log_operaciones/(10881:10897): procesando solicitud: SET unaC) farafa de ESI socket# 134516144
+[DEBUG] 03:03:27:539 log_operaciones/(11099:11099): cargando configuracion
+
+[DEBUG] 03:03:27:540 log_operaciones/(11099:11099): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 03:04:25:964 log_operaciones/(11099:11142): RIP socket 5
+[INFO] 03:05:18:702 log_operaciones/(11099:11202): RIP socket 6
+[DEBUG] 03:45:01:919 log_operaciones/(13842:13842): cargando configuracion
+
+[DEBUG] 03:45:01:919 log_operaciones/(13842:13842): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 03:45:45:159 log_operaciones/(13842:13853): recibi mensaje de 1
+[INFO] 03:59:14:746 log_operaciones/(13842:14429): RIP socket 6
+[INFO] 03:59:14:748 log_operaciones/(13842:13853): procesando solicitud: SET unaC) farafa de ESI socket# 134516096
+[DEBUG] 04:00:21:885 log_operaciones/(14542:14542): cargando configuracion
+
+[DEBUG] 04:00:21:885 log_operaciones/(14542:14542): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[DEBUG] 04:11:15:537 log_operaciones/(16225:16225): cargando configuracion
+
+[DEBUG] 04:11:15:538 log_operaciones/(16225:16225): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 04:11:47:177 log_operaciones/(16225:16334): RIP socket 5
+[INFO] 04:12:32:960 log_operaciones/(16225:16415): RIP socket 5
+[INFO] 04:12:56:512 log_operaciones/(16225:16469): RIP socket 5
+[INFO] 04:13:38:218 log_operaciones/(16225:16521): RIP socket 5
+[INFO] 04:14:48:220 log_operaciones/(16225:16630): RIP socket 5
+[INFO] 04:15:38:971 log_operaciones/(16225:16718): recibi mensaje de 1
+[INFO] 04:16:22:581 log_operaciones/(16225:16718): procesando solicitud: SET unaClave farafa de ESI socket# 134516096
+[DEBUG] 04:18:18:449 log_operaciones/(16862:16862): cargando configuracion
+
+[DEBUG] 04:18:18:449 log_operaciones/(16862:16862): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[ERROR] 04:18:18:449 log_operaciones/(16862:16862): error al obtener socket
+[DEBUG] 04:19:28:540 log_operaciones/(16978:16978): cargando configuracion
+
+[DEBUG] 04:19:28:540 log_operaciones/(16978:16978): 
+retardo: 1
+cantidad_entradas: 10
+tamanio_entrada: 100
+puerto_escucha: un puerto
+algoritmo: EQUITATIVE_LOAD
+
+[INFO] 04:19:46:557 log_operaciones/(16978:17068): recibi mensaje de 1
+[INFO] 04:20:35:484 log_operaciones/(16978:17068): procesando solicitud: GET unaClave farafa de ESI socket# 134516096
+[DEBUG] 04:20:40:317 log_operaciones/(16978:17068): GET
+[INFO] 04:20:49:214 log_operaciones/(16978:17068): se va a enviar mensaje desde el coordinador mensaje a 0: 06farafaunaClave
+[INFO] 04:20:49:214 log_operaciones/(16978:17068): error al enviar mensaje a 0

@@ -7,13 +7,10 @@
 
 int socket_planificador;
 
-int enviar_mensaje(int socket, tipoMensaje tipo, char* mensaje);
+int enviar_mensaje(int socket, tipoMensaje , void* contenido, tipoRemitente , char* idRemitente,	Message * (*empaquetador)(void*, tipoRemitente, char* id_remitente));
 void* recibir_conexion(void* con);
 int iniciar_servicio();
 
 int socket_fd;
-
-extern char* empaquetar_operacion(t_operacion* operacion);
-extern t_operacion* desempaquetar_operacion(char* , t_operacion* );
 
 #endif

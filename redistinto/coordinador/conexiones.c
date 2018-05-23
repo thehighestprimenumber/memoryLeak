@@ -1,20 +1,10 @@
 #include "./conexiones.h"
 #include "./coordinador.h"
 
-int enviar_mensaje(int socket, tipoMensaje tipo, char* mensaje) {
-	/*Message* msg = (Message*) malloc(sizeof(Message));
-	msg->contenido = (char*) malloc(strlen(mensaje));
-	strncpy(msg->contenido, mensaje, strlen(mensaje));
-	//msg->contenido = mensaje;
-	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader*));
-	msg->header->tipo_mensaje = tipo;
-	msg->header->remitente = COORDINADOR;
-	msg->header->size = strlen(msg->contenido) + 1;*/
+int enviar_mensaje(int socket, tipoMensaje tipo, void* mensaje, tipoRemitente remitente, char* id,
+		Message * (*empaquetador)(void*, tipoRemitente, char* id_remitente)) {
+	Message *msg = empaquetador(mensaje, remitente, id);
 
-	Message *msg = empaquetar_texto(mensaje, strlen(mensaje), COORDINADOR);
-	msg->header->tipo_mensaje = tipo;
-
-	sleep(5);
 	log_info(logger_coordinador,
 			"se va a enviar mensaje desde el coordinador mensaje a %d: %s",
 			socket, msg->contenido);
@@ -34,7 +24,7 @@ int enviar_mensaje(int socket, tipoMensaje tipo, char* mensaje) {
 void* recibir_conexion(void* con) {
 	Conexion* conexion = (Conexion*) con;
 	char* nombre_instancia = calloc(MAX_LEN_INSTANCE_NAME, 1);
-	while (1){
+	while (1) {
 		Message * msg = (Message *) calloc(sizeof(Message), 1);
 		int res = await_msg(conexion->socket, msg);
 		if (res < 0) {
@@ -51,30 +41,32 @@ void* recibir_conexion(void* con) {
 			free(msg->contenido);
 			free(msg->header);
 			return string_itoa(
-					enviar_mensaje(conexion->socket, ACK, "Hola soy el coordinador"));
+					enviar_mensaje(conexion->socket, ACK,
+							"Hola soy el coordinador", COORDINADOR, "idCoordinador", &empaquetar_texto));
 		}
 		t_operacion* operacion = (t_operacion*) calloc(sizeof(t_operacion), 1);
 		if (msg->header->tipo_mensaje == OPERACION) {
 			desempaquetar_operacion((char*) msg->contenido, operacion);
 		}
 		switch (msg->header->remitente) {
-			case ESI:
-				res = (int) procesarSolicitudDeEsi(operacion, conexion->socket);
+		case ESI:
+			res = procesarSolicitudDeEsi(operacion, conexion->socket,
+					*msg->header->id_remitente);
+			break;
+		case INSTANCIA:
+			switch (msg->header->tipo_mensaje) {
+			case CONEXION:
+				registar_instancia((char*) msg->contenido, conexion->socket);
 				break;
-			case INSTANCIA:
-				switch (msg->header->tipo_mensaje) {
-					case CONEXION:
-						registar_instancia((char*) msg->contenido, conexion->socket);
-						break;
-					case DESCONEXION:
-						desconectar_instancia((char*) msg->contenido);
-						break;
-					default:
-						break; //TODO
-				}
+			case DESCONEXION:
+				desconectar_instancia((char*) msg->contenido);
 				break;
 			default:
 				break; //TODO
+			}
+			break;
+		default:
+			break; //TODO
 		}
 		free_operacion(&operacion);
 		free_msg(&msg);
@@ -88,9 +80,8 @@ void* recibir_conexion(void* con) {
 
 int iniciar_servicio() {
 
-
 	socket_fd = create_listener(IP, PUERTO_COORDINADOR);
-	if (socket_fd < 0){
+	if (socket_fd < 0) {
 		log_error(logger_coordinador, "error al obtener socket");
 		return ERROR_DE_CONEXION;
 	}

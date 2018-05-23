@@ -19,11 +19,6 @@
 #define NO_HAY_INSTANCIAS -21
 #define CLAVE_BLOQUEADA -22
 
-#define OK 0
-#define ERROR -20
-#define NO_HAY_INSTANCIAS -21
-#define CLAVE_BLOQUEADA -22
-
 void configurar_logger();
 void salir(int return_nr);
 
@@ -53,7 +48,7 @@ typedef struct {
 char* arch_config;
 t_log * log_operaciones;
 
-int procesarSolicitudDeEsi(t_operacion * op_a_realizar, int socket_solicitante);
+int procesarSolicitudDeEsi(t_operacion * op_a_realizar, int socket_solicitante, int id_solicitante);
 
 
 #endif

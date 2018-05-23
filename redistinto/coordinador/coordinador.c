@@ -30,7 +30,7 @@ void inicializar_configuracion(){
 	ultima_instancia_usada=0;
 }
 
-int procesarSolicitudDeEsi(t_operacion * op_a_realizar, int socket_solicitante) {
+int procesarSolicitudDeEsi(t_operacion * op_a_realizar, int socket_solicitante, int id_solicitante) {
 	char* clave = op_a_realizar->clave;
 	int resultado;
 	log_info(logger_coordinador, "procesando solicitud: %s %s %s de ESI socket# %d", tipo_operacion_nombres[op_a_realizar->tipo], clave,
@@ -39,13 +39,18 @@ int procesarSolicitudDeEsi(t_operacion * op_a_realizar, int socket_solicitante) 
 		log_debug(logger_coordinador, tipo_operacion_nombres[op_GET]);
 		return pedirle_al_planif_que_bloquee_clave(op_a_realizar);
 	} else {
-
-		fila_tabla_instancias * instancia = seleccionar_instancia(clave);
-		log_debug(logger_coordinador, "usando %s", instancia->nombre_instancia);
+		fila_tabla_instancias * instancia;
+		if (op_a_realizar->tipo == op_SET)
+			instancia = seleccionar_instancia(clave);
+		else
+			instancia = buscar_instancia_por_valor_criterio(op_a_realizar->valor, instancia, &criterio_clave);
 
 		if (instancia == NULL) {
-			resultado = NO_HAY_INSTANCIAS;
-		}
+					resultado = NO_HAY_INSTANCIAS;
+				}
+
+		log_debug(logger_coordinador, "usando %s", instancia->nombre_instancia);
+
 		resultado = enviar_solicitud_a_instancia(op_a_realizar, instancia);
 		free(instancia);
 
@@ -56,7 +61,7 @@ int procesarSolicitudDeEsi(t_operacion * op_a_realizar, int socket_solicitante) 
 }
 
 int pedirle_al_planif_que_bloquee_clave(t_operacion* operacion){
-	if (enviar_mensaje(socket_planificador, OPERACION, empaquetar_operacion(operacion))<0) return ERROR_DE_ENVIO;
+	if (enviar_mensaje(socket_planificador, OPERACION, operacion, COORDINADOR, "idCoordinador", &empaquetar_op_en_mensaje)<0) return ERROR_DE_ENVIO;
 		log_debug(logger_coordinador, "se solicita bloqueo de clave %s", (char*) operacion->clave);
 
 	Message respuesta; //=  (Message*) calloc(1, sizeof(Message));
@@ -71,7 +76,9 @@ int enviar_solicitud_a_instancia(t_operacion * operacion, fila_tabla_instancias*
 	char* pedido = tipo_operacion_nombres[operacion->tipo];
 		string_append(&pedido, operacion->clave);
 		string_append(&pedido, operacion->valor);
-		if (enviar_mensaje( *string_itoa(instancia->socket_instancia), OPERACION, pedido)<0) return ERROR_DE_ENVIO;
+
+		if (enviar_mensaje(*string_itoa(instancia->socket_instancia), OPERACION, pedido, COORDINADOR, "idCoordinador",
+				&empaquetar_op_en_mensaje)<0) return ERROR_DE_ENVIO;
 		free(pedido);
 		log_debug(logger_coordinador, "se solicita %s %s %s", tipo_operacion_nombres[operacion->tipo], operacion->clave, operacion->valor);
 	Message respuesta;
@@ -86,7 +93,7 @@ int enviar_solicitud_a_instancia(t_operacion * operacion, fila_tabla_instancias*
 
 int informar_resultado_al_planificador(int resultado){
 	char* mje_resultado = string_itoa(resultado);
-	if (enviar_mensaje(socket_planificador, RESULTADO, mje_resultado)<0) return ERROR_DE_ENVIO;
+	if (enviar_mensaje(socket_planificador, RESULTADO, mje_resultado, COORDINADOR, "idCoordinador", &empaquetar_texto)<0) return ERROR_DE_ENVIO;
 		log_debug(logger_coordinador, "se envia resultado %s", mje_resultado);
 
 		Message respuesta;
