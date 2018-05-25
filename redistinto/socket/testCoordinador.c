@@ -11,11 +11,13 @@ int enviar_mensaje_test(int socket, Message msg) {
 }
 
 int test_operacion(){
-	t_operacion op = {.tipo = op_GET};
-	op.largo_clave = strlen("unaClave")+1;
-	op.largo_valor = strlen("unValor")+1;
-	op.clave = calloc(1, op.largo_clave);
-	op.valor = calloc(1, op.largo_valor);
+	t_operacion op;
+	op.opHeader = malloc(sizeof(OperacionHeader));
+	op.opHeader->tipo = op_GET;
+	op.opHeader->largo_clave = strlen("unaClave")+1;
+	op.opHeader->largo_valor = strlen("unValor")+1;
+	op.clave = calloc(1, op.opHeader->largo_clave);
+	op.valor = calloc(1, op.opHeader->largo_valor);
 	strcpy(op.clave, "unaClave");
 	strcpy(op.valor, "unValor");
 	Message * m = empaquetar_op_en_mensaje(&op, ESI);
@@ -36,11 +38,11 @@ int test_ESI_get(){
 	t_operacion * op = (t_operacion *) malloc(sizeof(t_operacion));
 		op->clave = calloc(1, strlen("claracla")+1);
 		memcpy(op->clave, "claracla", strlen("claracla"));
-		op->largo_clave=strlen(op->clave)+1;
-		op->tipo = op_GET;
+		op->opHeader->largo_clave=strlen(op->clave)+1;
+		op->opHeader->tipo = op_GET;
 		op->valor = calloc(1, strlen(nombre_ESI)+1);
 		strcpy(op->valor, nombre_ESI);
-		op->largo_valor=strlen(op->valor)+1;
+		op->opHeader->largo_valor=strlen(op->valor)+1;
 		Message * m = empaquetar_op_en_mensaje(op, ESI);
 
 	int res = enviar_mensaje_test(socket_coordinador, *m);
