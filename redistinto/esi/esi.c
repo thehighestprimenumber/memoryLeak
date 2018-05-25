@@ -1,7 +1,12 @@
 #include "esi.h"
 #include "parser.h"
+#include "../socket/testCoordinador.h"
 
-int main(int argc,char *argv[]) {
+int main(int argc,char *argv[]){
+	test_operacion();
+	test_ESI_get("esi1");
+}
+int main2(int argc,char *argv[]) {
 
 	// Levantamos configuracion
 

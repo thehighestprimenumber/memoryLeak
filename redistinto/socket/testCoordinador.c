@@ -11,18 +11,21 @@ int enviar_mensaje_test(int socket, Message msg) {
 }
 
 int test_operacion(){
-	t_operacion op = {.valor="farafa\0", .clave="claracla\0", .tipo = op_GET};
-	op.largo_clave = strlen(op.clave)+1;
-	op.largo_valor = strlen(op.valor)+1;
+	t_operacion op = {.tipo = op_GET};
+	op.largo_clave = strlen("unaClave")+1;
+	op.largo_valor = strlen("unValor")+1;
+	op.clave = calloc(1, op.largo_clave);
+	op.valor = calloc(1, op.largo_valor);
+	strcpy(op.clave, "unaClave");
+	strcpy(op.valor, "unValor");
 	Message * m = empaquetar_op_en_mensaje(&op, ESI);
-	t_operacion * desemp = (t_operacion *) m->contenido;
-	printf("%d", desemp->tipo);
-	printf("%s", desemp->clave);
-	printf("%s", desemp->valor);
-	return 0;
+	t_operacion * desemp = desempaquetar_operacion(m);
+
 
 	free_msg(desemp);
 	free_msg(m);
+
+	return 0;
 }
 
 int test_ESI_get(){
