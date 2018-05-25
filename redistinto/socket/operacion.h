@@ -6,13 +6,21 @@
 #include <string.h>
 #include "socket.h"
 
+typedef enum tipoOperacion {op_GET, op_SET, op_STORE};
+
 typedef struct {
 	int largo_clave;
 	int largo_valor;
-	enum tipoMensaje tipo;
+	enum tipoOperacion tipo;
 	char* clave;
 	char* valor;
 } __attribute__((packed)) t_operacion;
+
+typedef struct {
+	int largo_clave;
+	int largo_valor;
+	enum tipoOperacion tipo;
+} __attribute__((packed)) OperacionHeader;
 
 void free_operacion(t_operacion ** operacion);
 
