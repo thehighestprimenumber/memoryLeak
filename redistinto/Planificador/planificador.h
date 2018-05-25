@@ -101,7 +101,7 @@ void liberar_split(char** array);
 int conectar_a_coordinador(t_planificador* pConfig);
 int manejador_de_eventos(int socket, Message* msj);
 int realizar_evento(Conexion* con, Message* msj);
-int enviar_mensaje(int socket, char* mensaje, tipo_mensaje tipo);
+int enviar_mensaje(int socket, Message msg);
 
 //Firmas de las funciones para agregar a las listas
 void agregar_ready(int idEsi);
