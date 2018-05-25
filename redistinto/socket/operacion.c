@@ -70,12 +70,14 @@ t_operacion* desempaquetar_operacion(Message* msg) {
 	t_operacion* operacion = malloc(sizeof(t_operacion));
 
 	//Copiamos el header de la operacion
-	OperacionHeader *opHeader;
+	OperacionHeader *opHeader = malloc(sizeof(OperacionHeader));
 	memcpy(opHeader, msg->contenido, sizeof(OperacionHeader));
 
 	//Lo copiamos a la operacion y lo liberamos
 	operacion->largo_clave = opHeader->largo_clave;
+	operacion->clave = malloc(operacion->largo_clave);
 	operacion->largo_valor = opHeader->largo_valor;
+	operacion->valor = malloc(operacion->largo_valor);
 	operacion->tipo = opHeader->tipo;
 	free(opHeader);
 
