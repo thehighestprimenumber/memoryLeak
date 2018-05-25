@@ -22,6 +22,6 @@ char* desempaquetar_texto(Message* msg);
 Message* empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente);
 t_operacion* desempaquetar_operacion(Message* msg);
 
-Message* empaquetar_conexion(tipoRemitente remitente);
+Message* empaquetar_conexion(tipoRemitente remitente, char* idRemitente);
 
 #endif

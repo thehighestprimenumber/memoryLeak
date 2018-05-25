@@ -58,7 +58,7 @@ char* desempaquetar_texto(Message* msg) {
 }
 
 t_operacion* desempaquetar_operacion(Message* msg) {
-	t_operacion* operacion = calloc(1,sizeof(operacion));
+	t_operacion* operacion = (t_operacion*) calloc(1,sizeof(operacion));
 	operacion->tipo = msg->header->tipo_mensaje;
 	operacion->largo_clave = msg->header->sizeClave;
 	operacion->largo_valor = msg->header->sizeValor;
@@ -69,11 +69,9 @@ t_operacion* desempaquetar_operacion(Message* msg) {
 	memcpy(operacion->valor, msg->contenido+operacion->largo_clave, operacion->largo_valor);
 	return operacion;
 }
-Message* empaquetar_conexion(tipoRemitente remitente) {
-	Message *msg = malloc(sizeof(Message));
-	msg->header = malloc(sizeof(ContentHeader));
-	msg->header->remitente = remitente;
+
+Message* empaquetar_conexion(tipoRemitente remitente, char* idRemitente) {
+	Message *msg = empaquetar_texto(idRemitente, strlen(idRemitente), remitente);
 	msg->header->tipo_mensaje = CONEXION;
-	msg->header->size = 0;
 	return msg;
 }

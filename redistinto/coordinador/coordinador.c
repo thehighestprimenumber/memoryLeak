@@ -31,8 +31,11 @@ void inicializar_configuracion(){
 }
 
 int manejar_conexion(Message * m, int socket){
-	if (m->header->remitente == INSTANCIA)
-		return registar_instancia(m->contenido, socket);
+	t_operacion * operacion = desempaquetar_operacion(m);
+	if (m->header->remitente == INSTANCIA) {
+		log_info(logger_coordinador, "se va a recibe conexion de nueva instancia, socket %d", socket);
+		return registar_instancia(operacion->valor, socket);
+	}
 	return 0;
 }
 

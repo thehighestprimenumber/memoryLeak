@@ -7,7 +7,7 @@
 
 
 int test_empaquetado();
-int test_ESI_get(char*);
+int test_ESI_get();
 int test_INST_connect(char*);
 
 #endif /* TESTCOORDINADOR_H_ */

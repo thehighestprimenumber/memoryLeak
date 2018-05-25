@@ -37,7 +37,7 @@ int connect_to_server(char * ip, char * serverPort) {
  */
 int send_msg(int socket, Message msg) {
 	//Verifico la existencia del socket y que el mensaje posea contenido
-	if(socket == -1 ||  msg.header == NULL) return -1; //se elimina la validacion msg.contenido == NULL ||
+	if(socket == -1 ||  msg.contenido == NULL || msg.header == NULL) return -1;
 
 	//Calculo el tamaño total
 	int size = sizeof(ContentHeader) + msg.header->size;
