@@ -22,8 +22,8 @@ int test_operacion(){
 	t_operacion * desemp = desempaquetar_operacion(m);
 
 
-	free_msg(desemp);
-	free_msg(m);
+	free(desemp);
+	free_msg(&m);
 
 	return 0;
 }
@@ -48,8 +48,8 @@ int test_ESI_get(){
 		//free_msg(m); FIXME
 
 	while (1) {
-		Message msg;
-		int resultado = await_msg(socket_coordinador, &msg);
+		Message *msg;
+		int resultado = await_msg(socket_coordinador, msg);
 		free_msg(&msg);
 		if (resultado<0){
 			return ERROR_DE_RECEPCION;
