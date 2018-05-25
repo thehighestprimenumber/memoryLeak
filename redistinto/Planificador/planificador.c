@@ -55,7 +55,6 @@ int iniciar(int socketCoordinador){
 	if (socket_fd <0) return ERROR_DE_CONEXION;
 
 	start_listening_select(socket_fd, socketCoordinador, *manejador_de_eventos);
-	//start_listening_threads(socket_fd, *recibir_mensaje);
 
 	return 0;
 }
@@ -73,10 +72,6 @@ int manejador_de_eventos(int socket, Message* msg){
 
 	//Por ahora agrego caso con test para que siga funcionando, después sacar
 	enum tipoRemitente recipiente = msg->header->remitente;
-
-	//char * request = malloc((msg->header->size));
-	//strncpy(request, (char *) msg->contenido, strlen(msg->contenido) + 1);
-
 
 	if (msg->header->tipo_mensaje==TEST)
 	{
@@ -108,6 +103,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				//Switcheamos por el algoritmo
 				switch(algorimoEnUso){
 					case FIFO:
+						aceptar_conexion(socket);
 						manejar_nueva_esi_fifo(socket);
 						return 0;
 					default:
@@ -143,101 +139,7 @@ int manejador_de_eventos(int socket, Message* msg){
 	return ERROR;
 }
 
-/*int recibir_mensaje(Conexion* conexion, Message* msg){
-	tipo_mensaje tipo;
-	int esi_seleccionado = 0;
-
-	int res = await_msg(conexion->socket, msg);
-	if (res<0) {
-		log_info(log_planificador, "error al recibir un ensaje de %d", socket);
-		return ERROR_DE_RECEPCION;
-		//return string_itoa(ERROR_DE_RECEPCION);
-	}
-
-	enum tipoRemitente recipiente = msg->header->remitente;
-	char * request = malloc((msg->header->size));
-	strncpy(request, (char *) msg->contenido, strlen(msg->contenido) + 1);
-	//strcpy(request, (char *) msg->contenido);
-
-	log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
-
-	if (msg->header->tipo_mensaje==TEST)
-	{
-		tipo.enumTipo = TEST;
-
-		return enviar_mensaje(conexion->socket, "Hola soy el planificador",tipo);
-		//return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el planificador"));
-	}
-	else if ((msg->header->remitente==ESI) && (msg->header->tipo_mensaje==CONEXION)) {
-		//Agrego la nueva conexión a lista de preparados
-		agregar_ready(conexion->socket);
-
-		//Verifico si algún esi está corriendo, caso contrario
-		//envio un esi a ejecutarse según el algorimto seleccionado
-		if (esiRunning == 0) {
-			esi_seleccionado = planificar_esis();
-			if (esi_seleccionado > 0) {
-			//Primero confirmo la conexión
-				tipo.enumTipo = CONEXION;
-				int res_conexion = enviar_mensaje(conexion->socket, "Se conectó al planificador correctamente",tipo);
-
-				if (res_conexion < 0) {
-					log_debug(log_planificador,"Falló la conexión con el esi: %d",conexion->socket);
-					exit_proceso(-1);
-				}
-				else
-				{
-					//Envío mensaje para pedirle al esi que ejecute
-					tipo.enumTipo = OPERACION;
-					return enviar_mensaje(esi_seleccionado, "El planificador ordena ejecutar a este esi",tipo);
-				}
-			}
-		}
-
-		tipo.enumTipo = CONEXION;
-
-		//Por último envío mensaje de confirmación al esi que se conecto
-		return enviar_mensaje(conexion->socket, "Se conecto al planificador correctamente",tipo);
-	}
-	else if ((msg->header->remitente==ESI) && (msg->header->tipo_mensaje==DESCONEXION)) {
-		finalizar_esi(conexion->socket);
-
-		esi_seleccionado = planificar_esis();
-
-		if (esi_seleccionado > 0) {
-		//Primero confirmo la desconexión
-			tipo.enumTipo = ACK;
-			int res_conexion = enviar_mensaje(conexion->socket, "Planificador recibió notificación de desconexión",tipo);
-
-			if (res_conexion < 0) {
-				log_debug(log_planificador,"Falló la desconexión con el esi: %d",conexion->socket);
-				exit_proceso(-1);
-			}
-			else
-			{
-				//Envío mensaje para pedirle al esi que ejecute
-				tipo.enumTipo = OPERACION;
-				return enviar_mensaje(esi_seleccionado, "El planificador ordena ejecutar a este esi",tipo);
-			}
-		}
-	}
-
-	return ERROR;
-}
-
-*/
-
-//int enviar_mensaje(int socket, char* mensaje, tipo_mensaje tipo){
 int enviar_mensaje(int socket, Message msg) {
-	//Message* msg= (Message*) malloc(sizeof(Message));
-	//msg->contenido = (char*) malloc(strlen(mensaje) + 1);
-	//strcpy(msg->contenido,mensaje);
-
-	//msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
-	//msg->header->remitente = PLANIFICADOR;
-	//msg->header->size = strlen(msg->contenido) + 1;
-	//msg->header->tipo_mensaje = tipo.enumTipo;
-
 	sleep(1);
 	log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg.contenido);
 	int res = send_msg(socket, msg);
@@ -375,6 +277,13 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 	return pidCoordinador;
 }
 
+void aceptar_conexion(int socket) {
+	//Por último envío mensaje de confirmación al esi que se conecto
+	Message* mensaje = empaquetar_texto("Se conecto al planificador correctamente\0", strlen("Se conecto al planificador correctamente\0"), PLANIFICADOR);
+	mensaje->header->tipo_mensaje = ACK;
+	enviar_mensaje(socket, *mensaje);
+}
+
 void agregar_ready(int idEsi) {
 	struct_ready elemento;
 	elemento.pid = idEsi;
@@ -465,7 +374,7 @@ void liberar_split(char** array){
 }
 
 //Funciones dummy para que corra provisionalmente
-void manejar_nueva_esi_fifo(int socket){
+int manejar_nueva_esi_fifo(int socket){
 	int esi_seleccionado = 0;
 	//Agrego la nueva conexión a lista de preparados
 	agregar_ready(socket);
@@ -473,31 +382,17 @@ void manejar_nueva_esi_fifo(int socket){
 	//Verifico si algún esi está corriendo, caso contrario
 	//envio un esi a ejecutarse según el algorimto seleccionado
 	if (esiRunning == 0) {
-			esi_seleccionado = planificar_esis();
-			if (esi_seleccionado > 0) {
-				//Primero confirmo la conexión
-				Message* mensaje = empaquetar_texto("Se conectó al planificador correctamente\0", strlen("Se conectó al planificador correctamente\0"), PLANIFICADOR);
-				mensaje->header->tipo_mensaje = ACK;
-				int res_conexion = enviar_mensaje(socket, *mensaje);
-
-				if (res_conexion < 0) {
-					log_debug(log_planificador,"Falló la conexión con el esi: %d",socket);
-					exit_proceso(-1);
-				}
-				else
-				{   //Envío mensaje para pedirle al esi que ejecute
-					//DESPUES SEGURAMENTE CAMBIAR PARA QUE LE ENVIE UNA INSTRUCCION A PARSEAR
-					Message* mensaje = empaquetar_texto("El planificador ordena ejecutar a este esi\0", strlen("El planificador ordena ejecutar a este esi\0"), PLANIFICADOR);
-					mensaje->header->tipo_mensaje = ACK;
-					enviar_mensaje(esi_seleccionado, *mensaje);
-				}
-			}
+		esi_seleccionado = planificar_esis();
+		if (esi_seleccionado > 0) {
+			//Envío mensaje para pedirle al esi que ejecute
+			//DESPUES SEGURAMENTE CAMBIAR PARA QUE LE ENVIE UNA INSTRUCCION A PARSEAR
+			Message* mensaje = empaquetar_texto("El planificador ordena ejecutar a este esi\0", strlen("El planificador ordena ejecutar a este esi\0"), PLANIFICADOR);
+			mensaje->header->tipo_mensaje = EJECUTAR;
+			if (enviar_mensaje(esi_seleccionado, *mensaje) < 0 ) return ERROR_DE_ENVIO;
 		}
+	}
 
-	//Por último envío mensaje de confirmación al esi que se conecto
-	Message* mensaje = empaquetar_texto("Se conecto al planificador correctamente\0", strlen("Se conecto al planificador correctamente\0"), PLANIFICADOR);
-	mensaje->header->tipo_mensaje = ACK;
-	enviar_mensaje(socket, *mensaje);
+	return OK;
 }
 
 int manejar_mensaje_esi_fifo(int socket, Message *msg){return 0;}
@@ -508,7 +403,6 @@ void manejar_desconexion_esi_fifo(int socket){
 	//Le confirmo al esi que se puede desconectar
 	Message* mensaje = empaquetar_texto("Planificador recibió notificación de desconexión\0", strlen("Planificador recibió notificación de desconexión\0"), PLANIFICADOR);
 	mensaje->header->tipo_mensaje = ACK;
-	enviar_mensaje(socket, *mensaje);
 
 	int res_desconexion = enviar_mensaje(socket, *mensaje);
 
@@ -522,12 +416,11 @@ void manejar_desconexion_esi_fifo(int socket){
 	esi_seleccionado = planificar_esis();
 
 	if (esi_seleccionado > 0) {
-		//Envío mensaje para pedirle al esi que ejecute
-		//DESPUES SEGURAMENTE CAMBIAR PARA QUE LE ENVIE UNA INSTRUCCION A PARSEAR
+		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
+		//y comenzar a procesar instrucciones
 /**********************USAR UN TIPO DE OPERACION ESPECIFICO *************************/
-		//FIXME tipo.enumTipo = OPERACION;
 		Message* mensaje = empaquetar_texto("El planificador ordena ejecutar a este esi\0", strlen("El planificador ordena ejecutar a este esi\0"), PLANIFICADOR);
-		mensaje->header->tipo_mensaje = ACK;
+		mensaje->header->tipo_mensaje = EJECUTAR;
 		enviar_mensaje(esi_seleccionado, *mensaje);
 	}
 }

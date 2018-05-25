@@ -111,10 +111,11 @@ struct_ready* seleccionar_esi_ready_fifo();
 //Firmas de las funciones que irian más adelante
 int planificar_esis(); //Replanifica los esis y devuelve el identificador del próximo a ejecutar
 int abrirPlanificador(); //Abre la conexión del planificador y sus conexiones
-void manejar_nueva_esi_fifo(int socket); //Añade una esi a la lista de prioridades o cola o lo que diga el algoritmo(mirar var global)
+int manejar_nueva_esi_fifo(int socket); //Añade una esi a la lista de prioridades o cola o lo que diga el algoritmo(mirar var global)
 int manejar_mensaje_esi_fifo(int socket, Message *msg); //Se encarga de manejar el dato de la ESI y replanificar al respecto
 void manejar_desconexion_esi_fifo(int socket); //Elimina a la esi segun plantea fifo
 int estimar_rafaga(char* algoritmo); //Estima la duración de la próxima ráfaga usando formula de la media exponencial
+void aceptar_conexion(socket,msg);
 void finalizar_esi(int socket_esi);
 
 

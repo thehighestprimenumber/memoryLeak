@@ -29,7 +29,7 @@
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
 typedef enum tipoRemitente {DESCONOCIDO, ESI, PLANIFICADOR, INSTANCIA, COORDINADOR} tipoRemitente;
 
-typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, op_GET, op_SET, op_STORE, VALIDAR_BLOQUEO, TEST, TEXTO, RESULTADO} tipoMensaje;
+typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, op_GET, op_SET, op_STORE, VALIDAR_BLOQUEO, TEST, TEXTO, RESULTADO,EJECUTAR} tipoMensaje;
 
 //char* tipoMensajeNombre[11];
 
