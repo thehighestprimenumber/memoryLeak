@@ -26,11 +26,11 @@ fila_tabla_instancias* seleccionar_instancia(char* clave);
 
 int registar_instancia(char* nombre_instancia, int socket_instancia);
 
-int desconectar_instancia(char* nombre_instancia);
+int desconectar_instancia(int socket);
 
 int criterio_clave(fila_tabla_instancias* fila, void* nombre_clave);
 int criterio_nombre(fila_tabla_instancias* fila, void* nombre_clave);
-int buscar_instancia_por_valor_criterio (void* valor, fila_tabla_instancias *output, int criterio (fila_tabla_instancias*, void*));
+int buscar_instancia_por_valor_criterio (void* valor, fila_tabla_instancias * output, int criterio (fila_tabla_instancias*, void*));
 
 
 #endif

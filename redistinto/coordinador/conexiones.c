@@ -1,29 +1,24 @@
 #include "./conexiones.h"
 #include "./coordinador.h"
+#include "./socket.h"
 
-int enviar_mensaje(int socket, tipoMensaje tipo, void* mensaje, tipoRemitente remitente, char* id,
-		Message * (*empaquetador)(void*, tipoRemitente, char* id_remitente)) {
-	Message *msg = empaquetador(mensaje, remitente, id);
-
+int enviar_mensaje(int socket, Message msg) {
 	log_info(logger_coordinador,
-			"se va a enviar mensaje desde el coordinador mensaje a %d: %s",
-			socket, msg->contenido);
-	int res = send_msg(socket, (*msg));
+			"se va a enviar mensaje desde el coordinador mensaje a %d: %s", socket, msg.contenido);
+	int res = send_msg(socket, msg);
 	if (res < 0) {
 		log_info(logger_coordinador, "error al enviar mensaje a %d", socket);
 		return ERROR_DE_ENVIO;
 	}
 	log_info(logger_coordinador,
 			"se envio el mensaje desde el coordinador mensaje a %d: %s", socket,
-			msg->contenido);
-	free_msg(&msg);
-
+			msg.contenido);
 	return OK;
 }
 
 void* recibir_conexion(void* con) {
 	Conexion* conexion = (Conexion*) con;
-	char* nombre_instancia = calloc(MAX_LEN_INSTANCE_NAME, 1);
+
 	while (1) {
 		Message * msg = (Message *) calloc(sizeof(Message), 1);
 		int res = await_msg(conexion->socket, msg);
@@ -33,46 +28,35 @@ void* recibir_conexion(void* con) {
 			free_msg(&msg);
 			return string_itoa(ERROR_DE_RECEPCION);
 		}
-		enum tipoRemitente remitente = msg->header->remitente;
+		enum tipoMensaje tipo = msg->header->tipo_mensaje;
 
-		log_info(logger_coordinador, "recibi mensaje de %d", remitente);
+		log_info(logger_coordinador, "recibi mensaje de tipo %d", tipo);
 
-		if (msg->header->tipo_mensaje == TEST) {
-			free(msg->contenido);
-			free(msg->header);
-			return string_itoa(
-					enviar_mensaje(conexion->socket, ACK,
-							"Hola soy el coordinador", COORDINADOR, "idCoordinador", &empaquetar_texto));
-		}
-		t_operacion* operacion = (t_operacion*) calloc(sizeof(t_operacion), 1);
-		if (msg->header->tipo_mensaje == OPERACION) {
-			desempaquetar_operacion((char*) msg->contenido, operacion);
-		}
-		switch (msg->header->remitente) {
-		case ESI:
-			res = procesarSolicitudDeEsi(operacion, conexion->socket,
-					*msg->header->id_remitente);
-			break;
-		case INSTANCIA:
-			switch (msg->header->tipo_mensaje) {
+		switch (tipo){
+			case TEST: ;
+				Message* m = empaquetar_texto("hola soy el coodinador\0", strlen("hola soy el coodinador\0"), COORDINADOR);
+				m->header->tipo_mensaje = ACK;
+				int result = enviar_mensaje(conexion->socket, *m);
+				if (result) log_info(logger_coordinador, "error al enviar ack");
+				break;
 			case CONEXION:
-				registar_instancia((char*) msg->contenido, conexion->socket);
+				manejar_conexion(msg, conexion->socket);
 				break;
 			case DESCONEXION:
-				desconectar_instancia((char*) msg->contenido);
+				manejar_desconexion(conexion->socket);
 				break;
-			default:
-				break; //TODO
-			}
-			break;
-		default:
-			break; //TODO
+			case ACK:
+			case VALIDAR_BLOQUEO:
+			case TEXTO:
+			case RESULTADO:
+				break;
+			case op_GET:
+			case op_SET:
+			case op_STORE:
+				manejar_operacion(msg, conexion->socket);
 		}
-		free_operacion(&operacion);
 		free_msg(&msg);
-		free(nombre_instancia);
 	}
-
 	free(conexion);
 
 	return 0;

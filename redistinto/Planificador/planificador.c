@@ -516,7 +516,8 @@ void manejar_desconexion_esi_fifo(int socket){
 	if (esi_seleccionado > 0) {
 		//Envío mensaje para pedirle al esi que ejecute
 		//DESPUES SEGURAMENTE CAMBIAR PARA QUE LE ENVIE UNA INSTRUCCION A PARSEAR
-		tipo.enumTipo = OPERACION;
+/**********************USAR UN TIPO DE OPERACION ESPECIFICO *************************/
+		//FIXME tipo.enumTipo = OPERACION;
 		enviar_mensaje(esi_seleccionado, "El planificador ordena ejecutar a este esi",tipo);
 	}
 }
