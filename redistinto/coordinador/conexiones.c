@@ -50,9 +50,7 @@ void* recibir_conexion(void* con) {
 			case TEXTO:
 			case RESULTADO:
 				break;
-			case op_GET:
-			case op_SET:
-			case op_STORE:
+			case OPERACION:
 				manejar_operacion(msg, conexion->socket);
 		}
 		free_msg(&msg);
