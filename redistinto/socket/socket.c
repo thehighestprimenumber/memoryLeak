@@ -1,7 +1,5 @@
 #include "socket.h"
 
-//tipoMensajeNombre = {"ACK", "CONEXION", "DESCONEXION", "op_GET", "op_SET", "op_STORE", "VALIDAR_BLOQUEO", "TEST", "TEXTO", "RESULTADO"};
-
 int connect_to_server(char * ip, char * serverPort) {
 	//Nos aseguramos que no nos hayan mandado punteros vacios
 	if(ip == NULL || serverPort == NULL) return -1;
