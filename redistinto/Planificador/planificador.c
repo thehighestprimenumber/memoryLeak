@@ -100,10 +100,10 @@ int manejador_de_eventos(int socket, Message* msg){
 
 			case CONEXION:
 				log_info(log_planificador, "Se conecto una ESI");
+				aceptar_conexion(socket);
 				//Switcheamos por el algoritmo
 				switch(algorimoEnUso){
 					case FIFO:
-						aceptar_conexion(socket);
 						manejar_nueva_esi_fifo(socket);
 						return 0;
 					default:
@@ -140,7 +140,6 @@ int manejador_de_eventos(int socket, Message* msg){
 }
 
 int enviar_mensaje(int socket, Message msg) {
-	sleep(1);
 	log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg.contenido);
 	int res = send_msg(socket, msg);
 		if (res<0) {
@@ -282,6 +281,7 @@ void aceptar_conexion(int socket) {
 	Message* mensaje = empaquetar_texto("Se conecto al planificador correctamente\0", strlen("Se conecto al planificador correctamente\0"), PLANIFICADOR);
 	mensaje->header->tipo_mensaje = ACK;
 	enviar_mensaje(socket, *mensaje);
+	free(mensaje);
 }
 
 void agregar_ready(int idEsi) {
@@ -376,6 +376,8 @@ void liberar_split(char** array){
 //Funciones dummy para que corra provisionalmente
 int manejar_nueva_esi_fifo(int socket){
 	int esi_seleccionado = 0;
+	int msg_envio;
+
 	//Agrego la nueva conexión a lista de preparados
 	agregar_ready(socket);
 
@@ -388,7 +390,10 @@ int manejar_nueva_esi_fifo(int socket){
 			//DESPUES SEGURAMENTE CAMBIAR PARA QUE LE ENVIE UNA INSTRUCCION A PARSEAR
 			Message* mensaje = empaquetar_texto("El planificador ordena ejecutar a este esi\0", strlen("El planificador ordena ejecutar a este esi\0"), PLANIFICADOR);
 			mensaje->header->tipo_mensaje = EJECUTAR;
-			if (enviar_mensaje(esi_seleccionado, *mensaje) < 0 ) return ERROR_DE_ENVIO;
+			msg_envio = enviar_mensaje(esi_seleccionado, *mensaje);
+			free(mensaje);
+
+			if (msg_envio < 0 ) return ERROR_DE_ENVIO;
 		}
 	}
 
@@ -406,6 +411,8 @@ void manejar_desconexion_esi_fifo(int socket){
 
 	int res_desconexion = enviar_mensaje(socket, *mensaje);
 
+	free(mensaje);
+
 	if (res_desconexion < 0) {
 		log_debug(log_planificador,"Falló la desconexión con el esi: %d",socket);
 		exit_proceso(-1);
@@ -419,8 +426,11 @@ void manejar_desconexion_esi_fifo(int socket){
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
 /**********************USAR UN TIPO DE OPERACION ESPECIFICO *************************/
-		Message* mensaje = empaquetar_texto("El planificador ordena ejecutar a este esi\0", strlen("El planificador ordena ejecutar a este esi\0"), PLANIFICADOR);
-		mensaje->header->tipo_mensaje = EJECUTAR;
-		enviar_mensaje(esi_seleccionado, *mensaje);
+		Message* mensajeEjec = empaquetar_texto("El planificador ordena ejecutar a este esi\0", strlen("El planificador ordena ejecutar a este esi\0"), PLANIFICADOR);
+		mensajeEjec->header->tipo_mensaje = EJECUTAR;
+		int res_ejecutar = enviar_mensaje(esi_seleccionado, *mensajeEjec);
+		free(mensajeEjec);
+		if (res_ejecutar < 0) {exit_proceso(-1);}
+
 	}
 }
