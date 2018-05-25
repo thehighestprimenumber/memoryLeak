@@ -11,6 +11,7 @@
 #include <commons/log.h>
 #include "../socket/socket.h"
 #include <stdlib.h>
+#include "parser.h"
 
 t_log * log_esi;
 
