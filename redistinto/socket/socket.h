@@ -29,28 +29,17 @@
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
 typedef enum tipoRemitente {DESCONOCIDO, ESI, PLANIFICADOR, INSTANCIA, COORDINADOR} tipoRemitente;
 
-typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, OPERACION, TEST, TEXTO, RESULTADO} tipoMensaje;
+typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, op_GET, op_SET, op_STORE, VALIDAR_BLOQUEO, TEST, TEXTO, RESULTADO,EJECUTAR} tipoMensaje;
 
-typedef enum {
-	HANDSHAKE = 1
-}t_protocolo;
-
-
-//Estructuras
-
-//Estructura de paquete
-typedef struct {
-	int id_remitente; // Remitente del paquete
-	int protocolo; // Un int que representa lo que quiere hacer el remitente
-	long cantBytes;
-	void* pBuffer;
-} t_paquete;
+//char* tipoMensajeNombre[11];
 
 //Estructura del header
 typedef struct {
 	tipoRemitente remitente;
 	tipoMensaje tipo_mensaje;
 	int size;
+	int sizeClave;
+	int sizeValor;
 } __attribute__((packed)) ContentHeader;
 
 //Estructura del mensaje
@@ -58,6 +47,7 @@ typedef struct {
 	ContentHeader *header;
 	void *contenido;
 } Message;
+
 
 //Estructura de conexion
 typedef struct{
@@ -86,9 +76,5 @@ void close_conection(void *conexion);
 void close_listener(Conexion *conexion);
 void delete_conection(t_list *conexiones,int index);
 Conexion* get_conection(t_list *conexiones,int index);
-
-int pedir_handshake(int* pSocket, int remitente);
-void destruir_paquete(t_paquete un_paquete);
-t_paquete recibir_paquete(int* pSocket);
 
 #endif

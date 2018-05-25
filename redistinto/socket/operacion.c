@@ -2,70 +2,76 @@
 
 #include <commons/string.h>
 #include <string.h>
-#define TAMANIO_INT 4 //se podria definir un tipo de dato...
-#define TAMANIO_CLAVE 4
+#include <stdio.h>
+#include <stdlib.h>
+#include "stdlib.h"
 
-char* empaquetar_operacion(t_operacion* operacion){
-	int desplazamiento=0;
-	char* output = malloc(TAMANIO_INT*2+TAMANIO_CLAVE+operacion->long_valor);
-	memcpy(&output, (&operacion->tipo)-0, TAMANIO_INT);
-	desplazamiento+=TAMANIO_INT;
+#define TAMANIO_CLAVE 40
 
-	memcpy(&output+desplazamiento, &operacion->clave, TAMANIO_CLAVE);
-	desplazamiento+=TAMANIO_CLAVE;
-
-	memcpy(&output+desplazamiento, &operacion->long_valor, TAMANIO_INT);
-	desplazamiento+=TAMANIO_INT;
-	memcpy(&output+desplazamiento, &operacion->valor, operacion->long_valor);
-	desplazamiento+=operacion->long_valor;
-
-	return output;
-}
-
-t_operacion* desempaquetar_operacion(char* contenido_mensaje, t_operacion* operacion){
-
-		int desplazamiento=0;
-		memcpy(&operacion->tipo, contenido_mensaje, TAMANIO_INT);
-			desplazamiento+=TAMANIO_INT;
-
-
-		strcpy(contenido_mensaje+desplazamiento, operacion->clave);
-			desplazamiento+=TAMANIO_CLAVE;
-
-
-		memcpy(&operacion->long_valor, contenido_mensaje+desplazamiento, TAMANIO_INT);
-						desplazamiento+=TAMANIO_INT;
-		operacion->valor = malloc(operacion->long_valor);
-			strcpy(contenido_mensaje+desplazamiento, operacion->valor);
-
-		return operacion;
-}
-
-
-void free_operacion(t_operacion ** operacion){
-	if(operacion != NULL && (*operacion) != NULL){
-			if( (*operacion)->valor != NULL) free((*operacion)->valor);
-			free(*operacion);
+void free_operacion(t_operacion ** operacion) {
+	if (operacion != NULL && (*operacion) != NULL) {
+		if ((*operacion)->valor != NULL)
+			free((*operacion)->valor);
+		free(*operacion);
 	}
 }
 
 Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente){
-	if(texto == NULL || length < 1) return NULL;
+	if (texto == NULL || length < 1)
+		return NULL;
 	Message *msg = malloc(sizeof(Message));
 	msg->header = malloc(sizeof(ContentHeader));
-	msg->header->remitente = remitente;
 	msg->header->tipo_mensaje = TEXTO;
-	msg->header->size = length+1;
-	msg->contenido = malloc(length+1);
+	msg->header->size = length + 1;
+	msg->contenido = malloc(length + 1);
 	memcpy(msg->contenido, texto, length);
-	( (char*) msg->contenido )[length] = '\0';
+	((char*) msg->contenido)[length] = '\0';
 	return msg;
 }
 
-char* desempaquetar_texto(Message* msg){
-	if(msg == NULL || msg->header == NULL || msg->header->size < 1 || msg->contenido ==  NULL) return NULL;
+Message* empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente) {
+	if (op == NULL)
+		return NULL;
+		Message *msg = malloc(sizeof(Message));
+	msg->header = malloc(sizeof(ContentHeader));
+	msg->header->tipo_mensaje = op->tipo;
+	msg->header->remitente = remitente;
+	msg->header->sizeClave = op->largo_clave;
+	msg->header->sizeValor = op->largo_valor;
+	msg->header->size = op->largo_clave + op->largo_valor;
+	msg->contenido = calloc(1, msg->header->size);
+	char* desp = msg->contenido;
+	memcpy(desp, op->clave, op->largo_clave );
+		desp += op->largo_clave;
+	memcpy(desp, op->valor, op->largo_valor );
+		desp += op->largo_valor;
+	return msg;
+}
+
+char* desempaquetar_texto(Message* msg) {
+	if (msg == NULL || msg->header == NULL
+			|| msg->header->size < 1|| msg->contenido == NULL)
+		return NULL;
 	char* texto = malloc(msg->header->size);
 	memcpy(texto, msg->contenido, msg->header->size);
 	return texto;
+}
 
+t_operacion* desempaquetar_operacion(Message* msg) {
+	t_operacion* operacion = (t_operacion*) calloc(1,sizeof(operacion));
+	operacion->tipo = msg->header->tipo_mensaje;
+	operacion->largo_clave = msg->header->sizeClave;
+	operacion->largo_valor = msg->header->sizeValor;
+	operacion->clave = (char*) calloc(1, operacion->largo_clave);
+	operacion->valor = (char*) calloc(1, operacion->largo_valor);
+
+	memcpy(operacion->clave, msg->contenido, operacion->largo_clave);
+	memcpy(operacion->valor, msg->contenido+operacion->largo_clave, operacion->largo_valor);
+	return operacion;
+}
+
+Message* empaquetar_conexion(tipoRemitente remitente, char* idRemitente) {
+	Message *msg = empaquetar_texto(idRemitente, strlen(idRemitente), remitente);
+	msg->header->tipo_mensaje = CONEXION;
+	return msg;
 }
