@@ -66,13 +66,13 @@ int procesarSolicitudDeEsi(t_operacion * op, int socket_solicitante) {
 //	log_info(logger_coordinador, "procesando solicitud: %s %s %s de ESI socket# %d"
 //			, tipoMensajeNombre[op->tipo], clave, op->valor, socket);
 
-	if (op->tipo == op_GET) {
+	if (op->opHeader->tipo == op_GET) {
 //		log_debug(logger_coordinador, tipoMensajeNombre[op_GET]);
 		return pedirle_al_planif_que_bloquee_clave(op);
 
 	} else {
 		fila_tabla_instancias * instancia;
-		if (op->tipo == op_SET)
+		if (op->opHeader->tipo == op_SET)
 			instancia = seleccionar_instancia(clave);
 		else
 			buscar_instancia_por_valor_criterio(op->valor, &instancia, &criterio_clave);

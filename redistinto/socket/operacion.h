@@ -12,15 +12,13 @@ typedef struct {
 	int largo_clave;
 	int largo_valor;
 	enum tipoOperacion tipo;
-	char* clave;
-	char* valor;
-} __attribute__((packed)) t_operacion;
+} __attribute__((packed)) OperacionHeader;
 
 typedef struct {
-	int largo_clave;
-	int largo_valor;
-	enum tipoOperacion tipo;
-} __attribute__((packed)) OperacionHeader;
+	OperacionHeader *opHeader;
+	char* clave;
+	char* valor;
+} t_operacion;
 
 void free_operacion(t_operacion ** operacion);
 
