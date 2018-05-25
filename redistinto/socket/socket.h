@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <commons/collections/list.h>
 #include <pthread.h>
+#include <signal.h>
 #include "common.h"
 
 //Defines
@@ -21,6 +22,11 @@
 #define ERROR_DE_CONEXION -10
 #define ERROR_DE_ENVIO -11
 #define ERROR_DE_RECEPCION -12
+
+//Quizá estos dos deberían ir en operación.h, por ahora acá para no mezclar mensajes de error
+#define CLAVE_DUPLICADA -13
+#define CLAVE_INEXISTENTE -14
+#define CLAVE_MUY_GRANDE -15
 
 #define socket_OK 0
 

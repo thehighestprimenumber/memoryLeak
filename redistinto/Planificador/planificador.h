@@ -115,8 +115,13 @@ int manejar_nueva_esi_fifo(int socket); //Añade una esi a la lista de prioridad
 int manejar_mensaje_esi_fifo(int socket, Message *msg); //Se encarga de manejar el dato de la ESI y replanificar al respecto
 void manejar_desconexion_esi_fifo(int socket); //Elimina a la esi segun plantea fifo
 int estimar_rafaga(char* algoritmo); //Estima la duración de la próxima ráfaga usando formula de la media exponencial
-void aceptar_conexion(socket);
+void aceptar_conexion(int socket);
+int validar_clave(char* clave);
+int manejar_operacion(int socket,Message* msg);
 void finalizar_esi(int socket_esi);
-
+int validar_operacion_get(t_operacion* op);
+int validar_operacion_set(t_operacion* op);
+int validar_operacion_store(t_operacion* op);
+void kill_esi();
 
 #endif /* PRUEBA_H_ */

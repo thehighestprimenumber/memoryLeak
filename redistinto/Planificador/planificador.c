@@ -129,7 +129,23 @@ int manejador_de_eventos(int socket, Message* msg){
 				return 0;
 		}//fin del switch
 	}else if(msg->header->remitente == COORDINADOR){
-		//No se que mensajes manda el coordinador...
+		log_info(log_planificador, "Me hablo el Coordinador");
+		switch(msg->header->tipo_mensaje){
+			case VALIDAR_BLOQUEO:
+				log_info(log_planificador, "Me pidió validar un get o un set");
+
+				//Aca diferenció que operación me pide verificar el coordinador
+				//y actuo según el caso
+				int resultado_operacion = manejar_operacion(socket,msg);
+				free(msg);
+
+				//Por ahora es texto, en un futuro alguna estructura mas compleja
+				return resultado_operacion;
+				break;
+			default:
+				//fuck
+			return 0;
+		}//fin del switch
 	}else if(msg->header->remitente == DESCONOCIDO){
 		log_info(log_planificador, "Ocurrio algo con alguien pero no se quien");
 	}
@@ -433,4 +449,46 @@ void manejar_desconexion_esi_fifo(int socket){
 		if (res_ejecutar < 0) {exit_proceso(-1);}
 
 	}
+}
+
+int manejar_operacion(int socket,Message* msg) {
+	t_operacion* operacion = desempaquetar_operacion(msg);
+
+	if (operacion->opHeader->largo_clave > 40)
+	{
+		kill(esiRunning,SIGTERM);
+		return CLAVE_MUY_GRANDE;
+	}
+
+	if (operacion->opHeader->tipo == op_GET) {
+		return validar_operacion_get(operacion);
+	}
+	else if (operacion->opHeader->tipo == op_SET) {
+		return validar_operacion_set(operacion);
+	}
+	else if (operacion->opHeader->tipo == op_STORE) {
+		return validar_operacion_store(operacion);
+	}
+	else
+	{
+		//esto no debería pasar nunca
+		exit_proceso(-1);
+	}
+
+	return OK;
+}
+
+int validar_operacion_get(t_operacion* operacion) {
+	char* clave = operacion->clave;
+	return OK;
+}
+
+int validar_operacion_set(t_operacion* operacion) {
+	char* clave = operacion->clave;
+	return OK;
+}
+
+int validar_operacion_store(t_operacion* operacion) {
+	char* clave = operacion->clave;
+	return OK;
 }
