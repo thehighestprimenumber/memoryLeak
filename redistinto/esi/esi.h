@@ -11,7 +11,8 @@
 #include <commons/log.h>
 #include "../socket/socket.h"
 #include <stdlib.h>
-#include "parser.h"
+#include "../socket/operacion.h"
+#include "../parsi/src/parsi/parser.h"
 
 t_log * log_esi;
 
@@ -36,6 +37,7 @@ typedef struct {
 char* leer_propiedad_string (t_config *configuracion, char* propiedad);
 int conectar_a_planificador(esi_configuracion* pConfig);
 int conectar_a_coordinador(esi_configuracion* pConfig);
-int interpretar(int argc, char **argv);
+t_operacion* convertir_operacion(t_esi_operacion operacionOriginal);
+void* enviar_operacion_a_coordinador(char * linea);
 
 #endif

@@ -24,12 +24,6 @@ int main(int argc,char *argv[]) {
 	log_trace(log_esi,"El puerto del planificador es: %s",pConfig->planificador_puerto);
 	log_trace(log_esi,"La ip del planificador es: %s",pConfig->planificador_ip);
 
-	log_info(log_esi,"Inicia el proceso ESI\n");
-	log_info(log_esi,"El puerto del coordinador es: %s\n",pConfig->coordinador_puerto);
-	log_info(log_esi,"La ip del coordinador es: %s\n",pConfig->coordinador_ip);
-	log_info(log_esi,"El puerto del plnificador es: %s\n",pConfig->planificador_puerto);
-	log_info(log_esi,"La ip del planificador es: %s\n",pConfig->planificador_ip);
-
 	pidplanificador = pthread_create(&threadPlanificador, NULL, (void*)&conectar_a_planificador, (void*) pConfig);
 	if (pidplanificador < 0) {
 			log_error(log_esi,"Error al intentar conectar al planificador");
@@ -44,12 +38,6 @@ int main(int argc,char *argv[]) {
 
 	pthread_join(threadPlanificador,NULL);
 	pthread_join(threadCoordinador,NULL);
-
-	// Nos conectamos y pedimos handshake al planificador, este nos asigna un identificador
-	//conectar_a_planificador(pConfig);
-
-	// Nos conectamos y pedimos handshake al coordinador
-	//conectar_a_coordinador(pConfig);
 
 	return EXIT_SUCCESS;
 }
@@ -111,9 +99,9 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 
 int conectar_a_coordinador(esi_configuracion* pConfig) {
 
-	int resultado = connect_to_server(pConfig->coordinador_ip,pConfig->coordinador_puerto);
+	cliente_coordinador = connect_to_server(pConfig->coordinador_ip,pConfig->coordinador_puerto);
 	//Verifico conexion con el coordinador
-	if (resultado == -1) {
+	if (cliente_coordinador == -1) {
 		log_error(log_esi, "Fallo conexion con el Coordinador");
 		exit(EXIT_FAILURE);
 	} else {
@@ -131,12 +119,12 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 	msg->header->size = strlen(msg->contenido) + 1;
 
 
-	if (send_msg(resultado, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
+	if (send_msg(cliente_coordinador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
 	log_debug(log_esi, "Se envio el mensaje");
 	while (1) {
 		Message msg;
 		log_debug(log_esi, "esperando mensaje");
-		int result = await_msg(resultado, &msg);
+		int result = await_msg(cliente_coordinador, &msg);
 		log_debug(log_esi, "llego un mensaje. parseando...");
 		if (result<0){
 			log_debug(log_esi, "error de recepcion");
@@ -152,47 +140,54 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 	}
 }
 
-int interpretar(int argc, char **argv){
-    FILE * fp;
-    char * line = NULL;
-    size_t len = 0;
-    ssize_t read;
+t_operacion* convertir_operacion(t_esi_operacion operacionOriginal){
 
-    fp = fopen(argv[1], "r");
-    if (fp == NULL){
-        perror("Error al abrir el archivo: ");
-        exit(EXIT_FAILURE);
-    }
+	t_operacion* operacionNueva = (t_operacion*) malloc(sizeof(t_operacion));
 
-    while ((read = getline(&line, &len, fp)) != -1) {
-        t_esi_operacion parsed = parse(line);
+	switch(operacionOriginal.keyword){
+	case GET:
+		operacionNueva->opHeader->tipo = op_GET;
+		operacionNueva->clave = calloc(1, strlen(operacionNueva->clave)+1);
+		memcpy(operacionNueva->clave, operacionOriginal.argumentos.GET.clave, strlen(operacionOriginal.argumentos.GET.clave));
+		operacionNueva->opHeader->largo_clave = strlen(operacionNueva->clave)+1;
+		break;
+	case SET:
+		operacionNueva->opHeader->tipo = op_SET;
+		operacionNueva->clave = calloc(1, strlen(operacionNueva->clave)+1);
+		memcpy(operacionNueva->clave, operacionOriginal.argumentos.SET.clave, strlen(operacionOriginal.argumentos.SET.clave));
+		operacionNueva->opHeader->largo_clave = strlen(operacionNueva->clave)+1;
+		operacionNueva->valor = calloc(1, strlen(operacionNueva->valor)+1);
+		strcpy(operacionNueva->valor, operacionOriginal.argumentos.SET.valor);
+		operacionNueva->opHeader->largo_valor=strlen(operacionNueva->valor)+1;
+		break;
+	case STORE:
+		operacionNueva->opHeader->tipo = op_STORE;
+		operacionNueva->clave = calloc(1, strlen(operacionNueva->clave)+1);
+		memcpy(operacionNueva->clave, operacionOriginal.argumentos.STORE.clave, strlen(operacionOriginal.argumentos.STORE.clave));
+		operacionNueva->opHeader->largo_clave = strlen(operacionNueva->clave)+1;
+		break;
+	default:
+		log_error(log_esi, "Error al convertir la operacion solicitada.");
+	}
 
-        if(parsed.valido){
-            switch(parsed.keyword){
-                case GET:
-                    printf("GET\tclave: <%s>\n", parsed.argumentos.GET.clave);
-                    break;
-                case SET:
-                    printf("SET\tclave: <%s>\tvalor: <%s>\n", parsed.argumentos.SET.clave, parsed.argumentos.SET.valor);
-                    break;
-                case STORE:
-                    printf("STORE\tclave: <%s>\n", parsed.argumentos.STORE.clave);
-                    break;
-                default:
-                    fprintf(stderr, "No pude interpretar <%s>\n", line);
-                    exit(EXIT_FAILURE);
-            }
+	return operacionNueva;
 
-            destruir_operacion(parsed);
-        } else {
-            fprintf(stderr, "La linea <%s> no es valida\n", line);
-            exit(EXIT_FAILURE);
-        }
-    }
+}
 
-    fclose(fp);
-    if (line)
-        free(line);
+void* enviar_operacion_a_coordinador(char * linea){
 
-    return EXIT_SUCCESS;
+	t_operacion* operacion = convertir_operacion(parse(linea));
+	Message * msg = empaquetar_op_en_mensaje(operacion, ESI);
+
+	int res = send_msg(cliente_coordinador, *msg);
+	if (res < 0) return ERROR_DE_ENVIO;
+
+	while (1) {
+		Message *rta;
+		int resultado = await_msg(cliente_coordinador, rta);
+		free_msg(&rta);
+		if (resultado < 0){
+			return ERROR_DE_RECEPCION;
+		}
+	}
 }
