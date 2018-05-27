@@ -26,7 +26,8 @@ typedef struct {
 
 typedef struct {
 	ArchivoHeader *archHeader;
-	FILE* script;
+	char* nombreArchivo;
+	/*FILE* script;*/
 } t_archivo;
 
 void free_operacion(t_operacion ** operacion);

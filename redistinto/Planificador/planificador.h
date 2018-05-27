@@ -85,8 +85,8 @@ int identificador;
 char* configTxt = "./configPlanificador.txt";
 char* configTxtDebug = "../configPlanificador.txt";
 
-char* scriptTxt = "./script_a_parsear.txt";
-char* scriptTxtDebug = "../script_a_parsear.txt";
+char* scriptTxt = "./script_a_parsear.txt\0";
+char* scriptTxtDebug = "../script_a_parsear.txt\0";
 
 algorimoPrioridad algorimoEnUso;
 

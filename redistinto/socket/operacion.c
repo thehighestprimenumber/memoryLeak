@@ -17,8 +17,10 @@ void free_operacion(t_operacion ** operacion) {
 
 void free_archivo(t_archivo ** archivo) {
 	if (archivo != NULL && (*archivo) != NULL) {
-		if ((*archivo)->script != NULL)
-			txt_close_file((*archivo)->script);
+		//if ((*archivo)->script != NULL)
+		//	txt_close_file((*archivo)->script);
+		if ((*archivo)->nombreArchivo != NULL)
+			free((*archivo)->nombreArchivo);
 		free(*archivo);
 	}
 }
@@ -69,7 +71,8 @@ Message* empaquetar_arch_en_mensaje(t_archivo* arch, tipoRemitente remitente) {
 	//Preparo el contenido del mensaje
 	msg->contenido = malloc(msg->header->size);
 	memcpy(msg->contenido, arch->archHeader, sizeof(ArchivoHeader));
-	memcpy(msg->contenido + sizeof(ArchivoHeader), arch->script, arch->archHeader->tamanio_archivo);
+	memcpy(msg->contenido + sizeof(ArchivoHeader), arch->nombreArchivo, arch->archHeader->tamanio_archivo);
+	//memcpy(msg->contenido + sizeof(ArchivoHeader), arch->script, arch->archHeader->tamanio_archivo);
 
 	return msg;
 
@@ -110,10 +113,12 @@ t_archivo* desempaquetar_archivo(Message* msg) {
 	memcpy(archivo->archHeader, msg->contenido, sizeof(ArchivoHeader));
 
 	//Reservamos el espacio necesario para el archivo
-	archivo->script = malloc(archivo->archHeader->tamanio_archivo);
+	archivo->nombreArchivo = malloc(archivo->archHeader->tamanio_archivo);
+	//archivo->script = malloc(archivo->archHeader->tamanio_archivo);
 
 	//Copiamos el archivo en el contenido del mensaje
-	memcpy(archivo->script, msg->contenido + sizeof(ArchivoHeader), archivo->archHeader->tamanio_archivo);
+	memcpy(archivo->nombreArchivo, msg->contenido + sizeof(ArchivoHeader), archivo->archHeader->tamanio_archivo);
+	//memcpy(archivo->script, msg->contenido + sizeof(ArchivoHeader), archivo->archHeader->tamanio_archivo);
 
 	return archivo;
 }

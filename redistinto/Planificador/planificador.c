@@ -22,7 +22,15 @@ int main(void) {
 	script_a_procesar = txt_open_for_append(scriptTxt);
 
 	if (script_a_procesar == NULL)
-		script_a_procesar =txt_open_for_append(scriptTxtDebug);
+	{
+		scriptTxt = scriptTxtDebug;
+	}
+	else
+	{
+		txt_close_file(script_a_procesar);
+	}
+
+	//script_a_procesar =txt_open_for_append(scriptTxtDebug);
 
 	//conectar a coordinador
 	t_planificador* pConfig = (t_planificador*)&planificador;
@@ -308,9 +316,9 @@ void aceptar_conexion(int socket) {
 }
 
 void agregar_ready(int idEsi) {
-	struct_ready elemento;
-	elemento.pid = idEsi;
-	list_add(cola_blocked,&elemento);
+	struct_ready* elemento = malloc(sizeof(struct_ready));
+	elemento->pid = idEsi;
+	list_add(cola_ready,elemento);
 	log_debug(log_planificador,"\nSe agrego el esi %d, a la lista de listos",idEsi);
 }
 
@@ -344,7 +352,7 @@ struct_ready* seleccionar_esi_ready_fifo() {
 
 	//Si hay esis esperando, selecciona al primero de la lista
 	if (list_size(cola_ready) > 0) {
-		esi_seleccionado = (struct_ready*)list_get(cola_ready, 0);
+		esi_seleccionado = list_get(cola_ready, 0);
 		return esi_seleccionado;
 	}
 
@@ -355,7 +363,7 @@ struct_ready* seleccionar_esi_ready_fifo() {
 int planificar_esis() {
 	int esiSeleccionado = 0;
 
-	if (strcmp(planificador.algoritmo_planif,"FIFO")) {
+	if (strcmp(planificador.algoritmo_planif,"FIFO") == 0) {
 		struct_ready* primer_esi = seleccionar_esi_ready_fifo();
 		if (primer_esi != NULL){
 			//Obtengo el seleccionado para enviar un mensaje, y me lo guardo en variable
@@ -364,15 +372,15 @@ int planificar_esis() {
 			esiRunning = esiSeleccionado;
 		}
 	}
-	else if (strcmp(planificador.algoritmo_planif,"SJF-SD")) {
+	else if (strcmp(planificador.algoritmo_planif,"SJF-SD") == 0) {
 
 	}
 
-	else if (strcmp(planificador.algoritmo_planif,"SJF-CD")) {
+	else if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0) {
 
 	}
 
-	else if (strcmp(planificador.algoritmo_planif,"HRRN")) {
+	else if (strcmp(planificador.algoritmo_planif,"HRRN") == 0) {
 
 	}
 
@@ -518,18 +526,39 @@ void ejecutar_nueva_esi() {
 	if (esi_seleccionado > 0) {
 	//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 	//y comenzar a procesar instrucciones
-	t_archivo* archivo = malloc(sizeof(t_archivo));
+
+	//INTENTO EMPAQUETANDO ARCHIVOHEADER
+	/*t_archivo* archivo = malloc(sizeof(t_archivo));
 	archivo->archHeader = malloc(sizeof(ArchivoHeader));
-	archivo->archHeader->tamanio_archivo = sizeof(script_a_procesar);
-	archivo->script = malloc(archivo->archHeader->tamanio_archivo);
-	memcpy(archivo->script, script_a_procesar + sizeof(ArchivoHeader), archivo->archHeader->tamanio_archivo);
+
+	memcpy(archivo->archHeader, scriptTxt, sizeof(ArchivoHeader));
+
+	archivo->archHeader->tamanio_archivo = strlen(scriptTxt) + 1;
+	//archivo->archHeader->tamanio_archivo = sizeof(script_a_procesar);
+	archivo->nombreArchivo = (char*)malloc(archivo->archHeader->tamanio_archivo);
+	memcpy(archivo->nombreArchivo, scriptTxt, archivo->archHeader->tamanio_archivo);*/
+	//Message* mensajeEjec = empaquetar_arch_en_mensaje(archivo,PLANIFICADOR);
+
+	//INTENTO MANDAR FILE*
+	//archivo->script = malloc(archivo->archHeader->tamanio_archivo);
+	//memcpy(archivo->script, script_a_procesar + sizeof(ArchivoHeader), archivo->archHeader->tamanio_archivo);
 	//script_a_procesar
 
-	Message* mensajeEjec = empaquetar_arch_en_mensaje(archivo,PLANIFICADOR);
+
+
+	//Lo mando como msj básico
+	Message* mensajeEjec= (Message*) malloc(sizeof(Message));
+	mensajeEjec->contenido = (char*) malloc(strlen(scriptTxt) +1);
+	strcpy(mensajeEjec->contenido,scriptTxt);
+	mensajeEjec->header = (ContentHeader*) malloc(sizeof(ContentHeader));
+	mensajeEjec->header->remitente = PLANIFICADOR;
+	mensajeEjec->header->tipo_mensaje = EJECUTAR;
+	mensajeEjec->header->size = strlen(mensajeEjec->contenido)+1;
+
 	int res_ejecutar = enviar_mensaje(esi_seleccionado, *mensajeEjec);
 	free(mensajeEjec);
 	if (res_ejecutar < 0) {exit_proceso(-1);}
-		free_archivo(archivo);
+	//free_archivo(&archivo);
 	}
 }
 
