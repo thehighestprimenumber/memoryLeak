@@ -69,6 +69,7 @@ t_list* cola_ready;
 t_list* cola_blocked;
 t_list* cola_finished;
 
+t_list* cola_esi_blocked;
 
 t_planificador planificador;
 
@@ -84,6 +85,8 @@ int identificador;
 char* configTxt = "./configPlanificador.txt";
 char* configTxtDebug = "../configPlanificador.txt";
 algorimoPrioridad algorimoEnUso;
+
+t_operacion* operacionEnMemoria;
 
 void inicializar_logger();
 void exit_proceso();
@@ -119,9 +122,14 @@ void aceptar_conexion(int socket);
 int validar_clave(char* clave);
 int manejar_operacion(int socket,Message* msg);
 void finalizar_esi(int socket_esi);
-int validar_operacion_get(t_operacion* op);
-int validar_operacion_set(t_operacion* op);
-int validar_operacion_store(t_operacion* op);
+int validar_operacion_get();
+int validar_operacion_set();
+int validar_operacion_store();
+void ejecutar_nueva_esi();
 void kill_esi();
+
+bool clave_ya_bloqueada_config(char*clave1);
+bool clave_ya_bloqueada(struct_blocked elemento);
+bool clave_set_disponible(struct_blocked elemento);
 
 #endif /* PRUEBA_H_ */

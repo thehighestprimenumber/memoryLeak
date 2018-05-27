@@ -316,6 +316,15 @@ void agregar_blocked(int idEsi, char* clave) {
 	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de bloqueados",idEsi,clave);
 }
 
+void agregar_esi_blocked(int idEsi, char* clave) {
+	struct_blocked elemento;
+	elemento.pid = idEsi;
+	elemento.clave = (char*)malloc(strlen(clave)+1);
+	strcpy(elemento.clave,clave);
+	list_add(cola_esi_blocked,&elemento);
+	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de esis bloqueados por clave tomada anteriormente",idEsi,clave);
+}
+
 void agregar_finished(int idEsi) {
 	struct_finished elemento;
 	elemento.pid = idEsi;
@@ -419,8 +428,6 @@ int manejar_nueva_esi_fifo(int socket){
 int manejar_mensaje_esi_fifo(int socket, Message *msg){return 0;}
 
 void manejar_desconexion_esi_fifo(int socket){
-	int esi_seleccionado = 0;
-
 	//Le confirmo al esi que se puede desconectar
 	Message* mensaje = empaquetar_texto("Planificador recibió notificación de desconexión\0", strlen("Planificador recibió notificación de desconexión\0"), PLANIFICADOR);
 	mensaje->header->tipo_mensaje = ACK;
@@ -436,59 +443,104 @@ void manejar_desconexion_esi_fifo(int socket){
 
 	finalizar_esi(socket);
 
-	esi_seleccionado = planificar_esis();
-
-	if (esi_seleccionado > 0) {
-		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
-		//y comenzar a procesar instrucciones
-/**********************USAR UN TIPO DE OPERACION ESPECIFICO *************************/
-		Message* mensajeEjec = empaquetar_texto("El planificador ordena ejecutar a este esi\0", strlen("El planificador ordena ejecutar a este esi\0"), PLANIFICADOR);
-		mensajeEjec->header->tipo_mensaje = EJECUTAR;
-		int res_ejecutar = enviar_mensaje(esi_seleccionado, *mensajeEjec);
-		free(mensajeEjec);
-		if (res_ejecutar < 0) {exit_proceso(-1);}
-
-	}
+	ejecutar_nueva_esi();
 }
 
 int manejar_operacion(int socket,Message* msg) {
-	t_operacion* operacion = desempaquetar_operacion(msg);
+	operacionEnMemoria = desempaquetar_operacion(msg);
 
-	if (operacion->opHeader->largo_clave > 40)
+	if (operacionEnMemoria->opHeader->largo_clave > 40)
 	{
 		kill(esiRunning,SIGTERM);
+		free_operacion(&operacionEnMemoria);
+		ejecutar_nueva_esi();
 		return CLAVE_MUY_GRANDE;
 	}
 
-	if (operacion->opHeader->tipo == op_GET) {
-		return validar_operacion_get(operacion);
+	if (operacionEnMemoria->opHeader->tipo == op_GET) {
+		return validar_operacion_get();
 	}
-	else if (operacion->opHeader->tipo == op_SET) {
-		return validar_operacion_set(operacion);
+	else if (operacionEnMemoria->opHeader->tipo == op_SET) {
+		return validar_operacion_set();
 	}
-	else if (operacion->opHeader->tipo == op_STORE) {
-		return validar_operacion_store(operacion);
+	else if (operacionEnMemoria->opHeader->tipo == op_STORE) {
+		return validar_operacion_store();
 	}
 	else
 	{
 		//esto no debería pasar nunca
+		free_operacion(&operacionEnMemoria);
 		exit_proceso(-1);
 	}
 
 	return OK;
 }
 
-int validar_operacion_get(t_operacion* operacion) {
-	char* clave = operacion->clave;
+int validar_operacion_get() {
+	if (list_any_satisfy(planificador.clavesBloqueadas, ((void*) clave_ya_bloqueada_config)))
+	{
+		agregar_esi_blocked(esiRunning, operacionEnMemoria->clave);
+		free_operacion(&operacionEnMemoria);
+		return CLAVE_DUPLICADA;
+	}
+	else
+	{
+		if (list_any_satisfy(cola_blocked, (void*) clave_ya_bloqueada))
+		{
+			agregar_esi_blocked(esiRunning, operacionEnMemoria->clave);
+			free_operacion(&operacionEnMemoria);
+			return CLAVE_DUPLICADA;
+		}
+	}
+
+	//Si la clave no está tomada, la agrego a lista de bloqueados
+	agregar_blocked(esiRunning, operacionEnMemoria->clave);
+	free_operacion(&operacionEnMemoria);
 	return OK;
 }
 
-int validar_operacion_set(t_operacion* operacion) {
-	char* clave = operacion->clave;
+int validar_operacion_set() {
+	if (!list_any_satisfy(cola_blocked, ((void*) clave_set_disponible)))
+	{
+		kill(esiRunning,SIGTERM);
+		free_operacion(&operacionEnMemoria);
+		return CLAVE_MUY_GRANDE;
+	}
+
+	//Si puede tomar la clave sin problemas, simplemente retorna ok
+	free_operacion(&operacionEnMemoria);
 	return OK;
 }
 
-int validar_operacion_store(t_operacion* operacion) {
-	char* clave = operacion->clave;
+int validar_operacion_store() {
+	free_operacion(&operacionEnMemoria);
 	return OK;
+}
+
+void ejecutar_nueva_esi() {
+	int esi_seleccionado = planificar_esis();
+
+	if (esi_seleccionado > 0) {
+	//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
+	//y comenzar a procesar instrucciones
+	/**********************USAR UN TIPO DE OPERACION ESPECIFICO *************************/
+	Message* mensajeEjec = empaquetar_texto("El planificador ordena ejecutar a este esi\0", strlen("El planificador ordena ejecutar a este esi\0"), PLANIFICADOR);
+	mensajeEjec->header->tipo_mensaje = EJECUTAR;
+	int res_ejecutar = enviar_mensaje(esi_seleccionado, *mensajeEjec);
+	free(mensajeEjec);
+	if (res_ejecutar < 0) {exit_proceso(-1);}
+
+	}
+}
+
+bool clave_ya_bloqueada_config(char* clave) {
+	return (strcmp(operacionEnMemoria->clave,clave) == 0);
+}
+
+bool clave_ya_bloqueada(struct_blocked elemento) {
+	return (strcmp(operacionEnMemoria->clave,elemento.clave) == 0);
+}
+
+bool clave_set_disponible(struct_blocked elemento) {
+	return (strcmp(operacionEnMemoria->clave,elemento.clave) == 0 && (elemento.pid == esiRunning));
 }
