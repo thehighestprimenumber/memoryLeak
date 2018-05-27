@@ -1,0 +1,2 @@
+GET clave_1
+SET clave_1 1234 

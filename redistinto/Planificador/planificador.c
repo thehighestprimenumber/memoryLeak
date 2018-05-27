@@ -18,6 +18,12 @@ int main(void) {
 	cola_blocked = list_create();
 	cola_finished = list_create();
 
+	//Abrir archivo para los esis
+	script_a_procesar = txt_open_for_append(scriptTxt);
+
+	if (script_a_procesar == NULL)
+		script_a_procesar =txt_open_for_append(scriptTxtDebug);
+
 	//conectar a coordinador
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	int socketCoordinador = conectar_a_coordinador(pConfig);
@@ -40,6 +46,7 @@ int main(void) {
 
 	log_info(log_planificador,"\nProceso finalizado");
 	list_destroy(planificador.clavesBloqueadas);
+	txt_close_file(script_a_procesar);
 
 	exit_proceso(0);
 }
@@ -400,8 +407,6 @@ void liberar_split(char** array){
 
 //Funciones dummy para que corra provisionalmente
 int manejar_nueva_esi_fifo(int socket){
-	int esi_seleccionado = 0;
-	int msg_envio;
 
 	//Agrego la nueva conexión a lista de preparados
 	agregar_ready(socket);
@@ -409,17 +414,7 @@ int manejar_nueva_esi_fifo(int socket){
 	//Verifico si algún esi está corriendo, caso contrario
 	//envio un esi a ejecutarse según el algorimto seleccionado
 	if (esiRunning == 0) {
-		esi_seleccionado = planificar_esis();
-		if (esi_seleccionado > 0) {
-			//Envío mensaje para pedirle al esi que ejecute
-			//DESPUES SEGURAMENTE CAMBIAR PARA QUE LE ENVIE UNA INSTRUCCION A PARSEAR
-			Message* mensaje = empaquetar_texto("El planificador ordena ejecutar a este esi\0", strlen("El planificador ordena ejecutar a este esi\0"), PLANIFICADOR);
-			mensaje->header->tipo_mensaje = EJECUTAR;
-			msg_envio = enviar_mensaje(esi_seleccionado, *mensaje);
-			free(mensaje);
-
-			if (msg_envio < 0 ) return ERROR_DE_ENVIO;
-		}
+		ejecutar_nueva_esi();
 	}
 
 	return OK;
@@ -523,13 +518,18 @@ void ejecutar_nueva_esi() {
 	if (esi_seleccionado > 0) {
 	//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 	//y comenzar a procesar instrucciones
-	/**********************USAR UN TIPO DE OPERACION ESPECIFICO *************************/
-	Message* mensajeEjec = empaquetar_texto("El planificador ordena ejecutar a este esi\0", strlen("El planificador ordena ejecutar a este esi\0"), PLANIFICADOR);
-	mensajeEjec->header->tipo_mensaje = EJECUTAR;
+	t_archivo* archivo = malloc(sizeof(t_archivo));
+	archivo->archHeader = malloc(sizeof(ArchivoHeader));
+	archivo->archHeader->tamanio_archivo = sizeof(script_a_procesar);
+	archivo->script = malloc(archivo->archHeader->tamanio_archivo);
+	memcpy(archivo->script, script_a_procesar + sizeof(ArchivoHeader), archivo->archHeader->tamanio_archivo);
+	//script_a_procesar
+
+	Message* mensajeEjec = empaquetar_arch_en_mensaje(archivo,PLANIFICADOR);
 	int res_ejecutar = enviar_mensaje(esi_seleccionado, *mensajeEjec);
 	free(mensajeEjec);
 	if (res_ejecutar < 0) {exit_proceso(-1);}
-
+		free_archivo(archivo);
 	}
 }
 

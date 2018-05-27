@@ -84,9 +84,15 @@ int identificador;
 
 char* configTxt = "./configPlanificador.txt";
 char* configTxtDebug = "../configPlanificador.txt";
+
+char* scriptTxt = "./script_a_parsear.txt";
+char* scriptTxtDebug = "../script_a_parsear.txt";
+
 algorimoPrioridad algorimoEnUso;
 
 t_operacion* operacionEnMemoria;
+
+FILE* script_a_procesar;
 
 void inicializar_logger();
 void exit_proceso();
