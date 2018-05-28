@@ -516,6 +516,15 @@ int validar_operacion_set() {
 }
 
 int validar_operacion_store() {
+	//Si está entre las claves bloqueadas por config lo libero
+	list_remove_by_condition(planificador.clavesBloqueadas, ((void*) clave_ya_bloqueada_config));
+
+	//quito la clave con el respectivo esi que la tenía bloqueada
+	list_remove_by_condition(cola_blocked, ((void*) clave_set_disponible));
+
+	//Desbloqueo al primer esi que tuviera la clave tomada
+	desbloquear_esi();
+
 	free_operacion(&operacionEnMemoria);
 	return OK;
 }
@@ -572,4 +581,14 @@ bool clave_ya_bloqueada(struct_blocked elemento) {
 
 bool clave_set_disponible(struct_blocked elemento) {
 	return (strcmp(operacionEnMemoria->clave,elemento.clave) == 0 && (elemento.pid == esiRunning));
+}
+
+void desbloquear_esi() {
+	struct_blocked* esi_a_desbloquear;
+	esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)clave_ya_bloqueada);
+	if (esi_a_desbloquear != NULL)
+	{
+		list_remove_by_condition(cola_esi_blocked, ((void*) clave_set_disponible));
+		agregar_ready(esi_a_desbloquear->pid);
+	}
 }
