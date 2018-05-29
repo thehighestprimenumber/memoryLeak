@@ -18,19 +18,7 @@ int main(void) {
 	cola_blocked = list_create();
 	cola_finished = list_create();
 
-	//Abrir archivo para los esis
-	script_a_procesar = txt_open_for_append(scriptTxt);
-
-	if (script_a_procesar == NULL)
-	{
-		scriptTxt = scriptTxtDebug;
-	}
-	else
-	{
-		txt_close_file(script_a_procesar);
-	}
-
-	//script_a_procesar =txt_open_for_append(scriptTxtDebug);
+	leer_script_completo();
 
 	//conectar a coordinador
 	t_planificador* pConfig = (t_planificador*)&planificador;
@@ -54,13 +42,38 @@ int main(void) {
 
 	log_info(log_planificador,"\nProceso finalizado");
 	list_destroy(planificador.clavesBloqueadas);
-	txt_close_file(script_a_procesar);
 
 	exit_proceso(0);
 }
 
 void inicializar_logger() {
 	log_planificador = log_create("/home/utnso/tp/Planificador.log", "Planificador: ", true, LOG_LEVEL_INFO);
+}
+
+void leer_script_completo() {
+	//Abrir archivo para los esis
+	//script_a_procesar = txt_open_for_append(scriptTxt);
+	//if (script_a_procesar == NULL)
+	//	script_a_procesar = txt_open_for_append(scriptTxtDebug);
+	script_a_procesar = fopen(scriptTxt, "r");
+
+	if (script_a_procesar == NULL)
+		script_a_procesar = fopen(scriptTxtDebug, "r");
+
+	//Guardar contenido completo del string
+	fseek(script_a_procesar,0,SEEK_END);
+	long fsize = ftell(script_a_procesar);
+	fseek(script_a_procesar,0,SEEK_SET);
+
+	contenidoScript= malloc(fsize + 1);
+	fread(contenidoScript, fsize, 1, script_a_procesar);
+
+	//Cerrar script
+	txt_close_file(script_a_procesar);
+
+	contenidoScript[fsize] = 0;
+
+	log_debug(log_planificador,"\nPrueba: %s",contenidoScript);
 }
 
 int iniciar(int socketCoordinador){
@@ -556,13 +569,16 @@ void ejecutar_nueva_esi() {
 
 
 	//Lo mando como msj básico
-	Message* mensajeEjec= (Message*) malloc(sizeof(Message));
-	mensajeEjec->contenido = (char*) malloc(strlen(scriptTxt) +1);
-	strcpy(mensajeEjec->contenido,scriptTxt);
-	mensajeEjec->header = (ContentHeader*) malloc(sizeof(ContentHeader));
-	mensajeEjec->header->remitente = PLANIFICADOR;
+	Message* mensajeEjec = empaquetar_texto(contenidoScript, strlen(contenidoScript), PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
-	mensajeEjec->header->size = strlen(mensajeEjec->contenido)+1;
+
+	//Message* mensajeEjec= (Message*) malloc(sizeof(Message));
+	//mensajeEjec->contenido = (char*) malloc(strlen(contenidoScript) +1);
+	//strcpy(mensajeEjec->contenido,contenidoScript);
+	//mensajeEjec->header = (ContentHeader*) malloc(sizeof(ContentHeader));
+	//mensajeEjec->header->remitente = PLANIFICADOR;
+	//mensajeEjec->header->tipo_mensaje = EJECUTAR;
+	//mensajeEjec->header->size = strlen(mensajeEjec->contenido)+1;
 
 	int res_ejecutar = enviar_mensaje(esi_seleccionado, *mensajeEjec);
 	free(mensajeEjec);

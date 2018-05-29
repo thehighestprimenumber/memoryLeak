@@ -88,6 +88,8 @@ char* configTxtDebug = "../configPlanificador.txt";
 char* scriptTxt = "./script_a_parsear.txt\0";
 char* scriptTxtDebug = "../script_a_parsear.txt\0";
 
+char* contenidoScript;
+
 algorimoPrioridad algorimoEnUso;
 
 t_operacion* operacionEnMemoria;
@@ -99,6 +101,7 @@ void exit_proceso();
 
 void estructura_planificador();
 
+void leer_script_completo();
 void puerto_planif_read(t_config* configuracion);
 void algoritmo_read(t_config* configuracion);
 void estimacion_read(t_config* configuracion);
@@ -132,6 +135,7 @@ int validar_operacion_get();
 int validar_operacion_set();
 int validar_operacion_store();
 void ejecutar_nueva_esi();
+void desbloquear_esi();
 void kill_esi();
 
 bool clave_ya_bloqueada_config(char*clave1);
