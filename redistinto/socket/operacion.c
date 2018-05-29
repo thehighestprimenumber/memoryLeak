@@ -15,16 +15,6 @@ void free_operacion(t_operacion ** operacion) {
 	}
 }
 
-void free_archivo(t_archivo ** archivo) {
-	if (archivo != NULL && (*archivo) != NULL) {
-		//if ((*archivo)->script != NULL)
-		//	txt_close_file((*archivo)->script);
-		if ((*archivo)->nombreArchivo != NULL)
-			free((*archivo)->nombreArchivo);
-		free(*archivo);
-	}
-}
-
 Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente){
 	if (texto == NULL || length < 1)
 		return NULL;
@@ -58,26 +48,6 @@ Message* empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente) {
 
 }
 
-Message* empaquetar_arch_en_mensaje(t_archivo* arch, tipoRemitente remitente) {
-
-	Message *msg = malloc(sizeof(Message));
-
-	//Preparo el ContentHeader
-	msg->header = malloc(sizeof(ContentHeader));
-	msg->header->remitente = remitente;
-	msg->header->tipo_mensaje = EJECUTAR;
-	msg->header->size = sizeof(ArchivoHeader) + arch->archHeader->tamanio_archivo;
-
-	//Preparo el contenido del mensaje
-	msg->contenido = malloc(msg->header->size);
-	memcpy(msg->contenido, arch->archHeader, sizeof(ArchivoHeader));
-	memcpy(msg->contenido + sizeof(ArchivoHeader), arch->nombreArchivo, arch->archHeader->tamanio_archivo);
-	//memcpy(msg->contenido + sizeof(ArchivoHeader), arch->script, arch->archHeader->tamanio_archivo);
-
-	return msg;
-
-}
-
 char* desempaquetar_texto(Message* msg) {
 	if (msg == NULL || msg->header == NULL
 			|| msg->header->size < 1|| msg->contenido == NULL)
@@ -103,24 +73,6 @@ t_operacion* desempaquetar_operacion(Message* msg) {
 	memcpy(operacion->valor, msg->contenido + sizeof(OperacionHeader) + operacion->opHeader->largo_clave, operacion->opHeader->largo_valor);
 
 	return operacion;
-}
-
-t_archivo* desempaquetar_archivo(Message* msg) {
-	t_archivo* archivo = malloc(sizeof(t_archivo));
-
-	//Copiamos el header del archivo desde el contenido del mensaje
-	archivo->archHeader = malloc(sizeof(ArchivoHeader));
-	memcpy(archivo->archHeader, msg->contenido, sizeof(ArchivoHeader));
-
-	//Reservamos el espacio necesario para el archivo
-	archivo->nombreArchivo = malloc(archivo->archHeader->tamanio_archivo);
-	//archivo->script = malloc(archivo->archHeader->tamanio_archivo);
-
-	//Copiamos el archivo en el contenido del mensaje
-	memcpy(archivo->nombreArchivo, msg->contenido + sizeof(ArchivoHeader), archivo->archHeader->tamanio_archivo);
-	//memcpy(archivo->script, msg->contenido + sizeof(ArchivoHeader), archivo->archHeader->tamanio_archivo);
-
-	return archivo;
 }
 
 Message* empaquetar_conexion(tipoRemitente remitente, char* idRemitente) {

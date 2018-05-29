@@ -2,6 +2,8 @@
 #ifndef PLANIFICADOR_H_
 #define PLANIFICADOR_H_
 
+#define NO_USE_FSEEK 0
+
 #define puerto_planificador "puerto"
 #define algoritmo_planificador "algoritmo"
 #define estimacion_planificador "estimacion"
@@ -85,8 +87,8 @@ int identificador;
 char* configTxt = "./configPlanificador.txt";
 char* configTxtDebug = "../configPlanificador.txt";
 
-char* scriptTxt = "./script_a_parsear.txt\0";
-char* scriptTxtDebug = "../script_a_parsear.txt\0";
+char* scriptTxt = "./script_a_parsear.txt";
+char* scriptTxtDebug = "../script_a_parsear.txt";
 
 char* contenidoScript;
 

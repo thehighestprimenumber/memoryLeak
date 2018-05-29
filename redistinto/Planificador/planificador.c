@@ -55,25 +55,33 @@ void leer_script_completo() {
 	//script_a_procesar = txt_open_for_append(scriptTxt);
 	//if (script_a_procesar == NULL)
 	//	script_a_procesar = txt_open_for_append(scriptTxtDebug);
-	script_a_procesar = fopen(scriptTxt, "r");
 
-	if (script_a_procesar == NULL)
-		script_a_procesar = fopen(scriptTxtDebug, "r");
+	FILE *f = fopen(scriptTxtDebug, "rb");
+		if (f == NULL) {
+			f = fopen(scriptTxt, "rb");
+			if (f == NULL) {
+				perror("fopen");
+				exit(EXIT_FAILURE);
+			}
+		}
 
-	//Guardar contenido completo del string
-	fseek(script_a_procesar,0,SEEK_END);
-	long fsize = ftell(script_a_procesar);
-	fseek(script_a_procesar,0,SEEK_SET);
+		fseek(f,0,SEEK_END);
+		long fsize = ftell(f);
+		fseek(f,0,SEEK_SET);
 
-	contenidoScript= malloc(fsize + 1);
-	fread(contenidoScript, fsize, 1, script_a_procesar);
+		contenidoScript = malloc(fsize + 1);
+		if (contenidoScript == NULL) {
+			perror("malloc");
+			exit(EXIT_FAILURE);
+		}
 
-	//Cerrar script
-	txt_close_file(script_a_procesar);
+		fread(contenidoScript, fsize, 1, f);
 
-	contenidoScript[fsize] = 0;
+		fclose(f);
 
-	log_debug(log_planificador,"\nPrueba: %s",contenidoScript);
+		contenidoScript[fsize] = '\0';
+
+	log_info(log_planificador,"\nPrueba: %s",contenidoScript);
 }
 
 int iniciar(int socketCoordinador){
@@ -467,7 +475,7 @@ int manejar_operacion(int socket,Message* msg) {
 
 	if (operacionEnMemoria->opHeader->largo_clave > 40)
 	{
-		kill(esiRunning,SIGTERM);
+		//kill(esiRunning,SIGTERM);
 		free_operacion(&operacionEnMemoria);
 		ejecutar_nueva_esi();
 		return CLAVE_MUY_GRANDE;
@@ -518,7 +526,7 @@ int validar_operacion_get() {
 int validar_operacion_set() {
 	if (!list_any_satisfy(cola_blocked, ((void*) clave_set_disponible)))
 	{
-		kill(esiRunning,SIGTERM);
+		//kill(esiRunning,SIGTERM);
 		free_operacion(&operacionEnMemoria);
 		return CLAVE_MUY_GRANDE;
 	}
@@ -569,7 +577,7 @@ void ejecutar_nueva_esi() {
 
 
 	//Lo mando como msj básico
-	Message* mensajeEjec = empaquetar_texto(contenidoScript, strlen(contenidoScript), PLANIFICADOR);
+	Message* mensajeEjec = empaquetar_texto(contenidoScript, strlen(contenidoScript) + 1, PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
 	//Message* mensajeEjec= (Message*) malloc(sizeof(Message));
