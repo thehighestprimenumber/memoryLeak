@@ -21,6 +21,7 @@ Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remite
 	Message *msg = malloc(sizeof(Message));
 	msg->header = malloc(sizeof(ContentHeader));
 	msg->header->tipo_mensaje = TEXTO;
+	msg->header->remitente = remitente;
 	msg->header->size = length + 1;
 	msg->contenido = malloc(length + 1);
 	memcpy(msg->contenido, texto, length);
