@@ -143,26 +143,31 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 t_operacion* convertir_operacion(t_esi_operacion operacionOriginal){
 
 	t_operacion* operacionNueva = (t_operacion*) malloc(sizeof(t_operacion));
+	operacionNueva->opHeader = malloc(sizeof(OperacionHeader));
 
 	switch(operacionOriginal.keyword){
 	case GET:
 		operacionNueva->opHeader->tipo = op_GET;
-		operacionNueva->clave = calloc(1, strlen(operacionNueva->clave)+1);
+		operacionNueva->clave = calloc(1, strlen(operacionOriginal.argumentos.GET.clave)+1);
 		memcpy(operacionNueva->clave, operacionOriginal.argumentos.GET.clave, strlen(operacionOriginal.argumentos.GET.clave));
 		operacionNueva->opHeader->largo_clave = strlen(operacionNueva->clave)+1;
+		//Asigno valores vacios para que funcione la operacion
+		operacionNueva->valor = calloc(1, 1);
+		strcpy(operacionNueva->valor, "\0");
+		operacionNueva->opHeader->largo_valor=strlen(operacionNueva->valor)+1;
 		break;
 	case SET:
 		operacionNueva->opHeader->tipo = op_SET;
-		operacionNueva->clave = calloc(1, strlen(operacionNueva->clave)+1);
+		operacionNueva->clave = calloc(1, strlen(operacionOriginal.argumentos.SET.clave)+1);
 		memcpy(operacionNueva->clave, operacionOriginal.argumentos.SET.clave, strlen(operacionOriginal.argumentos.SET.clave));
 		operacionNueva->opHeader->largo_clave = strlen(operacionNueva->clave)+1;
-		operacionNueva->valor = calloc(1, strlen(operacionNueva->valor)+1);
+		operacionNueva->valor = calloc(1, strlen(operacionOriginal.argumentos.SET.valor)+1);
 		strcpy(operacionNueva->valor, operacionOriginal.argumentos.SET.valor);
 		operacionNueva->opHeader->largo_valor=strlen(operacionNueva->valor)+1;
 		break;
 	case STORE:
 		operacionNueva->opHeader->tipo = op_STORE;
-		operacionNueva->clave = calloc(1, strlen(operacionNueva->clave)+1);
+		operacionNueva->clave = calloc(1, strlen(operacionOriginal.argumentos.STORE.clave)+1);
 		memcpy(operacionNueva->clave, operacionOriginal.argumentos.STORE.clave, strlen(operacionOriginal.argumentos.STORE.clave));
 		operacionNueva->opHeader->largo_clave = strlen(operacionNueva->clave)+1;
 		break;
