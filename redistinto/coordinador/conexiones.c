@@ -40,13 +40,15 @@ void* recibir_conexion(void* con) {
 				if (result) log_info(logger_coordinador, "error al enviar ack");
 				break;
 			case CONEXION:
+				//OJO ACA
 				manejar_conexion(msg, conexion->socket);
 				break;
 			case DESCONEXION:
 				manejar_desconexion(conexion->socket);
 				break;
 			case ACK:
-			case VALIDAR_BLOQUEO:
+			//case VALIDAR_BLOQUEO:
+			case EJECUTAR:
 			case TEXTO:
 			case RESULTADO:
 				break;

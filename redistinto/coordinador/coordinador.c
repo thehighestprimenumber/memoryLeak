@@ -31,11 +31,32 @@ void inicializar_configuracion(){
 }
 
 int manejar_conexion(Message * m, int socket){
-	t_operacion * operacion = desempaquetar_operacion(m);
+	/*t_operacion * operacion = desempaquetar_operacion(m);
 	if (m->header->remitente == INSTANCIA) {
 		log_info(logger_coordinador, "se va a recibe conexion de nueva instancia, socket %d", socket);
 		return registar_instancia(operacion->valor, socket);
 	}
+	return 0;*/
+
+	//a confirmar. La conexión o no debería ser una operación, o armarla de otra forma
+	//como está ahora rompe cuando se conectan esi y planificador
+	if (m->header->remitente == INSTANCIA) {
+		t_operacion * operacion = desempaquetar_operacion(m);
+		log_info(logger_coordinador, "se va a recibe conexion de nueva instancia, socket %d", socket);
+		return registar_instancia(operacion->valor, socket);
+	}
+	else
+	{
+		if (m->header->remitente == PLANIFICADOR) {
+			socket_planificador = socket;
+		}
+
+		Message* m = empaquetar_texto("hola soy el coordinador\0", strlen("hola soy el coordinador\0"), COORDINADOR);
+		m->header->tipo_mensaje = ACK;
+		int result = enviar_mensaje(socket, *m);
+		if (result) log_info(logger_coordinador, "error al enviar ack");
+	}
+
 	return 0;
 }
 
@@ -98,6 +119,9 @@ int pedirle_al_planif_que_bloquee_clave(t_operacion* operacion){
 		log_debug(logger_coordinador, "se solicita bloqueo de clave %s", (char*) operacion->clave);
 
 	Message respuesta;
+
+	//ACA HAY UN PROBLEMA PORQUE ENTRA POR EL AWAIT DEL MANEJADOR DE EVENTOS
+	//PARA MI DEBERIA HACER LO DEL CODIGO DE ABAJO EN EL MANEJADOR EN EL CASE RESULTADO
 	if (await_msg(socket_planificador, &respuesta)<0) return ERROR_DE_RECEPCION;
 	char * contenido_respuesta = calloc(1, respuesta.header->size);
 		strcpy(contenido_respuesta, (char *) respuesta.contenido);

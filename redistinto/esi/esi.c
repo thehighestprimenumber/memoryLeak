@@ -24,17 +24,17 @@ int main(int argc,char *argv[]) {
 	log_trace(log_esi,"El puerto del planificador es: %s",pConfig->planificador_puerto);
 	log_trace(log_esi,"La ip del planificador es: %s",pConfig->planificador_ip);
 
+	pidcoordinador = pthread_create(&threadCoordinador, NULL, (void*)&conectar_a_coordinador, (void*) pConfig);
+		if (pidcoordinador < 0) {
+			log_error(log_esi,"Error al intentar conectar al coordinador");
+			exit(EXIT_FAILURE);
+		}
+
 	pidplanificador = pthread_create(&threadPlanificador, NULL, (void*)&conectar_a_planificador, (void*) pConfig);
 	if (pidplanificador < 0) {
 			log_error(log_esi,"Error al intentar conectar al planificador");
 			exit(EXIT_FAILURE);
 		}
-
-	pidcoordinador = pthread_create(&threadCoordinador, NULL, (void*)&conectar_a_coordinador, (void*) pConfig);
-	if (pidcoordinador < 0) {
-		log_error(log_esi,"Error al intentar conectar al coordinador");
-		exit(EXIT_FAILURE);
-	}
 
 	pthread_join(threadPlanificador,NULL);
 	pthread_join(threadCoordinador,NULL);
@@ -52,6 +52,8 @@ char* leer_propiedad_string (t_config *configuracion, char* propiedad){
 }
 
 int conectar_a_planificador(esi_configuracion* pConfig) {
+	sleep(2);
+
 	socket_planificador = connect_to_server(pConfig->planificador_ip,pConfig->planificador_puerto);
 	//Verifico conexion con el planificador
 	if (socket_planificador < 0) {
@@ -68,7 +70,10 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 	//msg->contenido = "Envio mensaje al Planificador desde ESI";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
 	msg->header->remitente = ESI;
-	msg->header->tipo_mensaje = TEST;
+	//msg->header->tipo_mensaje = TEST;
+
+	//a confirmar. Habria que cambiar tipo TEST por CONEXION en todos lados
+	msg->header->tipo_mensaje = CONEXION;
 	msg->header->size = strlen(msg->contenido)+1;
 
 	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
@@ -90,7 +95,11 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 		log_debug(log_esi, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
 		//log_debug(log_inst, "%s", request);
 
-
+		//HABRIA QUE PONER COMO EN PLANIFICADOR Y CONTROLADOR UNA FUNCION QUE MANEJE LOS
+		//MENSAJES QUE VAN LLEGANDO. POR AHORA DEJO EJEMPLOS COMENTADOS
+		//if (msg.header->tipo_mensaje == EJECUTAR) {
+		//	enviar_operacion_a_coordinador("GET CLAVE_1");
+		//}
 	}
 
 	free_msg(&msg);
@@ -115,9 +124,11 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 	//msg->contenido = "Hola coordinador";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
 	msg->header->remitente = ESI;
-	msg->header->tipo_mensaje = TEST;
-	msg->header->size = strlen(msg->contenido) + 1;
+	//msg->header->tipo_mensaje = TEST;
 
+	//a confirmar. cambio por CONEXION
+	msg->header->tipo_mensaje = CONEXION;
+	msg->header->size = strlen(msg->contenido) + 1;
 
 	if (send_msg(cliente_coordinador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
 	log_debug(log_esi, "Se envio el mensaje");

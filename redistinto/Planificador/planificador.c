@@ -80,8 +80,6 @@ void leer_script_completo() {
 		fclose(f);
 
 		contenidoScript[fsize] = '\0';
-
-	log_info(log_planificador,"\nPrueba: %s",contenidoScript);
 }
 
 int iniciar(int socketCoordinador){
@@ -98,12 +96,16 @@ int iniciar(int socketCoordinador){
 int manejador_de_eventos(int socket, Message* msg){
 	log_info(log_planificador, "Ocurrio un evento");
 
-	int res = await_msg(socket, msg);
-	if (res<0) {
-		log_info(log_planificador, "RIP socket %d", socket);
-		close(socket);
-		free_msg(&msg);
-		return ERROR_DE_RECEPCION;
+	//En el caso de las operaciones el socket ya escucha el mensaje por lo que esto no va
+	if (msg->header->tipo_mensaje != OPERACION)
+	{
+		int res = await_msg(socket, msg);
+		if (res<0) {
+			log_info(log_planificador, "RIP socket %d", socket);
+			close(socket);
+			free_msg(&msg);
+			return ERROR_DE_RECEPCION;
+		}
 	}
 
 	//Por ahora agrego caso con test para que siga funcionando, después sacar
@@ -167,13 +169,23 @@ int manejador_de_eventos(int socket, Message* msg){
 	}else if(msg->header->remitente == COORDINADOR){
 		log_info(log_planificador, "Me hablo el Coordinador");
 		switch(msg->header->tipo_mensaje){
-			case VALIDAR_BLOQUEO:
+			case OPERACION:
 				log_info(log_planificador, "Me pidió validar un get o un set");
 
 				//Aca diferenció que operación me pide verificar el coordinador
 				//y actuo según el caso
 				int resultado_operacion = manejar_operacion(socket,msg);
-				free(msg);
+				//Saco el free porque lo hace en el socket
+
+				//Retorno mensaje con constante con resultado de la operacion
+				//Para que la maneje el coordinador
+				Message* mensaje = empaquetar_texto(string_itoa(resultado_operacion), strlen(string_itoa(resultado_operacion)), PLANIFICADOR);
+				mensaje->header->tipo_mensaje = RESULTADO;
+				int result = enviar_mensaje(socket, *mensaje);
+				if (result) {
+					log_info(log_planificador, "error al enviar resultado al coordinador");
+					return ERROR_DE_ENVIO;
+				}
 
 				//Por ahora es texto, en un futuro alguna estructura mas compleja
 				return resultado_operacion;
@@ -300,7 +312,10 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 			PLANIFICADOR);
 
 	//Para mantener el funcionamiento
-	msg->header->tipo_mensaje = TEST;
+	//msg->header->tipo_mensaje = TEST;
+
+	//a confirmar. En todos lados iría CONEXION en lugar de TEST
+	msg->header->tipo_mensaje = CONEXION;
 
 	//Chequeo que se haya enviado correctamente, registro y lo elimino
 	if (send_msg(pidCoordinador, (*msg))<0) log_debug(log_planificador, "Error al enviar el mensaje hacia el planificador");
@@ -473,7 +488,7 @@ void manejar_desconexion_esi_fifo(int socket){
 int manejar_operacion(int socket,Message* msg) {
 	operacionEnMemoria = desempaquetar_operacion(msg);
 
-	if (operacionEnMemoria->opHeader->largo_clave > 40)
+	if (operacionEnMemoria->opHeader->largo_clave - 2 > 40)
 	{
 		//kill(esiRunning,SIGTERM);
 		free_operacion(&operacionEnMemoria);
@@ -556,42 +571,12 @@ void ejecutar_nueva_esi() {
 	if (esi_seleccionado > 0) {
 	//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 	//y comenzar a procesar instrucciones
-
-	//INTENTO EMPAQUETANDO ARCHIVOHEADER
-	/*t_archivo* archivo = malloc(sizeof(t_archivo));
-	archivo->archHeader = malloc(sizeof(ArchivoHeader));
-
-	memcpy(archivo->archHeader, scriptTxt, sizeof(ArchivoHeader));
-
-	archivo->archHeader->tamanio_archivo = strlen(scriptTxt) + 1;
-	//archivo->archHeader->tamanio_archivo = sizeof(script_a_procesar);
-	archivo->nombreArchivo = (char*)malloc(archivo->archHeader->tamanio_archivo);
-	memcpy(archivo->nombreArchivo, scriptTxt, archivo->archHeader->tamanio_archivo);*/
-	//Message* mensajeEjec = empaquetar_arch_en_mensaje(archivo,PLANIFICADOR);
-
-	//INTENTO MANDAR FILE*
-	//archivo->script = malloc(archivo->archHeader->tamanio_archivo);
-	//memcpy(archivo->script, script_a_procesar + sizeof(ArchivoHeader), archivo->archHeader->tamanio_archivo);
-	//script_a_procesar
-
-
-
-	//Lo mando como msj básico
 	Message* mensajeEjec = empaquetar_texto(contenidoScript, strlen(contenidoScript) + 1, PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
-
-	//Message* mensajeEjec= (Message*) malloc(sizeof(Message));
-	//mensajeEjec->contenido = (char*) malloc(strlen(contenidoScript) +1);
-	//strcpy(mensajeEjec->contenido,contenidoScript);
-	//mensajeEjec->header = (ContentHeader*) malloc(sizeof(ContentHeader));
-	//mensajeEjec->header->remitente = PLANIFICADOR;
-	//mensajeEjec->header->tipo_mensaje = EJECUTAR;
-	//mensajeEjec->header->size = strlen(mensajeEjec->contenido)+1;
 
 	int res_ejecutar = enviar_mensaje(esi_seleccionado, *mensajeEjec);
 	free(mensajeEjec);
 	if (res_ejecutar < 0) {exit_proceso(-1);}
-	//free_archivo(&archivo);
 	}
 }
 

@@ -35,7 +35,7 @@
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
 typedef enum tipoRemitente {DESCONOCIDO, ESI, PLANIFICADOR, INSTANCIA, COORDINADOR} tipoRemitente;
 
-typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, OPERACION, VALIDAR_BLOQUEO, TEST, TEXTO, RESULTADO, EJECUTAR} tipoMensaje;
+typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, OPERACION, TEST, TEXTO, RESULTADO, EJECUTAR} tipoMensaje;
 
 //Estructura del header
 typedef struct {

@@ -25,6 +25,10 @@ int main(){
 	//msg->contenido = "Holaquetal coordinador";
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
 	msg->header->remitente = INSTANCIA;
+
+	//***************************************************************
+	//******** ACA DEBERIA IR TIPO MENSAJE CONEXION EN VEZ DE TEST *************
+	//**************************************************************************
 	msg->header->tipo_mensaje = TEST;
 	msg->header->size = strlen(msg->contenido)+1;
 
