@@ -95,11 +95,6 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 		log_debug(log_esi, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
 		//log_debug(log_inst, "%s", request);
 
-		//HABRIA QUE PONER COMO EN PLANIFICADOR Y CONTROLADOR UNA FUNCION QUE MANEJE LOS
-		//MENSAJES QUE VAN LLEGANDO. POR AHORA DEJO EJEMPLOS COMENTADOS
-		//if (msg.header->tipo_mensaje == EJECUTAR) {
-		//	enviar_operacion_a_coordinador("GET CLAVE_1");
-		//}
 	}
 
 	free_msg(&msg);
@@ -191,8 +186,13 @@ t_operacion* convertir_operacion(t_esi_operacion operacionOriginal){
 }
 
 void* enviar_operacion_a_coordinador(char * linea){
+	t_esi_operacion operacionParseada = parse(linea);
 
-	t_operacion* operacion = convertir_operacion(parse(linea));
+	if (operacionParseada.valido == false) {
+		return CLAVE_MUY_GRANDE;
+	}
+
+	t_operacion* operacion = convertir_operacion(operacionParseada);
 	Message * msg = empaquetar_op_en_mensaje(operacion, ESI);
 
 	int res = send_msg(cliente_coordinador, *msg);

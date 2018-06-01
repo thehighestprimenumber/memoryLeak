@@ -16,6 +16,7 @@ int main(void) {
 	//Crear listas de procesos
 	cola_ready = list_create();
 	cola_blocked = list_create();
+	cola_esi_blocked = list_create();
 	cola_finished = list_create();
 
 	leer_script_completo();
@@ -293,7 +294,7 @@ void clavesBloqueadas_read(t_config* configuracion) {
 		list_add(planificador.clavesBloqueadas,claves[i]);
 	}
 
-	liberar_split(claves);
+	//liberar_split(claves);
 }
 
 int conectar_a_coordinador(t_planificador* pConfig) {
@@ -492,7 +493,7 @@ int manejar_operacion(int socket,Message* msg) {
 	{
 		//kill(esiRunning,SIGTERM);
 		free_operacion(&operacionEnMemoria);
-		ejecutar_nueva_esi();
+		//ejecutar_nueva_esi();
 		return CLAVE_MUY_GRANDE;
 	}
 
@@ -543,7 +544,7 @@ int validar_operacion_set() {
 	{
 		//kill(esiRunning,SIGTERM);
 		free_operacion(&operacionEnMemoria);
-		return CLAVE_MUY_GRANDE;
+		return CLAVE_INEXISTENTE;
 	}
 
 	//Si puede tomar la clave sin problemas, simplemente retorna ok
