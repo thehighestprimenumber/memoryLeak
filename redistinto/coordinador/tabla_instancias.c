@@ -14,16 +14,16 @@ int buscar_instancia_por_nombre (char* nombre_instancia, fila_tabla_instancias *
 			}
 			element = element->next;
 		}
-		log_debug(logger_coordinador, "ubicacion de la instancia instancia en lista: %d", i);
-	free(element);
+		free(element);
 	return 0;
 }
 int criterio_nombre(fila_tabla_instancias* fila, void* nombre_instancia){
 	return !strcmp ((fila->nombre_instancia), (char*) nombre_instancia);
 }
 
-int criterio_socket(fila_tabla_instancias* fila, int socket){
-	return (fila->socket_instancia == socket);
+int criterio_socket(fila_tabla_instancias* fila, void * socket){
+	int numero_socket = (int) socket;
+	return (fila->socket_instancia == numero_socket);
 }
 
 int criterio_clave(fila_tabla_instancias* fila, void* nombre_clave){
@@ -40,68 +40,117 @@ int criterio_clave(fila_tabla_instancias* fila, void* nombre_clave){
 			}
 			element = element->next;
 		}
-			log_debug(logger_coordinador, "ubicacion de la instancia instancia en lista: %d", i);
 		free(element);
 		return 0;
 
 }
 
-int buscar_instancia_por_valor_criterio (void* valor, fila_tabla_instancias *output, int criterio (fila_tabla_instancias*, void*)){
+fila_tabla_instancias * buscar_instancia_por_valor_criterio (void* valor, int criterio (fila_tabla_instancias*, void*)){
 	t_link_element *element = coordinador.tabla_instancias->head;
-	int i=0;
 	fila_tabla_instancias *fila;
 		while (element != NULL) {
 			fila = (fila_tabla_instancias*) (element->data);
-			i++;
 			if (criterio(fila, valor)) {
-				output = fila;
-				return i;
+				free(element);
+				return fila;
 			}
 			element = element->next;
 		}
-		log_debug(logger_coordinador, "ubicacion de la instancia instancia en lista: %d", i);
 	free(element);
 	return 0;
 }
 
+//int buscar_instancia_por_valor_criterio (void* valor, fila_tabla_instancias *output, int criterio (fila_tabla_instancias*, void*)){
+//	t_link_element *element = coordinador.tabla_instancias->head;
+//	int i=0;
+//	fila_tabla_instancias *fila;
+//		while (element != NULL) {
+//			fila = (fila_tabla_instancias*) (element->data);
+//			i++;
+//			if (criterio(fila, valor)) {
+//				output = fila;
+//				return i;
+//			}
+//			element = element->next;
+//		}
+//		log_debug(logger_coordinador, "ubicacion de la instancia instancia en lista: %d", i);
+//	free(element);
+//	return 0;
+//}
 
 int cambiar_estado_instancia(fila_tabla_instancias* fila, int esta_activa){
-	log_debug(logger_coordinador, "se va a cambiar el estado de la instancia %s. esta activa: %i", fila->nombre_instancia, esta_activa);
 	fila->esta_activa=esta_activa;
 	return OK;
 }
 
+fila_tabla_instancias* seleccionar_instancia_EL(){
+	fila_tabla_instancias* candidata;
+	int i;
+	for (i = 0; i<list_size(coordinador.tabla_instancias); i++){
+		candidata = list_get(coordinador.tabla_instancias, ((ultima_instancia_usada++)%list_size(coordinador.tabla_instancias)));
+		if (candidata->esta_activa) return candidata;
+	}
+	return NULL;
+}
+
+
 fila_tabla_instancias* seleccionar_instancia(char* clave) {
 	switch (coordinador.algoritmo) {
 		case EQUITATIVE_LOAD:
-			return list_get(coordinador.tabla_instancias, ultima_instancia_usada++);
+			return seleccionar_instancia_EL();
 		default: return 0;
 	}
 }
 
-int registar_instancia(char* nombre_instancia, int socket_instancia) {
-	fila_tabla_instancias* fila2 = (fila_tabla_instancias*) calloc(sizeof(fila_tabla_instancias), 1);
-	if (buscar_instancia_por_valor_criterio(nombre_instancia, fila2, criterio_nombre))
-		cambiar_estado_instancia(fila2, 1);
-	else {
-		fila_tabla_instancias* fila = (fila_tabla_instancias*) calloc(sizeof(fila_tabla_instancias), 1);
-					fila->socket_instancia = 1;
-					fila->esta_activa = 1;
-					strcpy(fila->nombre_instancia, (char*) nombre_instancia);
-					fila->claves = list_create();
-					pthread_mutex_init(&fila->lock, NULL);
-					pthread_mutex_lock(&fila->lock);
-					list_add(coordinador.tabla_instancias, fila);
-					log_debug(logger_coordinador, "se registro una instancia, nombre: %s", fila->nombre_instancia);
+
+void esperar_operacion(fila_tabla_instancias* instancia){
+	while (instancia->esta_activa) {
+		sem_wait(&instancia->lock);
+		Message * mensaje = empaquetar_op_en_mensaje(coordinador.operacion_global_threads, COORDINADOR);
+		if (enviar_mensaje(instancia->socket_instancia, *mensaje)<0)
+			coordinador.resultado_global = ERROR_DE_ENVIO;
+		free(mensaje);
+			//log_debug(logger_coordinador, "se solicita %s %s %s", tipoMensajeNombre[operacion->header->tipo], operacion->clave, operacion->valor);
+
+		Message *respuesta;
+			if (await_msg(instancia->socket_instancia, respuesta)<0){
+				coordinador.resultado_global = ERROR_DE_RECEPCION;
+				log_error(log_coordinador, "error al recibir respuesta de la instancia");
+			}
+			else if (respuesta->header->tipo_mensaje != ACK)
+				log_error(log_coordinador, "error, se esperaba ACK pero se recibio: %s", respuesta->header->tipo_mensaje);
+			log_debug(log_coordinador, "se recibio ACK");
+			coordinador.resultado_global = 0;
+			free(respuesta);
+
+		sem_post(&coordinador.lock_operaciones);
+		sem_wait(&instancia->lock);
+
+
 	}
-	free_fila_tabla_instancias(&fila2);
-	return OK;
+}
+
+void registar_instancia_y_quedar_esperando(char* nombre_instancia, int socket_instancia) {
+	fila_tabla_instancias* fila = buscar_instancia_por_valor_criterio(nombre_instancia, criterio_nombre);
+	if (fila !=NULL)
+		cambiar_estado_instancia(fila, 1);
+	else {
+		free_fila_tabla_instancias(&fila);
+		fila = (fila_tabla_instancias*) calloc(sizeof(fila_tabla_instancias), 1);
+			fila->socket_instancia = socket_instancia;
+			fila->esta_activa = 1;
+			strcpy(fila->nombre_instancia, (char*) nombre_instancia);
+			fila->claves = list_create();
+			sem_init(&fila->lock, 0, 0);
+			list_add(coordinador.tabla_instancias, fila);
+	}
+	esperar_operacion(fila);
+	//free_fila_tabla_instancias(&fila);
 }
 
 int desconectar_instancia(int socket){
-	log_debug(logger_coordinador, "se va a desconectar una instancia, socket %d", socket);
-	fila_tabla_instancias* fila = (fila_tabla_instancias*) calloc(sizeof(fila_tabla_instancias*), 1);
-	if (buscar_instancia_por_valor_criterio(socket, fila, criterio_socket))
+	fila_tabla_instancias* fila = buscar_instancia_por_valor_criterio(&socket, criterio_socket);
+	if (fila!=NULL)
 		return cambiar_estado_instancia(fila, 0);
 	return ERROR_COORDINADOR;
 }

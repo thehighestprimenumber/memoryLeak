@@ -29,6 +29,61 @@ Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remite
 	return msg;
 }
 
+Message* empaquetar_ack(tipoRemitente remitente){
+	Message *msg = malloc(sizeof(Message));
+	msg->header = malloc(sizeof(ContentHeader));
+	msg->header->tipo_mensaje = ACK;
+	msg->header->size = 0;
+	msg->header->remitente = remitente;
+	return msg;
+}
+
+Message* empaquetar_resultado(tipoRemitente remitente, int resultado){
+	Message *msg = malloc(sizeof(Message));
+	msg->header = malloc(sizeof(ContentHeader));
+	msg->header->tipo_mensaje = RESULTADO;
+	msg->header->size = sizeof(int);
+	msg->header->remitente = remitente;
+	msg->contenido = calloc(1, sizeof(int));
+	memcpy(msg->contenido, &resultado, sizeof(int));
+	return msg;
+}
+
+int desempaquetar_resultado(Message* msg){
+	if (msg == NULL || msg->header == NULL || msg->header->size < 1|| msg->contenido == NULL)
+			return NULL;
+	int resultado;
+	memcpy (resultado, (int*) msg->contenido,  sizeof(int));
+	return resultado;
+}
+
+
+tipoRemitente desempaquetar_ack(Message* m){
+	Message *msg = malloc(sizeof(Message));
+	msg->header = malloc(sizeof(ContentHeader));
+	return msg->header->remitente;
+}
+
+t_operacion * crear_operacion(char* clave, int len_clave, char* valor, int len_valor, enum tipoOperacion tipo){
+	t_operacion * op = (t_operacion *) malloc(sizeof(t_operacion));
+	op->tipo = tipo;
+
+	op->largo_clave=len_clave+1;
+
+	if (len_clave >0 ){
+	op->clave = calloc(1, len_clave+1);
+	memcpy(op->clave, clave, len_clave);
+	}
+
+	op->largo_valor=len_valor+1;
+	if (len_valor >0 ){
+	op->valor= calloc(1, len_valor+1);
+	memcpy(op->valor, valor, len_valor);
+	}
+	return op;
+
+}
+
 Message* empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente) {
 
 	Message *msg = malloc(sizeof(Message));
@@ -37,13 +92,25 @@ Message* empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente) {
 	msg->header = malloc(sizeof(ContentHeader));
 	msg->header->remitente = remitente;
 	msg->header->tipo_mensaje = OPERACION;
-	msg->header->size = sizeof(OperacionHeader) + op->opHeader->largo_clave + op->opHeader->largo_valor;
+	msg->header->size = sizeof(OperacionHeader) + op->largo_clave + op->largo_valor;
+
+	//Preparo el OperacionHeader
+	OperacionHeader *opHeader = malloc(sizeof(OperacionHeader));
+	opHeader->largo_clave = op->largo_clave;
+	opHeader->largo_valor = op->largo_valor;
+	opHeader->tipo = op->tipo;
 
 	//Preparo el contenido del mensaje
 	msg->contenido = malloc(msg->header->size);
-	memcpy(msg->contenido, op->opHeader, sizeof(OperacionHeader));
-	memcpy(msg->contenido + sizeof(OperacionHeader), op->clave, op->opHeader->largo_clave);
-	memcpy(msg->contenido + sizeof(OperacionHeader) + op->opHeader->largo_clave, op->valor, op->opHeader->largo_valor);
+	memcpy(msg->contenido, opHeader, sizeof(OperacionHeader));
+	if (op->largo_clave>1)
+	memcpy(msg->contenido + sizeof(OperacionHeader), op->clave, op->largo_clave);
+
+	if (op->largo_valor>1)
+	memcpy(msg->contenido + sizeof(OperacionHeader) + op->largo_clave, op->valor, op->largo_valor);
+
+	//Liberamos lo que ya no nos sirve
+	free(opHeader);
 
 	return msg;
 
@@ -61,17 +128,24 @@ char* desempaquetar_texto(Message* msg) {
 t_operacion* desempaquetar_operacion(Message* msg) {
 	t_operacion* operacion = malloc(sizeof(t_operacion));
 
-	//Copiamos el header de la operacion desde el contenido del mensaje
-	operacion->opHeader = malloc(sizeof(OperacionHeader));
-	memcpy(operacion->opHeader, msg->contenido, sizeof(OperacionHeader));
+	//Copiamos el header de la operacion
+	OperacionHeader *opHeader = malloc(sizeof(OperacionHeader));
+	memcpy(opHeader, msg->contenido, sizeof(OperacionHeader));
 
-	//Reservamos el espacio necesario para clave y valor
-	operacion->clave = malloc(operacion->opHeader->largo_clave);
-	operacion->valor = malloc(operacion->opHeader->largo_valor);
+	//Lo copiamos a la operacion y lo liberamos
+	operacion->largo_clave = opHeader->largo_clave;
+	operacion->clave = malloc(operacion->largo_clave);
+	operacion->largo_valor = opHeader->largo_valor;
+	operacion->valor = malloc(operacion->largo_valor);
+	operacion->tipo = opHeader->tipo;
+	free(opHeader);
 
-	//Copiamos la clave y el valor del contenido del mensaje
-	memcpy(operacion->clave, msg->contenido + sizeof(OperacionHeader), operacion->opHeader->largo_clave);
-	memcpy(operacion->valor, msg->contenido + sizeof(OperacionHeader) + operacion->opHeader->largo_clave, operacion->opHeader->largo_valor);
+	//Copiamos la clave y el valor
+	if (operacion->largo_clave>1)
+	memcpy(operacion->clave, msg->contenido + sizeof(OperacionHeader), operacion->largo_clave);
+
+	if (operacion->largo_valor>1)
+	memcpy(operacion->valor, msg->contenido + sizeof(OperacionHeader) + operacion->largo_clave, operacion->largo_valor);
 
 	return operacion;
 }

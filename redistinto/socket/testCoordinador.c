@@ -10,17 +10,31 @@ int enviar_mensaje_test(int socket, Message msg) {
 	return 0;
 }
 
+int correr_tests_instancia(){
+	connect_to_server(IP, PUERTO_COORDINADOR);
+	pthread_t i1;//, i2, i3;
+
+	//char* inst1 = "inst1";
+	char* inst2 = "inst2";
+	//char* inst3 = "inst3";
+
+	test_INST_connect(inst2);
+//	pthread_create(&i1, NULL, test_INST_connect, inst1);
+//	pthread_create(&i2, NULL, test_INST_connect, inst2);
+//	pthread_create(&i3, NULL, test_INST_connect, inst3);
+	return 0;
+}
+
 int test_operacion(){
-	t_operacion op;
-	op.opHeader = malloc(sizeof(OperacionHeader));
-	op.opHeader->tipo = op_GET;
-	op.opHeader->largo_clave = strlen("unaClave")+1;
-	op.opHeader->largo_valor = strlen("unValor")+1;
-	op.clave = calloc(1, op.opHeader->largo_clave);
-	op.valor = calloc(1, op.opHeader->largo_valor);
-	strcpy(op.clave, "unaClave");
-	strcpy(op.valor, "unValor");
-	Message * m = empaquetar_op_en_mensaje(&op, ESI);
+//	t_operacion op = {.tipo = op_GET};
+//	op.largo_clave = strlen("unaClave")+1;
+//	op.largo_valor = strlen("unValor")+1;
+//	op.clave = calloc(1, op.largo_clave);
+//	op.valor = calloc(1, op.largo_valor);
+//	strcpy(op.clave, "unaClave");
+//	strcpy(op.valor, "unValor");
+	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), "unValor12345", strlen("unValor12345"), op_GET);
+	Message * m = empaquetar_op_en_mensaje(op, ESI);
 	t_operacion * desemp = desempaquetar_operacion(m);
 
 
@@ -30,45 +44,56 @@ int test_operacion(){
 	return 0;
 }
 
-int test_ESI_get(){
+int mandar_operaciones_test(t_operacion * op){
 	int socket_coordinador =  connect_to_server(IP, PUERTO_COORDINADOR);
-	if(socket_coordinador == -1) return -10;
-	char* nombre_ESI = calloc(1, strlen("ESI1")+1);
-	strcpy(nombre_ESI, "ESI1");
-	t_operacion * op = (t_operacion *) malloc(sizeof(t_operacion));
-		op->clave = calloc(1, strlen("claracla")+1);
-		memcpy(op->clave, "claracla", strlen("claracla"));
-		op->opHeader->largo_clave=strlen(op->clave)+1;
-		op->opHeader->tipo = op_GET;
-		op->valor = calloc(1, strlen(nombre_ESI)+1);
-		strcpy(op->valor, nombre_ESI);
-		op->opHeader->largo_valor=strlen(op->valor)+1;
-		Message * m = empaquetar_op_en_mensaje(op, ESI);
-
+	if(socket_coordinador == -1)
+		return -10;
+	Message * m = empaquetar_op_en_mensaje(op, ESI);
 	int res = enviar_mensaje_test(socket_coordinador, *m);
-		if (res<0) return ERROR_DE_ENVIO;
-		//free_msg(m); FIXME
+			if (res<0) return ERROR_DE_ENVIO;
+			//free_msg(m); FIXME
 
-	while (1) {
-		Message *msg;
-		int resultado = await_msg(socket_coordinador, msg);
-		free_msg(&msg);
-		if (resultado<0){
-			return ERROR_DE_RECEPCION;
+		while (1) {
+			Message *msg;
+			int resultado = await_msg(socket_coordinador, msg);
+			//free_msg(&msg);
+			if (resultado<0){
+				return ERROR_DE_RECEPCION;
+			}
+
 		}
-	}
 
-	return 0;
+}
+int test_ESI_get(char* nombre_esi){
+	char* nombre_ESI = calloc(1, strlen(nombre_esi)+1);
+	memcpy(nombre_ESI, nombre_esi, strlen(nombre_esi)+1);
+	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), nombre_ESI, strlen(nombre_ESI)+1, op_GET);
+	return mandar_operaciones_test(op);
+}
+
+int test_ESI_set(char* nombre_esi){
+	char* nombre_ESI = calloc(1, strlen(nombre_esi)+1);
+	memcpy(nombre_ESI, nombre_esi, strlen(nombre_esi)+1);
+	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), "unvalor12345", strlen("unvalor12345")+1, op_SET);
+	return mandar_operaciones_test(op);
+}
+
+int test_ESI_store(char* nombre_esi){
+	char* nombre_ESI = calloc(1, strlen(nombre_esi)+1);
+	memcpy(nombre_ESI, nombre_esi, strlen(nombre_esi)+1);
+	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), "", 0, op_STORE);
+	return mandar_operaciones_test(op);
 }
 
 
 int test_INST_connect(char* nombre_instancia){
 	int socket_coordinador = connect_to_server(IP, PUERTO_COORDINADOR);
-	if(socket_coordinador == -1) return -10;
-	sleep(5);
+	if(socket_coordinador == -1)
+		return -10;
 	Message * mensaje = empaquetar_conexion(INSTANCIA, nombre_instancia);
 	int res = enviar_mensaje_test(socket_coordinador, *mensaje);
-				//if (res<0) return ERROR_DE_ENVIO;
+		if (res<0)
+			return ERROR_DE_ENVIO;
 
 	while (1) {
 		Message msg;
@@ -76,11 +101,17 @@ int test_INST_connect(char* nombre_instancia){
 		if (resultado<0){
 			return ERROR_DE_RECEPCION;
 		}
-		if (msg.header->tipo_mensaje == ACK)
-			printf("ok");
-//TODO validar otros tipos
-		else
-			printf("%s: mensaje recibido: %s", nombre_instancia, (char*) msg.contenido);
+		switch (msg.header->tipo_mensaje){
+		case ACK : printf("ok");
+					break;
+		case OPERACION:;
+			Message * m = empaquetar_ack(INSTANCIA);
+			enviar_mensaje_test(socket_coordinador, *m);
+			break;
+		default: printf("%s: mensaje recibido: %s", nombre_instancia, (char*) msg.contenido);
+				break;
+		}
+		//free(&msg);
 
 	}
 	return res;

@@ -489,7 +489,7 @@ void manejar_desconexion_esi_fifo(int socket){
 int manejar_operacion(int socket,Message* msg) {
 	operacionEnMemoria = desempaquetar_operacion(msg);
 
-	if (operacionEnMemoria->opHeader->largo_clave - 2 > 40)
+	if (operacionEnMemoria->largo_clave - 2 > 40)
 	{
 		//kill(esiRunning,SIGTERM);
 		free_operacion(&operacionEnMemoria);
@@ -497,13 +497,13 @@ int manejar_operacion(int socket,Message* msg) {
 		return CLAVE_MUY_GRANDE;
 	}
 
-	if (operacionEnMemoria->opHeader->tipo == op_GET) {
+	if (operacionEnMemoria->tipo == op_GET) {
 		return validar_operacion_get();
 	}
-	else if (operacionEnMemoria->opHeader->tipo == op_SET) {
+	else if (operacionEnMemoria->tipo == op_SET) {
 		return validar_operacion_set();
 	}
-	else if (operacionEnMemoria->opHeader->tipo == op_STORE) {
+	else if (operacionEnMemoria->tipo == op_STORE) {
 		return validar_operacion_store();
 	}
 	else
