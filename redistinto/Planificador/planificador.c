@@ -313,18 +313,18 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 			PLANIFICADOR);
 
 	//Para mantener el funcionamiento
-	//msg->header->tipo_mensaje = TEST;
-
-	//a confirmar. En todos lados iría CONEXION en lugar de TEST
 	msg->header->tipo_mensaje = CONEXION;
 
+	//a confirmar. En todos lados iría CONEXION en lugar de TEST
+	//msg->header->tipo_mensaje = CONEXION;
+
 	//Chequeo que se haya enviado correctamente, registro y lo elimino
-	if (send_msg(pidCoordinador, (*msg))<0) log_debug(log_planificador, "Error al enviar el mensaje hacia el planificador");
-	else log_debug(log_planificador, "Mensaje enviado al coordinador corectamente");
+	if (send_msg(pidCoordinador, (*msg))<0) log_info(log_planificador, "Error al enviar el mensaje hacia el planificador");
+	else log_info(log_planificador, "Mensaje enviado al coordinador corectamente");
 	free_msg(&msg);
 
 	//Espero mensaje de respuesta
-	log_debug(log_planificador, "esperando mensaje");
+	log_info(log_planificador, "esperando mensaje");
 
 	msg = malloc(sizeof(Message));
 	int resultado = await_msg(pidCoordinador, msg);
@@ -491,9 +491,7 @@ int manejar_operacion(int socket,Message* msg) {
 
 	if (operacionEnMemoria->largo_clave - 2 > 40)
 	{
-		//kill(esiRunning,SIGTERM);
 		free_operacion(&operacionEnMemoria);
-		//ejecutar_nueva_esi();
 		return CLAVE_MUY_GRANDE;
 	}
 
