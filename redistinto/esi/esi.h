@@ -38,6 +38,9 @@ char* leer_propiedad_string (t_config *configuracion, char* propiedad);
 int conectar_a_planificador(esi_configuracion* pConfig);
 int conectar_a_coordinador(esi_configuracion* pConfig);
 t_operacion* convertir_operacion(t_esi_operacion operacionOriginal);
-void* enviar_operacion_a_coordinador(char * linea);
+void* enviar_operacion_a_coordinador(t_operacion* operacion);
+void enviar_ruta_script_al_planificador(char* path);
+int cantidad_lineas_script(char* script);
+void correr_script(char* script);
 
 #endif

@@ -39,6 +39,10 @@ int main(int argc,char *argv[]) {
 	pthread_join(threadPlanificador,NULL);
 	pthread_join(threadCoordinador,NULL);
 
+	//Recibo la ruta del script a ejecutar y se la envio al planificador
+	char* path_script = argv[1];
+	enviar_ruta_script_al_planificador(path_script);
+
 	return EXIT_SUCCESS;
 }
 
@@ -65,15 +69,11 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 
 	Message* msg= (Message*) malloc(sizeof(Message));
 
-  msg->contenido = (char*) malloc(strlen("Envio mensaje al Planificador desde ESI") +1);
-	strcpy(msg->contenido,"Envio mensaje al Planificador desde ESI");
-	//msg->contenido = "Envio mensaje al Planificador desde ESI";
+	msg->contenido = (char*) malloc(strlen("Envio mensaje al Planificador desde ESI") +1);
+	strcpy(msg->contenido, "Envio mensaje al Planificador desde ESI");
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
 	msg->header->remitente = ESI;
-	//msg->header->tipo_mensaje = TEST;
-
-	//a confirmar. Habria que cambiar tipo TEST por CONEXION en todos lados
-	msg->header->tipo_mensaje = CONEXION;
+	msg->header->tipo_mensaje = TEST;
 	msg->header->size = strlen(msg->contenido)+1;
 
 	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
@@ -115,14 +115,10 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 	Message* msg= (Message*) malloc(sizeof(Message));
 
 	msg->contenido = (char*) malloc(strlen("Hola coordinador")+1);
-	strcpy(msg->contenido,"Hola coordinador");
-	//msg->contenido = "Hola coordinador";
+	strcpy(msg->contenido, "Hola coordinador");
 	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
 	msg->header->remitente = ESI;
-	//msg->header->tipo_mensaje = TEST;
-
-	//a confirmar. cambio por CONEXION
-	msg->header->tipo_mensaje = CONEXION;
+	msg->header->tipo_mensaje = TEST;
 	msg->header->size = strlen(msg->contenido) + 1;
 
 	if (send_msg(cliente_coordinador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
@@ -139,7 +135,6 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 		}
 	char * request = malloc(msg.header->size);
 	strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
-	//strcpy(request, (char *) msg.contenido);
 	log_debug(log_esi, "mensaje recibido: %s", request);
 	//log_debug(log_inst, "%s", request);
 	return socket_OK; //TODO que devuelva lo que corresponda
@@ -148,8 +143,11 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 
 t_operacion* convertir_operacion(t_esi_operacion operacionOriginal){
 
-	t_operacion* operacionNueva = (t_operacion*) malloc(sizeof(t_operacion));
+	if (operacionOriginal.valido == false) {
+		return CLAVE_MUY_GRANDE;
+	}
 
+	t_operacion* operacionNueva = (t_operacion*) malloc(sizeof(t_operacion));
 
 	switch(operacionOriginal.keyword){
 	case GET:
@@ -185,19 +183,14 @@ t_operacion* convertir_operacion(t_esi_operacion operacionOriginal){
 
 }
 
-void* enviar_operacion_a_coordinador(char * linea){
-	t_esi_operacion operacionParseada = parse(linea);
+void* enviar_operacion_a_coordinador(t_operacion* operacion){
 
-	if (operacionParseada.valido == false) {
-		return CLAVE_MUY_GRANDE;
-	}
-
-	t_operacion* operacion = convertir_operacion(operacionParseada);
 	Message * msg = empaquetar_op_en_mensaje(operacion, ESI);
 
 	int res = send_msg(cliente_coordinador, *msg);
 	if (res < 0) return ERROR_DE_ENVIO;
 
+	//TODO: Segun la respuesta que recibo deberia bloquear la ESI o desconectarla
 	while (1) {
 		Message *rta;
 		int resultado = await_msg(cliente_coordinador, rta);
@@ -207,3 +200,43 @@ void* enviar_operacion_a_coordinador(char * linea){
 		}
 	}
 }
+
+void enviar_ruta_script_al_planificador(char* path){
+
+	Message* msg= (Message*) malloc(sizeof(Message));
+
+	msg->contenido = (char*) malloc(strlen(path) +1);
+	strcpy(msg->contenido, path);
+	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
+	msg->header->remitente = ESI;
+	msg->header->tipo_mensaje = TEXTO;
+	msg->header->size = strlen(msg->contenido) +1;
+
+	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar la ruta del script.");
+	log_debug(log_esi, "Se envio la ruta del script.");
+
+}
+
+int cantidad_lineas_script(char* script){
+
+	int n_lineas = 0;
+
+	for(int i = 0; script[i] != '\0'; i++){
+	if (script[i] == '\n') n_lineas++;
+	}
+
+	return n_lineas + 1;
+
+}
+
+void correr_script(char* script){
+
+	int n_lineas = cantidad_lineas_script(script);
+	char** split = string_n_split(script, n_lineas,(char*) '\n');
+
+	for(int i = 0; split[i] != NULL; i++){
+		enviar_operacion_a_coordinador(convertir_operacion(parse(split[i])));
+	}
+
+}
+
