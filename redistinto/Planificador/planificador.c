@@ -307,40 +307,6 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 		log_info(log_planificador, "Planificador se conecto con el Coordinador");
 	}
 
-	//printf("Se pudo conectar con el coordinador");
-	Message* msg= empaquetar_texto("Envio mensaje al Coordinador desde Planificador",
-			strlen("Envio mensaje al Coordinador desde Planificador"),
-			PLANIFICADOR);
-
-	//Para mantener el funcionamiento
-	msg->header->tipo_mensaje = CONEXION;
-
-	//a confirmar. En todos lados iría CONEXION en lugar de TEST
-	//msg->header->tipo_mensaje = CONEXION;
-
-	//Chequeo que se haya enviado correctamente, registro y lo elimino
-	if (send_msg(pidCoordinador, (*msg))<0) log_info(log_planificador, "Error al enviar el mensaje hacia el planificador");
-	else log_info(log_planificador, "Mensaje enviado al coordinador corectamente");
-	free_msg(&msg);
-
-	//Espero mensaje de respuesta
-	log_info(log_planificador, "esperando mensaje");
-
-	msg = malloc(sizeof(Message));
-	int resultado = await_msg(pidCoordinador, msg);
-
-	log_info(log_planificador, "llego un mensaje. parseando...");
-
-	if (resultado<0){
-		log_debug(log_planificador, "error de recepcion");
-		//return ERROR_DE_RECEPCION;
-	}else{
-		char *respuesta = desempaquetar_texto(msg);
-		log_info(log_planificador, "mensaje recibido: %s", respuesta);
-		free(respuesta);
-		free_msg(&msg);
-	}
-
 	return pidCoordinador;
 }
 
