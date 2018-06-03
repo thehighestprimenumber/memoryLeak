@@ -26,7 +26,7 @@ void* recibir_conexion(void* con) {
 		}
 		enum tipoMensaje tipo = msg->header->tipo_mensaje;
 
-		loguear_recepcion(msg, socket);
+		loguear_recepcion(msg, conexion->socket);
 
 		switch (tipo){
 			case TEST: ;

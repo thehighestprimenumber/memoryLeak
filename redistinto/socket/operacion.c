@@ -51,10 +51,10 @@ Message* empaquetar_resultado(tipoRemitente remitente, int resultado){
 
 int desempaquetar_resultado(Message* msg){
 	if (msg == NULL || msg->header == NULL || msg->header->size < 1|| msg->contenido == NULL)
-			return NULL;
-	int resultado;
+		return NULL;
+	int* resultado = calloc (1, sizeof(int));
 	memcpy (resultado, (int*) msg->contenido,  sizeof(int));
-	return resultado;
+	return *resultado;
 }
 
 
@@ -117,6 +117,15 @@ Message* empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente) {
 }
 
 char* desempaquetar_texto(Message* msg) {
+	if (msg == NULL || msg->header == NULL
+			|| msg->header->size < 1|| msg->contenido == NULL)
+		return NULL;
+	char* texto = malloc(msg->header->size);
+	memcpy(texto, msg->contenido, msg->header->size);
+	return texto;
+}
+
+char* desempaquetar_conexion(Message* msg) {
 	if (msg == NULL || msg->header == NULL
 			|| msg->header->size < 1|| msg->contenido == NULL)
 		return NULL;

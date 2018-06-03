@@ -3,8 +3,7 @@
 
 
 int procesarSolicitudDeEsi(Message * msg, int socket_solicitante);
-int validar_bloqueo_con_planificador(Message * msg);
-int pedirle_al_planif_que_bloquee_clave(t_operacion * operacion);
+int validar_bloqueo_con_planificador(t_operacion* operacion);
 int informar_resultado_al_planificador(int resultado);
 extern int iniciar_servicio();
 void inicializar_configuracion();
@@ -33,6 +32,7 @@ void inicializar_configuracion(){
 }
 
 int manejar_conexion(Message * m, int socket){
+	char* nombre_modulo = desempaquetar_conexion(m);
 	char* nombre_instancia = desempaquetar_texto(m);
 	if (m->header->remitente == INSTANCIA) {
 		loguear_conexion(socket);
@@ -67,64 +67,64 @@ enum tipoRemitente remitente = msg->header->remitente;
 
 int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 	t_operacion * op = desempaquetar_operacion(msg);
-	enviar_mensaje(socket_solicitante, *empaquetar_ack(COORDINADOR));
+
+	//enviar_mensaje(socket_solicitante, *empaquetar_ack(COORDINADOR));
 	char* clave = op->clave;
-	int resultado;
+	int resultado = validar_bloqueo_con_planificador(op);
+	if (resultado == OK) {
 //	log_info(logger_coordinador, "procesando solicitud: %s %s %s de ESI socket# %d"
 //			, tipoMensajeNombre[op->tipo], clave, op->valor, socket);
-
-	if (op->tipo == op_GET) {
-//		log_debug(logger_coordinador, tipoMensajeNombre[op_GET]);
-		return pedirle_al_planif_que_bloquee_clave(op);
-	} else {
-		resultado = validar_bloqueo_con_planificador(msg);
-		if (resultado == OK) {
-			fila_tabla_instancias * instancia;
-			if (op->tipo == op_SET){
-				instancia = seleccionar_instancia(clave);
-				//list_add(instancia->claves, clave);
-			} else
-				instancia = buscar_instancia_por_valor_criterio(op->valor, &criterio_clave);
-
-			if (instancia == NULL) {
-						resultado = NO_HAY_INSTANCIAS;
-			}
-			loguear_inst_op(instancia->nombre_instancia, op);
-			despertar_hilo_instancia(op, instancia);
-
-
-			informar_resultado_al_planificador(coordinador.resultado_global);
-
-			resultado = coordinador.resultado_global;
-			//free(instancia);
+		fila_tabla_instancias * instancia;
+		if (op->tipo == op_GET){
+			instancia = seleccionar_instancia(clave);
+			list_add(instancia->claves, clave);
+		} else {
+			instancia = buscar_instancia_por_valor_criterio(op->clave, &criterio_clave);
 		}
-
+		if (instancia == NULL) {
+			resultado = NO_HAY_INSTANCIAS;
+		}
+		loguear_inst_op(instancia->nombre_instancia, op);
+		if (op->tipo != op_GET){
+			despertar_hilo_instancia(op, instancia);
+		}
 	}
+	Message* rta_a_esi = empaquetar_resultado(COORDINADOR, resultado);
+	enviar_mensaje(socket_solicitante, *rta_a_esi);
+
+	/*informar_resultado_al_planificador(coordinador.resultado_global);
+
+		resultado = coordinador.resultado_global;
+		//free(instancia);
+
+	*/
+
 	loguear_resultado(resultado);
-
-
 	free_msg(&msg);
 	return resultado;
 }
 
-int validar_bloqueo_con_planificador(Message * msg){
-	//TODO
-	return OK;
-}
+int validar_bloqueo_con_planificador(t_operacion* operacion){
+	t_operacion interna = {.tipo = operacion->tipo, .largo_clave = operacion->largo_clave, .largo_valor= operacion->largo_valor};
+	interna.clave = operacion->clave;
+	interna.valor = operacion->valor;
 
-int pedirle_al_planif_que_bloquee_clave(t_operacion* operacion){
-	return OK;
-	//mockeado por ahora, despues descomentar lo de abajo
-/*	Message * mensaje = empaquetar_op_en_mensaje(operacion, COORDINADOR);
+	if (interna.tipo==op_SET) { //para no mandar el valor de la clave que podria ser bastante largo al pedo
+		free (interna.valor);
+		interna.valor = calloc(1,1);
+		interna.largo_valor = 0;
+	}
+
+	Message * mensaje = empaquetar_op_en_mensaje(&interna, COORDINADOR);
 	if (enviar_mensaje(socket_planificador, *mensaje)<0) return ERROR_DE_ENVIO;
-		log_debug(logger_coordinador, "se solicita bloqueo de clave %s", (char*) operacion->clave);
+		//log_debug(logger_coordinador, "se solicita bloqueo de clave %s", (char*) operacion->clave);
 
-	Message respuesta;
-	if (await_msg(socket_planificador, &respuesta)<0) return ERROR_DE_RECEPCION;
-	char * contenido_respuesta = calloc(1, respuesta.header->size);
-		strcpy(contenido_respuesta, (char *) respuesta.contenido);
-		log_debug(logger_coordinador, "resultado bloqueo de clave: %s", contenido_respuesta);
-	return atoi(contenido_respuesta); ////CLAVE_YA_BLOQUEADA o OK */
+	Message * respuesta;
+	if (await_msg(socket_planificador, respuesta)<0)
+		return ERROR_DE_RECEPCION;
+	int contenido_respuesta = desempaquetar_resultado(respuesta);
+	loguear_resultado(contenido_respuesta);
+	return contenido_respuesta; ////CLAVE_YA_BLOQUEADA o OK */
 }
 
 int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* instancia){
