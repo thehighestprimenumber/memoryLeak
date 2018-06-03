@@ -6,7 +6,7 @@
 #include <string.h>
 #include "socket.h"
 
-typedef enum tipoOperacion {op_GET, op_SET, op_STORE};
+typedef enum tipoOperacion {op_GET, op_SET, op_STORE} tipoOperacion;
 
 typedef struct {
 	int largo_clave;
@@ -33,6 +33,7 @@ Message* empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente);
 t_operacion* desempaquetar_operacion(Message* msg);
 
 Message* empaquetar_conexion(tipoRemitente remitente, char* idRemitente);
+char* desempaquetar_conexion(Message* msg);
 
 Message* empaquetar_ack(tipoRemitente remitente);
 tipoRemitente desempaquetar_ack(Message* m);
