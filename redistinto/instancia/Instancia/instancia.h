@@ -1,29 +1,36 @@
 #ifndef INSTANCIA_INSTANCIA_H_
 #define INSTANCIA_INSTANCIA_H_
 
-#define IP_coordinador "IP_coordinador"
-#define puerto_coordinador "puerto_coordinador"
-#define algoritmo "algoritmo"
-#define punto_montaje "punto_montaje"
-#define nombre_instancia "nombre_instancia"
-#define dump "dump"
-
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/txt.h>
 #include <commons/log.h>
+
+#include "../../socket/operacion.h"
+#include "configuracionInstancia.h"
+#include "handlerCoordinador.h"
+#include <commons/txt.h>
 
 t_log * log_inst;
 
 typedef struct {
 	int identificador;
 	char* ip_coordinador;
-	int puerto_coord;
-	char* ip_planif;
+	char* puerto_coord;
+	int socket_coordinador;
 	char* nombre_inst;
 	int int_dump;
 	char* path;
-} instancia;
+	t_list* tabla_entradas;
+} t_instancia;
+t_instancia instancia;
+
+typedef struct {
+	int largo_clave;
+	int largo_valor;
+	char* clave;
+	char* valor;
+} t_clave_valor;
 
 
 #endif /* INSTANCIA_INSTANCIA_H_ */

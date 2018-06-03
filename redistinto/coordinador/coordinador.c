@@ -32,8 +32,7 @@ void inicializar_configuracion(){
 }
 
 int manejar_conexion(Message * m, int socket){
-	char* nombre_modulo = desempaquetar_conexion(m);
-	char* nombre_instancia = desempaquetar_texto(m);
+	char* nombre_instancia = desempaquetar_conexion(m);
 	if (m->header->remitente == INSTANCIA) {
 		loguear_conexion(socket);
 		Message * m_ack = empaquetar_ack(COORDINADOR);
@@ -124,7 +123,7 @@ int validar_bloqueo_con_planificador(t_operacion* operacion){
 		return ERROR_DE_RECEPCION;
 	int contenido_respuesta = desempaquetar_resultado(respuesta);
 	loguear_resultado(contenido_respuesta);
-	return contenido_respuesta; ////CLAVE_YA_BLOQUEADA o OK */
+	return contenido_respuesta; ////CLAVE_DUPLICADA o OK */
 }
 
 int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* instancia){

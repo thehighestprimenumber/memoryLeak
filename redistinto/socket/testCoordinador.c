@@ -64,24 +64,18 @@ int mandar_operaciones_test(t_operacion * op){
 		}
 
 }
-int test_ESI_get(char* nombre_esi){
-	char* nombre_ESI = calloc(1, strlen(nombre_esi)+1);
-	memcpy(nombre_ESI, nombre_esi, strlen(nombre_esi)+1);
-	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), nombre_ESI, strlen(nombre_ESI)+1, op_GET);
+int test_ESI_get(){
+	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), " ", 1, op_GET);
 	return mandar_operaciones_test(op);
 }
 
-int test_ESI_set(char* nombre_esi){
-	char* nombre_ESI = calloc(1, strlen(nombre_esi)+1);
-	memcpy(nombre_ESI, nombre_esi, strlen(nombre_esi)+1);
+int test_ESI_set(){
 	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), "unvalor12345", strlen("unvalor12345")+1, op_SET);
 	return mandar_operaciones_test(op);
 }
 
-int test_ESI_store(char* nombre_esi){
-	char* nombre_ESI = calloc(1, strlen(nombre_esi)+1);
-	memcpy(nombre_ESI, nombre_esi, strlen(nombre_esi)+1);
-	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), "", 0, op_STORE);
+int test_ESI_store(){
+	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), " ", 1, op_STORE);
 	return mandar_operaciones_test(op);
 }
 

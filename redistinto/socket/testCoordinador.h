@@ -7,7 +7,8 @@
 int correr_tests_instancia();
 int test_empaquetado();
 int test_ESI_get();
-int test_ESI_set(char* nombre_esi);
+int test_ESI_set();
+int test_ESI_Store();
 int test_INST_connect(char*);
 
 #endif /* TESTCOORDINADOR_H_ */
