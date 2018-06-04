@@ -204,14 +204,8 @@ void* enviar_operacion_a_coordinador(t_operacion* operacion){
 
 void enviar_ruta_script_al_planificador(char* path){
 
-	Message* msg= (Message*) malloc(sizeof(Message));
-
-	msg->contenido = (char*) malloc(strlen(path) +1);
-	strcpy(msg->contenido, path);
-	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
-	msg->header->remitente = ESI;
-	msg->header->tipo_mensaje = TEXTO;
-	msg->header->size = strlen(msg->contenido) +1;
+	Message* msg = empaquetar_texto(path, strlen(msg->contenido) +1, ESI);
+	msg->header->tipo_mensaje = CONEXION;
 
 	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar la ruta del script.");
 	log_debug(log_esi, "Se envio la ruta del script.");
