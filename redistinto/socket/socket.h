@@ -25,7 +25,8 @@
 #define CLAVE_INEXISTENTE -14
 #define CLAVE_MUY_GRANDE -15
 
-#define socket_OK 0
+//#define socket_OK 0
+#define OK 0
 
 //Enums
 

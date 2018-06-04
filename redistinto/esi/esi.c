@@ -23,6 +23,7 @@ int main(int argc,char *argv[]) {
 	log_trace(log_esi,"La ip del coordinador es: %s",pConfig->coordinador_ip);
 	log_trace(log_esi,"El puerto del planificador es: %s",pConfig->planificador_puerto);
 	log_trace(log_esi,"La ip del planificador es: %s",pConfig->planificador_ip);
+	log_trace(log_esi,"El nombre del script es: %s",argv[1]);
 
 	pidcoordinador = pthread_create(&threadCoordinador, NULL, (void*)&conectar_a_coordinador, (void*) pConfig);
 		if (pidcoordinador < 0) {
@@ -137,7 +138,7 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 	strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
 	log_debug(log_esi, "mensaje recibido: %s", request);
 	//log_debug(log_inst, "%s", request);
-	return socket_OK; //TODO que devuelva lo que corresponda
+	return OK; //TODO que devuelva lo que corresponda
 	}
 }
 
