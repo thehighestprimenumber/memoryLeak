@@ -19,8 +19,6 @@ int main(void) {
 	cola_esi_blocked = list_create();
 	cola_finished = list_create();
 
-	leer_script_completo();
-
 	//conectar a coordinador
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	int socketCoordinador = conectar_a_coordinador(pConfig);
@@ -51,18 +49,29 @@ void inicializar_logger() {
 	log_planificador = log_create("/home/utnso/tp/Planificador.log", "Planificador: ", true, LOG_LEVEL_INFO);
 }
 
-void leer_script_completo() {
+char* armarPathScript(char* cadenaPath,char* nombreScript) {
+	char* cadenaScript = malloc(strlen(cadenaPath) + strlen(nombreScript) + 1);
+	memcpy(cadenaScript,cadenaPath,strlen(cadenaPath) + 1);
+	strcat(cadenaScript,nombreScript);
+	//strcat(cadenaScript,".txt");
+	return cadenaScript;
+}
+
+void leer_script_completo(char* nombreArchivo) {
 	//Abrir archivo para los esis
 	//script_a_procesar = txt_open_for_append(scriptTxt);
 	//if (script_a_procesar == NULL)
 	//	script_a_procesar = txt_open_for_append(scriptTxtDebug);
 
-	FILE *f = fopen(scriptTxtDebug, "rb");
+	FILE *f = fopen(armarPathScript(scriptTxtDebug,nombreArchivo), "rb");
 		if (f == NULL) {
-			f = fopen(scriptTxt, "rb");
+			f = fopen(armarPathScript(scriptTxt,nombreArchivo), "rb");
 			if (f == NULL) {
-				perror("fopen");
-				exit(EXIT_FAILURE);
+				//perror("fopen");
+				//exit(EXIT_FAILURE);
+				contenidoScript = malloc(strlen(" "));
+				memcpy(contenidoScript," ",strlen(" "));
+				return ERROR_ARCHIVO_NO_ENCONTRADO;
 			}
 		}
 
@@ -139,7 +148,7 @@ int manejador_de_eventos(int socket, Message* msg){
 
 			case CONEXION:
 				log_info(log_planificador, "Se conecto una ESI");
-				aceptar_conexion(socket);
+				aceptar_conexion(socket, msg->contenido);
 				//Switcheamos por el algoritmo
 				switch(algorimoEnUso){
 					case FIFO:
@@ -310,9 +319,10 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 	return pidCoordinador;
 }
 
-void aceptar_conexion(int socket) {
+void aceptar_conexion(int socket, char* nombreScript) {
 	//Por último envío mensaje de confirmación al esi que se conecto
-	Message* mensaje = empaquetar_texto("Se conecto al planificador correctamente\0", strlen("Se conecto al planificador correctamente\0"), PLANIFICADOR);
+	leer_script_completo(nombreScript);
+	Message* mensaje = empaquetar_texto(contenidoScript, strlen(contenidoScript), PLANIFICADOR);
 	mensaje->header->tipo_mensaje = ACK;
 	enviar_mensaje(socket, *mensaje);
 	free(mensaje);
@@ -536,7 +546,7 @@ void ejecutar_nueva_esi() {
 	if (esi_seleccionado > 0) {
 	//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 	//y comenzar a procesar instrucciones
-	Message* mensajeEjec = empaquetar_texto(contenidoScript, strlen(contenidoScript) + 1, PLANIFICADOR);
+	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
 	int res_ejecutar = enviar_mensaje(esi_seleccionado, *mensajeEjec);
