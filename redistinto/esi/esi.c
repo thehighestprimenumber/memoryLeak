@@ -11,6 +11,10 @@ int main(int argc,char *argv[]) {
 		config = config_create("../configESI.txt");
 	}
 
+	path_script = malloc(strlen(argv[1]) + 1);
+	memcpy(path_script,argv[1],strlen(argv[1]));
+	((char*) path_script)[strlen(argv[1])] = '\0';
+
 	pConfig->coordinador_ip = leer_propiedad_string(config, "IP_coordinador");
 	pConfig->coordinador_puerto = leer_propiedad_string(config, "puerto_coordinador");
 	pConfig->planificador_ip = leer_propiedad_string(config, "IP_planificador");
@@ -41,8 +45,8 @@ int main(int argc,char *argv[]) {
 	pthread_join(threadCoordinador,NULL);
 
 	//Recibo la ruta del script a ejecutar y se la envio al planificador
-	char* path_script = argv[1];
-	enviar_ruta_script_al_planificador(path_script);
+	//char* path_script = argv[1];
+	//enviar_ruta_script_al_planificador(path_script);
 
 	return EXIT_SUCCESS;
 }
@@ -68,17 +72,10 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 		log_info(log_esi, "ESI se conecto con el Planificador");
 	}
 
-	Message* msg= (Message*) malloc(sizeof(Message));
+	enviar_ruta_script_al_planificador(path_script);
 
-	msg->contenido = (char*) malloc(strlen("Envio mensaje al Planificador desde ESI") +1);
-	strcpy(msg->contenido, "Envio mensaje al Planificador desde ESI");
-	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
-	msg->header->remitente = ESI;
-	msg->header->tipo_mensaje = TEST;
-	msg->header->size = strlen(msg->contenido)+1;
+	free(path_script);
 
-	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
-	log_debug(log_esi, "Se envio el mensaje");
 	while (1) {
 		Message msg;
 		log_debug(log_esi, "esperando mensaje");
@@ -89,16 +86,18 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
      	//continue;
 			return ERROR_DE_RECEPCION;
 		}
+
+		//Funcion manejador_mensajes
+		manejador_mensajes(msg);
+
 		//TODO parsear mensaje y hacer algo.
-		char * request = malloc(msg.header->size);
-		strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
-		//strcpy(request, (char *) msg.contenido);
-		log_debug(log_esi, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
-		//log_debug(log_inst, "%s", request);
+		//char * request = malloc(msg.header->size);
+		//strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
+		//log_debug(log_esi, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
 
 	}
 
-	free_msg(&msg);
+	//free_msg(&msg);
 
 }
 
@@ -192,19 +191,20 @@ void* enviar_operacion_a_coordinador(t_operacion* operacion){
 	if (res < 0) return ERROR_DE_ENVIO;
 
 	//TODO: Segun la respuesta que recibo deberia bloquear la ESI o desconectarla
-	while (1) {
+	//El while ya lo hace cuando recorre las sentencias del script
+	//while (1) {
 		Message *rta;
 		int resultado = await_msg(cliente_coordinador, rta);
 		free_msg(&rta);
 		if (resultado < 0){
 			return ERROR_DE_RECEPCION;
 		}
-	}
+	//}
 }
 
 void enviar_ruta_script_al_planificador(char* path){
 
-	Message* msg = empaquetar_texto(path, strlen(msg->contenido) +1, ESI);
+	Message* msg = empaquetar_texto(path, strlen(path), ESI);
 	msg->header->tipo_mensaje = CONEXION;
 
 	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar la ruta del script.");
@@ -224,10 +224,10 @@ int cantidad_lineas_script(char* script){
 
 }
 
-void correr_script(char* script){
+void correr_script(){
 
-	int n_lineas = cantidad_lineas_script(script);
-	char** split = string_n_split(script, n_lineas,(char*) '\n');
+	//int n_lineas = cantidad_lineas_script(script);
+	char** split = string_n_split(script.script_contenido, script.script_largo - 1,(char*) "\n");
 
 	for(int i = 0; split[i] != NULL; i++){
 		enviar_operacion_a_coordinador(convertir_operacion(parse(split[i])));
@@ -235,3 +235,35 @@ void correr_script(char* script){
 
 }
 
+void manejador_mensajes(Message mensaje) {
+	log_info(log_esi, "LLegó un mensaje");
+
+	if(mensaje.header->remitente == PLANIFICADOR) {
+		//Recibe contenido del script
+		if (mensaje.header->tipo_mensaje == CONEXION) {
+			log_info(log_esi, "Recibido el contenido del script");
+
+			armar_estructura_script(mensaje.contenido);
+		}
+
+		//Recibo ok para ejecutar sus instrucciones
+		if (mensaje.header->tipo_mensaje == EJECUTAR) {
+			correr_script();
+		}
+	}
+
+	if(mensaje.header->remitente == COORDINADOR) {
+		if (mensaje.header->tipo_mensaje == RESULTADO) {
+
+		}
+	}
+}
+
+void armar_estructura_script(char* contenidoScript) {
+	script.script_contenido = malloc(strlen(contenidoScript));
+	memcpy(script.script_contenido,"",1);
+	strcat(script.script_contenido,contenidoScript);
+	//memcpy(script.script_contenido,contenidoScript,strlen(contenidoScript));
+	((char*) script.script_contenido)[strlen(script.script_contenido)] = '\0';
+	script.script_largo = cantidad_lineas_script(script.script_contenido);
+}

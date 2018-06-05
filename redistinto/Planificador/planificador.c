@@ -323,7 +323,7 @@ void aceptar_conexion(int socket, char* nombreScript) {
 	//Por último envío mensaje de confirmación al esi que se conecto
 	leer_script_completo(nombreScript);
 	Message* mensaje = empaquetar_texto(contenidoScript, strlen(contenidoScript), PLANIFICADOR);
-	mensaje->header->tipo_mensaje = ACK;
+	mensaje->header->tipo_mensaje = CONEXION;
 	enviar_mensaje(socket, *mensaje);
 	free(mensaje);
 }
