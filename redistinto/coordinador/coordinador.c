@@ -32,8 +32,12 @@ void inicializar_configuracion(){
 }
 
 int manejar_conexion(Message * m, int socket){
-	char* nombre_instancia = desempaquetar_conexion(m);
+	if (m->header->remitente == PLANIFICADOR) {
+		socket_planificador = socket;
+	}
+
 	if (m->header->remitente == INSTANCIA) {
+		char* nombre_instancia = desempaquetar_conexion(m);
 		loguear_conexion(socket);
 		Message * m_ack = empaquetar_ack(COORDINADOR);
 		enviar_mensaje(socket, *m_ack);
@@ -108,22 +112,31 @@ int validar_bloqueo_con_planificador(t_operacion* operacion){
 	interna.clave = operacion->clave;
 	interna.valor = operacion->valor;
 
-	if (interna.tipo==op_SET) { //para no mandar el valor de la clave que podria ser bastante largo al pedo
+	if (interna.tipo==op_GET) { //para no mandar el valor de la clave que podria ser bastante largo al pedo
 		free (interna.valor);
 		interna.valor = calloc(1,1);
 		interna.largo_valor = 0;
 	}
 
 	Message * mensaje = empaquetar_op_en_mensaje(&interna, COORDINADOR);
-	if (enviar_mensaje(socket_planificador, *mensaje)<0) return ERROR_DE_ENVIO;
+	int envio = enviar_mensaje(socket_planificador, *mensaje);
+
+	if (envio < 0) {
+		return ERROR_DE_ENVIO;
+	}
+
 		//log_debug(logger_coordinador, "se solicita bloqueo de clave %s", (char*) operacion->clave);
 
-	Message * respuesta;
-	if (await_msg(socket_planificador, respuesta)<0)
-		return ERROR_DE_RECEPCION;
-	int contenido_respuesta = desempaquetar_resultado(respuesta);
-	loguear_resultado(contenido_respuesta);
-	return contenido_respuesta; ////CLAVE_DUPLICADA o OK */
+	//Message * respuesta;
+	//int res = await_msg(socket_planificador, respuesta);
+
+	//if (res < 0) {
+	//	return ERROR_DE_RECEPCION;
+	//}
+
+	//int contenido_respuesta = desempaquetar_resultado(respuesta);
+	//loguear_resultado(contenido_respuesta);
+	return resultadoGlobal; ////CLAVE_DUPLICADA o OK */
 }
 
 int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* instancia){

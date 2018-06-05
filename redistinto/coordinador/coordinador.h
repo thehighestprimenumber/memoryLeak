@@ -24,7 +24,9 @@
 
 void salir(int return_nr);
 
+sem_t sem_resultado;
 
+int resultadoGlobal;
 
 enum algoritmo_coordinador {
 	EQUITATIVE_LOAD, LEAST_SPACE_USED, KEY_EXPLICIT

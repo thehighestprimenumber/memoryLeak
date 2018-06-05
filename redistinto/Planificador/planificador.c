@@ -182,6 +182,8 @@ int manejador_de_eventos(int socket, Message* msg){
 			case OPERACION:
 				log_info(log_planificador, "Me pidió validar un get o un set");
 
+				sleep(5);
+
 				//Aca diferenció que operación me pide verificar el coordinador
 				//y actuo según el caso
 				int resultado_operacion = manejar_operacion(socket,msg);
@@ -189,8 +191,9 @@ int manejador_de_eventos(int socket, Message* msg){
 
 				//Retorno mensaje con constante con resultado de la operacion
 				//Para que la maneje el coordinador
-				Message* mensaje = empaquetar_texto(string_itoa(resultado_operacion), strlen(string_itoa(resultado_operacion)), PLANIFICADOR);
-				mensaje->header->tipo_mensaje = RESULTADO;
+				//Message* mensaje = empaquetar_texto(string_itoa(resultado_operacion), strlen(string_itoa(resultado_operacion)), PLANIFICADOR);
+				//mensaje->header->tipo_mensaje = RESULTADO;
+				Message* mensaje = empaquetar_resultado(PLANIFICADOR, resultado_operacion);
 				int result = enviar_mensaje(socket, *mensaje);
 				if (result) {
 					log_info(log_planificador, "error al enviar resultado al coordinador");
@@ -314,6 +317,15 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 		return -1;
 	} else {
 		log_info(log_planificador, "Planificador se conecto con el Coordinador");
+	}
+
+	Message * mensaje = empaquetar_texto("Planificador conecta a coordinador\0", strlen("Planificador conecta a coordinador\0"), PLANIFICADOR);
+	mensaje->header->tipo_mensaje = CONEXION;
+	int resultado = enviar_mensaje(pidCoordinador, *mensaje);
+
+	if (resultado < 0) {
+		log_error(log_planificador, "Fallo envio mensaje conexión al Coordinador");
+		return -1;
 	}
 
 	return pidCoordinador;
