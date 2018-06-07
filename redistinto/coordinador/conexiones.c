@@ -44,9 +44,6 @@ void* recibir_conexion(void* con) {
 			case VALIDAR_BLOQUEO:
 			case TEXTO:
 			case RESULTADO:
-				//resultadoGlobal = desempaquetar_resultado(msg);
-				//loguear_resultado(resultadoGlobal);
-				//sem_post(&sem_resultado);
 				break;
 			case OPERACION:
 				manejar_operacion(msg, conexion->socket);
