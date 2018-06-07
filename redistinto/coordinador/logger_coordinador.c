@@ -1,14 +1,23 @@
 #include "logger_coordinador.h"
 
 char* nombres_operacion[] = { "GET", "SET", "STORE" };
-char* nombres_resultados[] = { "ERROR_COORDINADOR" - 20, "NO_HAY_INSTANCIAS"
-		- 21, "CLAVE_BLOQUEADA" - 22 };
+char* nombres_resultados[] = {	"OK" 	,
+								"ERROR DE ENVIO" 		-11,
+								"ERROR DE RECEPCION" 	-12,
+								"CLAVE DUPLICADA" 		-13,
+								"CLAVE INEXISTENTE" 	-14,
+								"CLAVE MUY GRANDE" 		-15,
+								"ERROR COORDINADOR" 	-20,
+								"NO HAY INSTANCIAS"		-21,
+								"CLAVE BLOQUEADA" 		-22,
+								"ERROR DE CONEXION" 	-10,
+							};
 
 char* desempaquetar_varios(Message * m);
 
 void loguear_conexion(int socket) {
 	log_info(log_coordinador,
-			"se recibe conexion de nueva instancia, socket %d", socket);
+			"el coordinador recibe conexion de nueva instancia, socket %d", socket);
 }
 
 void loguear_recepcion(Message * m, int socket) {
@@ -16,12 +25,12 @@ void loguear_recepcion(Message * m, int socket) {
 	if (m->header->tipo_mensaje == OPERACION) {
 		t_operacion * op = desempaquetar_operacion(m);
 		log_info(log_coordinador,
-				"se recibe mensaje de %d para la operacion %s %s %s", socket,
+				"el coordinador recibio un mensaje de %d para la operacion %s %s %s", socket,
 				nombres_operacion[op->tipo], op->clave, op->valor);
 	} else {
 		char* contenido = desempaquetar_varios(m);
 		log_info(log_coordinador,
-				"se recibio un mensaje al coordinador de %d: %s", socket,
+				"el coordinador recibio un mensaje de %d: %s", socket,
 				contenido);
 	}
 }
@@ -36,7 +45,7 @@ void loguear_resultado(int resultado) {
 
 void loguear_inst_op(char* nombre, t_operacion* op) {
 	log_info(log_coordinador,
-			"se selecciona la instancia %s para la operacion %s %s %s", nombre,
+			"se selecciona la instancia '%s' para la operacion %s %s %s", nombre,
 			nombres_operacion[op->tipo], op->clave, op->valor);
 }
 
@@ -63,7 +72,7 @@ void loguear_envio_OK(Message * m, int socket) {
 	} else {
 		char* contenido = desempaquetar_varios(m);
 		log_info(log_coordinador,
-				"se envio mensaje desde el coordinador mensaje a %d: %s",
+				"el coordinador envio mensaje a %d: %s",
 				socket, contenido);
 
 	}

@@ -141,7 +141,7 @@ void registar_instancia_y_quedar_esperando(char* nombre_instancia, int socket_in
 			fila->esta_activa = 1;
 			strcpy(fila->nombre_instancia, (char*) nombre_instancia);
 			fila->claves = list_create();
-			sem_init(&fila->lock, 0, 0);
+			sem_init(&(fila->lock), 0, 0);
 			list_add(coordinador.tabla_instancias, fila);
 	}
 	esperar_operacion(fila);
@@ -152,7 +152,7 @@ int desconectar_instancia(int socket){
 	fila_tabla_instancias* fila = buscar_instancia_por_valor_criterio(&socket, criterio_socket);
 	if (fila!=NULL)
 		return cambiar_estado_instancia(fila, 0);
-	return ERROR_COORDINADOR;
+	return OK;
 }
 
 

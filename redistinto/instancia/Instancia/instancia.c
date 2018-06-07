@@ -52,8 +52,8 @@ int inicializar(){
 	}
 	instancia.nombre_inst = leer_propiedad_string(config, "nombre");
 
-	instancia.ip_coordinador = leer_propiedad_string(config, "IP_coordinador");
-	instancia.puerto_coord= leer_propiedad_string(config, "puerto_coordinador");
+	instancia.ip_coordinador = IP; //leer_propiedad_string(config, "IP_coordinador");
+	instancia.puerto_coord= PUERTO_COORDINADOR; //leer_propiedad_string(config, "puerto_coordinador");
 
 	instancia.tabla_entradas = list_create();
 	instancia.socket_coordinador = conectar_a_coordinador(instancia.ip_coordinador, instancia.puerto_coord);
@@ -87,7 +87,7 @@ int manejar_operacion(Message * msg) {
 		if (send_msg(instancia.socket_coordinador, *m_resultado)<0)
 			return ERROR_DE_ENVIO;
 		log_debug(log_inst, "Se envio el mensaje");
-
+		return OK;
 }
 
 int agregar_clave_a_lista(char* clave, int largo_clave){

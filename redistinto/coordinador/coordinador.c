@@ -9,14 +9,17 @@ extern int iniciar_servicio();
 void inicializar_configuracion();
 void manejar_kill(int signal);
 int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* instancia);
+void registrar_coordinador_y_quedar_esperando(int socket);
 
 int main() {
 	inicializar_configuracion();
 	if (signal(SIGINT, manejar_kill) == SIG_ERR)
 		log_error(log_coordinador, "error en registrar manejador de kill");
 	iniciar_servicio();//cuando llegue un mensaje se va a correr recibir_mensaje (en conexiones.c)
-	sem_init(&coordinador.lock_operaciones, 1, 1);
-	sem_post(&coordinador.lock_operaciones);
+	sem_init(&coordinador.lock_operaciones, 0, 1);
+	sem_init(&coordinador.lock_planificador, 0, 1);
+
+	//sem_post(&coordinador.lock_operaciones);
 }
 
 void inicializar_configuracion(){
@@ -39,9 +42,12 @@ int manejar_conexion(Message * m, int socket){
 		enviar_mensaje(socket, *m_ack);
 		//FIXME free_msg(&m_ack);
 		registar_instancia_y_quedar_esperando(nombre_instancia, socket);
+	} else if (m->header->remitente == PLANIFICADOR) {
+		registrar_coordinador_y_quedar_esperando(socket);
 	}
 	return 0;
 }
+
 
 void manejar_desconexion(int socket){
 	close(socket);
@@ -59,7 +65,7 @@ enum tipoRemitente remitente = msg->header->remitente;
 	default:
 		break; //TODO
 	}
-	free(msg);
+	//FIXME free(&msg);
 
 	return res;
 }
@@ -69,14 +75,18 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 
 	//enviar_mensaje(socket_solicitante, *empaquetar_ack(COORDINADOR));
 	char* clave = op->clave;
-	int resultado = validar_bloqueo_con_planificador(op);
+	coordinador.operacion_global_threads = op;
+	sem_post(&coordinador.lock_planificador);
+	sem_wait(&coordinador.lock_operaciones);
+	int resultado = coordinador.resultado_global;
 	if (resultado == OK) {
 //	log_info(logger_coordinador, "procesando solicitud: %s %s %s de ESI socket# %d"
 //			, tipoMensajeNombre[op->tipo], clave, op->valor, socket);
 		fila_tabla_instancias * instancia;
 		if (op->tipo == op_GET){
 			instancia = seleccionar_instancia(clave);
-			list_add(instancia->claves, clave);
+			if (instancia != NULL)
+				list_add(instancia->claves, clave);
 		} else {
 			instancia = buscar_instancia_por_valor_criterio(op->clave, &criterio_clave);
 		}
@@ -115,19 +125,31 @@ int validar_bloqueo_con_planificador(t_operacion* operacion){
 	}
 
 	Message * mensaje = empaquetar_op_en_mensaje(&interna, COORDINADOR);
-	if (enviar_mensaje(socket_planificador, *mensaje)<0) return ERROR_DE_ENVIO;
+	if (enviar_mensaje(coordinador.socket_planificador, *mensaje)<0)
+		return ERROR_DE_ENVIO;
 		//log_debug(logger_coordinador, "se solicita bloqueo de clave %s", (char*) operacion->clave);
 
 	Message * respuesta;
-	if (await_msg(socket_planificador, respuesta)<0)
+	if (await_msg(coordinador.socket_planificador, respuesta)<0)
 		return ERROR_DE_RECEPCION;
 	int contenido_respuesta = desempaquetar_resultado(respuesta);
 	loguear_resultado(contenido_respuesta);
+	coordinador.resultado_global = contenido_respuesta;
 	return contenido_respuesta; ////CLAVE_DUPLICADA o OK */
 }
 
+void registrar_coordinador_y_quedar_esperando(int socket){
+	coordinador.socket_planificador = socket;
+	while (	coordinador.socket_planificador != 0) {
+		sem_wait(&coordinador.lock_planificador);
+		coordinador.resultado_global = validar_bloqueo_con_planificador(coordinador.operacion_global_threads);
+		sem_post(&coordinador.lock_operaciones);
+	}
+
+}
+
 int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* instancia){
-	//free(&coordinador.operacion_global_threads);
+
 	coordinador.operacion_global_threads = operacion;
 	sem_post(&instancia->lock);
 

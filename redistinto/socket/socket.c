@@ -234,7 +234,7 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 			}else{
 				manejadorDeEvento(socketCoordinador, msg);
 			}
-			free_msg(msg);
+			free_msg(&msg);
 		}
 
 		//Recorremos preguntando por cada conexion si ocurrio algun evento

@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,7 +42,9 @@ typedef struct {
 	int tamanio_entrada;
 	int retardo;
 	t_operacion * operacion_global_threads;
+	int socket_planificador;
 	sem_t lock_operaciones;
+	sem_t lock_planificador;
 	int resultado_global;
 } t_coordinador;
 t_coordinador coordinador;
