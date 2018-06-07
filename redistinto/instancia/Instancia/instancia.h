@@ -11,6 +11,8 @@
 #include "handlerCoordinador.h"
 #include <commons/txt.h>
 
+#define OK 0
+
 t_log * log_inst;
 
 typedef struct {

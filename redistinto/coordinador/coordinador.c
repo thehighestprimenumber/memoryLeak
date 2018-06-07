@@ -35,8 +35,8 @@ void inicializar_configuracion(){
 }
 
 int manejar_conexion(Message * m, int socket){
-	char* nombre_instancia = desempaquetar_conexion(m);
 	if (m->header->remitente == INSTANCIA) {
+		char* nombre_instancia = desempaquetar_conexion(m);
 		loguear_conexion(socket);
 		Message * m_ack = empaquetar_ack(COORDINADOR);
 		enviar_mensaje(socket, *m_ack);
@@ -125,6 +125,7 @@ int validar_bloqueo_con_planificador(t_operacion* operacion){
 	}
 
 	Message * mensaje = empaquetar_op_en_mensaje(&interna, COORDINADOR);
+
 	if (enviar_mensaje(coordinador.socket_planificador, *mensaje)<0)
 		return ERROR_DE_ENVIO;
 		//log_debug(logger_coordinador, "se solicita bloqueo de clave %s", (char*) operacion->clave);

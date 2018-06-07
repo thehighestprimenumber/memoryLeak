@@ -87,8 +87,8 @@ int identificador;
 char* configTxt = "./configPlanificador.txt";
 char* configTxtDebug = "../configPlanificador.txt";
 
-char* scriptTxt = "./script_a_parsear.txt";
-char* scriptTxtDebug = "../script_a_parsear.txt";
+char* scriptTxtDebug = "../../scripts/";
+char* scriptTxt = "../scripts/";
 
 char* contenidoScript;
 
@@ -103,7 +103,8 @@ void exit_proceso();
 
 void estructura_planificador();
 
-void leer_script_completo();
+char* armarPathScript(char* cadenaPath,char* nombreScript);
+void leer_script_completo(char* nombreScript);
 void puerto_planif_read(t_config* configuracion);
 void algoritmo_read(t_config* configuracion);
 void estimacion_read(t_config* configuracion);
@@ -129,7 +130,7 @@ int manejar_nueva_esi_fifo(int socket); //Añade una esi a la lista de prioridad
 int manejar_mensaje_esi_fifo(int socket, Message *msg); //Se encarga de manejar el dato de la ESI y replanificar al respecto
 void manejar_desconexion_esi_fifo(int socket); //Elimina a la esi segun plantea fifo
 int estimar_rafaga(char* algoritmo); //Estima la duración de la próxima ráfaga usando formula de la media exponencial
-void aceptar_conexion(int socket);
+void aceptar_conexion(int socket, char* nombreScript);
 int validar_clave(char* clave);
 int manejar_operacion(int socket,Message* msg);
 void finalizar_esi(int socket_esi);

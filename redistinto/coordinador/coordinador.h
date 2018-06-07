@@ -25,8 +25,6 @@
 
 void salir(int return_nr);
 
-
-
 enum algoritmo_coordinador {
 	EQUITATIVE_LOAD, LEAST_SPACE_USED, KEY_EXPLICIT
 };
