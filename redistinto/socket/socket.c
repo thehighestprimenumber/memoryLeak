@@ -278,8 +278,10 @@ void close_conection(void *conexion){
 
 void free_msg(Message **msg){
 	if(msg != NULL && (*msg) != NULL){
-		if((*msg)->header != NULL) free_memory(&((*msg)->header)); //FIXME
-		if((*msg)->contenido != NULL) free_memory(&((*msg)->contenido));
+		if((*msg)->header != NULL){
+			if((*msg)->contenido != NULL && (*msg)->header->size > 0) free_memory(&((*msg)->contenido));
+			free_memory(&((*msg)->header));
+		}
 		free_memory(msg);
 	}
 }

@@ -24,7 +24,8 @@
 #define CLAVE_DUPLICADA -13
 #define CLAVE_INEXISTENTE -14
 #define CLAVE_MUY_GRANDE -15
-#define ERROR_ARCHIVO_NO_ENCONTRADO
+#define ERROR_ARCHIVO_NO_ENCONTRADO -16
+#define ERROR_VALOR_NULO -17
 
 #define OK 0
 
@@ -33,7 +34,7 @@
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
 typedef enum tipoRemitente {DESCONOCIDO, ESI, PLANIFICADOR, INSTANCIA, COORDINADOR} tipoRemitente;
 
-typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, OPERACION, VALIDAR_BLOQUEO, TEST, TEXTO, RESULTADO, EJECUTAR} tipoMensaje;
+typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, OPERACION, VALIDAR_BLOQUEO, TEST, TEXTO, RESULTADO, EJECUTAR, CONFSTORAGE} tipoMensaje;
 
 //Estructura del header
 typedef struct {

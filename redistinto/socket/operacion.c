@@ -9,9 +9,16 @@
 
 void free_operacion(t_operacion ** operacion) {
 	if (operacion != NULL && (*operacion) != NULL) {
-		if ((*operacion)->valor != NULL)
+		if ((*operacion)->valor != NULL){
 			free((*operacion)->valor);
+			(*operacion)->valor = NULL;
+		}
+		if ((*operacion)->clave != NULL){
+			free((*operacion)->clave);
+			(*operacion)->clave = NULL;
+		}
 		free(*operacion);
+		*operacion = NULL;
 	}
 }
 
@@ -163,4 +170,26 @@ Message* empaquetar_conexion(tipoRemitente remitente, char* idRemitente) {
 	Message *msg = empaquetar_texto(idRemitente, strlen(idRemitente), remitente);
 	msg->header->tipo_mensaje = CONEXION;
 	return msg;
+}
+
+Message* empaquetar_config_storage(tipoRemitente remitente, int cantEntradas, int tamEntrada){
+	Message *msg = malloc(sizeof(Message));
+	msg->header = malloc(sizeof(ContentHeader));
+	ConfigStorage *config = malloc(sizeof(ConfigStorage));
+
+	msg->header->remitente = remitente;
+	msg->header->size = sizeof(ConfigStorage);
+	msg->header->tipo_mensaje = CONFSTORAGE;
+
+	config->cantEntradas = cantEntradas;
+	config->tamEntrada = tamEntrada;
+	msg->contenido = config;
+
+	return msg;
+}
+
+ConfigStorage* desempaquetar_config_storage(Message *msg){
+	ConfigStorage *cs = malloc(sizeof(ConfigStorage));
+	memcpy(cs,msg->contenido, sizeof(ConfigStorage));
+	return cs;
 }
