@@ -343,27 +343,27 @@ void agregar_ready(int idEsi) {
 }
 
 void agregar_blocked(int idEsi, char* clave) {
-	struct_blocked elemento;
-	elemento.pid = idEsi;
-	elemento.clave = (char*)malloc(strlen(clave)+1);
-	strcpy(elemento.clave,clave);
-	list_add(cola_blocked,&elemento);
+	struct_blocked* elemento = malloc(sizeof(struct_blocked));
+	elemento->pid = idEsi;
+	elemento->clave = (char*)malloc(strlen(clave)+1);
+	strcpy(elemento->clave,clave);
+	list_add(cola_blocked,elemento);
 	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de bloqueados",idEsi,clave);
 }
 
 void agregar_esi_blocked(int idEsi, char* clave) {
-	struct_blocked elemento;
-	elemento.pid = idEsi;
-	elemento.clave = (char*)malloc(strlen(clave)+1);
-	strcpy(elemento.clave,clave);
-	list_add(cola_esi_blocked,&elemento);
+	struct_blocked* elemento = malloc(sizeof(struct_blocked));
+	elemento->pid = idEsi;
+	elemento->clave = (char*)malloc(strlen(clave)+1);
+	strcpy(elemento->clave,clave);
+	list_add(cola_esi_blocked,elemento);
 	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de esis bloqueados por clave tomada anteriormente",idEsi,clave);
 }
 
 void agregar_finished(int idEsi) {
-	struct_finished elemento;
-	elemento.pid = idEsi;
-	list_add(cola_blocked,&elemento);
+	struct_finished* elemento = malloc(sizeof(struct_finished));
+	elemento->pid = idEsi;
+	list_add(cola_blocked,elemento);
 	log_debug(log_planificador,"\nSe agrego el esi %d, a la lista de finalizados",idEsi);
 }
 
@@ -570,8 +570,8 @@ bool clave_ya_bloqueada(struct_blocked elemento) {
 	return (strcmp(operacionEnMemoria->clave,elemento.clave) == 0);
 }
 
-bool clave_set_disponible(struct_blocked elemento) {
-	return (strcmp(operacionEnMemoria->clave,elemento.clave) == 0 && (elemento.pid == esiRunning));
+bool clave_set_disponible(struct_blocked* elemento) {
+	return (strcmp(operacionEnMemoria->clave,elemento->clave) == 0 && (elemento->pid == esiRunning));
 }
 
 void desbloquear_esi() {
