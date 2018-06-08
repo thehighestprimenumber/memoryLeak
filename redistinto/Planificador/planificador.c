@@ -161,7 +161,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				break;
 
 			case DESCONEXION:
-				log_info(log_planificador, "Se desconecto una ESI");
+				loguear_desconexion(socket);
 				switch(algorimoEnUso){
 					case FIFO:
 						manejar_desconexion_esi_fifo(socket);
@@ -187,12 +187,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				//Aca diferenció que operación me pide verificar el coordinador
 				//y actuo según el caso
 				int resultado_operacion = manejar_operacion(socket,msg);
-				//Saco el free porque lo hace en el socket
 
-				//Retorno mensaje con constante con resultado de la operacion
-				//Para que la maneje el coordinador
-				//Message* mensaje = empaquetar_texto(string_itoa(resultado_operacion), strlen(string_itoa(resultado_operacion)), PLANIFICADOR);
-				//mensaje->header->tipo_mensaje = RESULTADO;
 				Message* mensaje = empaquetar_resultado(PLANIFICADOR, resultado_operacion);
 				int result = enviar_mensaje(socket, *mensaje);
 				if (result) {
@@ -217,14 +212,15 @@ int manejador_de_eventos(int socket, Message* msg){
 }
 
 int enviar_mensaje(int socket, Message msg) {
-	log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg.contenido);
+	//log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg.contenido);
 	int res = send_msg(socket, msg);
 		if (res<0) {
-			log_info(log_planificador, "error al enviar mensaje a %d", socket);
+			//log_info(log_planificador, "error al enviar mensaje a %d", socket);
+			loguear_error_envio(&msg, socket);
 			return ERROR_DE_ENVIO;
 		}
-	log_info(log_planificador, "se envio el mensaje desde el planificador mensaje a %d: %s", socket, msg.contenido);
-
+	//log_info(log_planificador, "se envio el mensaje desde el planificador mensaje a %d: %s", socket, msg.contenido);
+	loguear_envio_OK(&msg, socket);
 	return OK;
 }
 

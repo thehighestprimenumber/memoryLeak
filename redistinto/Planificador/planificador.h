@@ -27,13 +27,13 @@
 #include "consola.h"
 #include "../socket/socket.h"
 #include "../socket/operacion.h"
+#include "logger_planificador.h"
 
 #define OK 0
 
 #define ERROR -20
 
 char* arch_config;
-t_log * log_planificador;
 pthread_t threadConsola;
 int pidConsola;
 int pidCoordinador;
