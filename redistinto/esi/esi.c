@@ -73,10 +73,12 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 		log_info(log_esi, "ESI se conecto con el Planificador");
 	}
 
+	enviar_ruta_script_al_planificador(path_script);
 	Message* msg = empaquetar_texto("Envio mensaje al Planificador desde ESI", strlen("Envio mensaje al Planificador desde ESI"), ESI);
 
 	//a confirmar. Habria que cambiar tipo TEST por CONEXION en todos lados
 	msg->header->tipo_mensaje = CONEXION;
+	free(path_script);
 
 	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
 	log_debug(log_esi, "Se envio el mensaje");
@@ -90,6 +92,8 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 			log_debug(log_esi, "error de recepcion");
 			return ERROR_DE_RECEPCION;
 		}
+
+		manejador_mensajes(msg);
 
 		char * request = desempaquetar_texto(&msg);
 		log_debug(log_esi, "mensaje recibido: %s", request);
