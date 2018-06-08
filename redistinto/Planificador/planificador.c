@@ -104,16 +104,15 @@ int iniciar(int socketCoordinador){
 }
 
 int manejador_de_eventos(int socket, Message* msg){
-	log_info(log_planificador, "Ocurrio un evento");
+	log_info(log_planificador, "Ocurrio un evento del tipo: %d", msg->header->tipo_mensaje);
 
 	//En el caso de las operaciones el socket ya escucha el mensaje por lo que esto no va
-	if (msg->header->tipo_mensaje != OPERACION)
+	if (msg->header->tipo_mensaje != OPERACION && msg->header->tipo_mensaje != RESULTADO)
 	{
 		int res = await_msg(socket, msg);
 		if (res<0) {
 			log_info(log_planificador, "RIP socket %d", socket);
 			close(socket);
-			free_msg(&msg);
 			return ERROR_DE_RECEPCION;
 		}
 	}
@@ -182,7 +181,7 @@ int manejador_de_eventos(int socket, Message* msg){
 			case OPERACION:
 				log_info(log_planificador, "Me pidió validar un get o un set");
 
-				sleep(5);
+				sleep(1);
 
 				//Aca diferenció que operación me pide verificar el coordinador
 				//y actuo según el caso

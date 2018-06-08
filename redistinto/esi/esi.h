@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include "../socket/operacion.h"
 #include "../parsi/src/parsi/parser.h"
+#include  <signal.h>
+#include <semaphore.h>
 
 t_log * log_esi;
 
@@ -42,6 +44,7 @@ typedef struct {
 } esi_configuracion;
 
 esi_script script;
+sem_t lock_resultados;
 
 char* leer_propiedad_string (t_config *configuracion, char* propiedad);
 int conectar_a_planificador(esi_configuracion* pConfig);

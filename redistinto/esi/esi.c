@@ -7,6 +7,8 @@ int main(int argc,char *argv[]) {
 	esi_configuracion* pConfig = (esi_configuracion*) malloc(sizeof(esi_configuracion));;
 	t_config* config = config_create("./configESI.txt");
 
+	sem_init(&lock_resultados, 0, 1);
+
 	if (config == NULL) {
 		config = config_create("../configESI.txt");
 	}
@@ -74,14 +76,14 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 	}
 
 	enviar_ruta_script_al_planificador(path_script);
-	Message* msg = empaquetar_texto("Envio mensaje al Planificador desde ESI", strlen("Envio mensaje al Planificador desde ESI"), ESI);
+	//Message* msg = empaquetar_texto("Envio mensaje al Planificador desde ESI", strlen("Envio mensaje al Planificador desde ESI"), ESI);
 
 	//a confirmar. Habria que cambiar tipo TEST por CONEXION en todos lados
-	msg->header->tipo_mensaje = CONEXION;
+	//msg->header->tipo_mensaje = CONEXION;
 	free(path_script);
 
-	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
-	log_debug(log_esi, "Se envio el mensaje");
+	//if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
+	//log_debug(log_esi, "Se envio el mensaje");
 
 	while (1) {
 		Message msg;
@@ -100,7 +102,7 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 
 	}
 
-	free_msg(&msg);
+	//free_msg(&msg);
 
 }
 
@@ -116,7 +118,7 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 	}
 
 	Message* msg = empaquetar_texto("Hola coordinador", strlen("Hola coordinador"), ESI);
-	msg->header->tipo_mensaje = TEST;
+	msg->header->tipo_mensaje = CONEXION;
 
 	if (send_msg(cliente_coordinador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
 	log_debug(log_esi, "Se envio el mensaje");
@@ -130,11 +132,11 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 			continue;
 			return ERROR_DE_RECEPCION;
 		}
-	char * request = malloc(msg.header->size);
-	strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
-	log_debug(log_esi, "mensaje recibido: %s", request);
 
-	return OK;
+		manejador_mensajes(msg);
+
+		char * request = desempaquetar_texto(&msg);
+		log_debug(log_esi, "mensaje recibido: %s", request);;
 	}
 }
 
@@ -187,16 +189,13 @@ void* enviar_operacion_a_coordinador(t_operacion* operacion){
 	int res = send_msg(cliente_coordinador, *msg);
 	if (res < 0) return ERROR_DE_ENVIO;
 
-	//TODO: Segun la respuesta que recibo deberia bloquear la ESI o desconectarla
-	//El while ya lo hace cuando recorre las sentencias del script
-	//while (1) {
-		Message *rta;
-		int resultado = await_msg(cliente_coordinador, rta);
-		free_msg(&rta);
-		if (resultado < 0){
-			return ERROR_DE_RECEPCION;
-		}
+	//Message *rta;
+	//int resultado = await_msg(cliente_coordinador, rta);
+	//free_msg(&rta);
+	//if (resultado < 0){
+	//	return ERROR_DE_RECEPCION;
 	//}
+
 }
 
 void enviar_ruta_script_al_planificador(char* path){
@@ -224,9 +223,10 @@ int cantidad_lineas_script(char* script){
 void correr_script(){
 
 	//int n_lineas = cantidad_lineas_script(script);
-	char** split = string_n_split(script.script_contenido, script.script_largo - 1,(char*) "\n");
+	char** split = string_n_split(script.script_contenido, script.script_largo,(char*) "\n");
 
 	for(int i = 0; split[i] != NULL; i++){
+		sem_wait(&lock_resultados);
 		enviar_operacion_a_coordinador(convertir_operacion(parse(split[i])));
 	}
 
@@ -251,7 +251,9 @@ void manejador_mensajes(Message mensaje) {
 
 	if(mensaje.header->remitente == COORDINADOR) {
 		if (mensaje.header->tipo_mensaje == RESULTADO) {
+			mensaje.header->remitente = ESI;
 			send_msg(socket_planificador, mensaje);
+			sem_post(&lock_resultados);
 		}
 	}
 }
