@@ -40,7 +40,7 @@ int manejar_conexion(Message * m, int socket){
 		loguear_conexion(socket);
 		Message * m_ack = empaquetar_ack(COORDINADOR);
 		enviar_mensaje(socket, *m_ack);
-		//FIXME free_msg(&m_ack);
+		free_msg(&m_ack);
 		registar_instancia_y_quedar_esperando(nombre_instancia, socket);
 	} else if (m->header->remitente == PLANIFICADOR) {
 		registrar_coordinador_y_quedar_esperando(socket);
@@ -102,10 +102,8 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 	enviar_mensaje(socket_solicitante, *rta_a_esi);
 
 	/*informar_resultado_al_planificador(coordinador.resultado_global);
-
 		resultado = coordinador.resultado_global;
 		//free(instancia);
-
 	*/
 
 	loguear_resultado(resultado);
@@ -177,3 +175,4 @@ void manejar_kill(int signal){
 
 	}
 }
+

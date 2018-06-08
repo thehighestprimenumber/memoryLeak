@@ -11,5 +11,5 @@ char* leer_propiedad_string (t_config *configuracion, char* propiedad){
 	if (config_has_property(configuracion, propiedad)){
 		return config_get_string_value(configuracion,propiedad);
 	}
-	return "";
+	return "/0";
 }

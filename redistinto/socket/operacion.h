@@ -22,6 +22,11 @@ typedef struct {
 	enum tipoOperacion tipo;
 } __attribute__((packed)) OperacionHeader;
 
+typedef struct {
+	int cantEntradas;
+	int tamEntrada;
+} __attribute__((packed)) ConfigStorage;
+
 void free_operacion(t_operacion ** operacion);
 
 Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente);
@@ -40,4 +45,8 @@ tipoRemitente desempaquetar_ack(Message* m);
 
 int desempaquetar_resultado(Message* msg);
 Message* empaquetar_resultado(tipoRemitente remitente, int resultado);
+
+Message* empaquetar_config_storage(tipoRemitente remitente, int cantEntradas, int tamEntrada);
+ConfigStorage* desempaquetar_config_storage(Message *msg);
+
 #endif

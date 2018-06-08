@@ -1,22 +1,13 @@
 #include "instancia.h"
 
-
-int inicializar();
-int manejar_operacion(Message * msg);
-t_clave_valor* buscar_clave_valor (char* clave);
-int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_valor);
-int agregar_clave_a_lista(char* clave, int largo_clave);
-void guardar(t_clave_valor * entrada);
-void dump();
-
 int main(){
 	int socket_coordinador = inicializar();
 	if (socket_coordinador<0)
 		return socket_coordinador;
 	while (1) {
-		Message msg;
+		Message *msg = malloc(sizeof(Message));
 		log_debug(log_inst, "esperando mensaje");
-		int resultado = await_msg(socket_coordinador, &msg);
+		int resultado = await_msg(socket_coordinador, msg);
 		log_debug(log_inst, "llego un mensaje. parseando...");
 		if (resultado<0){
 			log_debug(log_inst, "error de recepcion");
@@ -24,21 +15,16 @@ int main(){
 			//continue;
 		}
 
-		resultado = 0;
-		Message * m;
+		switch (msg->header->tipo_mensaje){
+			case ACK:
+				printf("ok");
+				break;
+			case OPERACION:
+				manejar_operacion(msg);
+				break;
+			default: printf("%s: mensaje recibido: %s", instancia.nombre_inst, (char*) msg->contenido);
+				break;
 
-		switch (msg.header->tipo_mensaje){
-		case ACK : printf("ok");
-					break;
-		case OPERACION:
-			resultado = manejar_operacion(&msg);
-			m = empaquetar_resultado(INSTANCIA, resultado);
-			if (send_msg(socket_coordinador, *m)<0)
-				return ERROR_DE_ENVIO;
-			log_debug(log_inst, "Se envio el mensaje");
-			break;
-		default: printf("%s: mensaje recibido: %s", instancia.nombre_inst, (char*) msg.contenido);
-			break;
 		}
 
 
@@ -54,11 +40,28 @@ int inicializar(){
 	if (config == NULL) {
 		config = config_create("../configInstancia.txt");
 	}
-	instancia.nombre_inst = leer_propiedad_string(config, "nombre");
+	instancia.nombre_inst = leer_propiedad_string(config, "nombre_instancia");
 
-	instancia.ip_coordinador = IP; //leer_propiedad_string(config, "IP_coordinador");
-	instancia.puerto_coord= PUERTO_COORDINADOR; //leer_propiedad_string(config, "puerto_coordinador");
+	instancia.ip_coordinador = leer_propiedad_string(config, "IP_coordinador");
+	instancia.puerto_coord = leer_propiedad_string(config, "puerto_coordinador");
 
+	char *alg = calloc(1, 5);
+	alg = leer_propiedad_string(config, "algoritmo");
+	if(strcmp(alg, "LRU")==0) instancia.algorimoActual = LRU;
+	else if(strcmp(alg, "BSU")==0) instancia.algorimoActual = BSU;
+	else {
+		instancia.algorimoActual = CIRC;
+		inicializar_circular();
+	}
+	instancia.path = leer_propiedad_string(config, "punto_montaje");//"/home/utnso/instancia1/\0";
+	char *dir = calloc(1, strlen(instancia.path));
+	memcpy(dir, instancia.path, strlen(instancia.path)-1);
+	int resultado;
+	if (stat(dir, &pepito) == -1) {
+	    resultado = mkdir(dir, 0777);
+	}
+	free(dir);
+	instancia.int_dump = leer_propiedad_int(config, "dump");
 	instancia.tabla_entradas = list_create();
 	instancia.socket_coordinador = conectar_a_coordinador(instancia.ip_coordinador, instancia.puerto_coord);
 	if(instancia.socket_coordinador == -1){
@@ -67,9 +70,14 @@ int inicializar(){
 	}
 	log_debug(log_inst, "Se pudo conectar con el coordinador");
 	Message* msg= empaquetar_conexion(INSTANCIA, "id de instancia");
-	if (send_msg(instancia.socket_coordinador, (*msg))<0)
-		return ERROR_DE_ENVIO;
+
+	if (send_msg(instancia.socket_coordinador, (*msg))<0) return ERROR_DE_ENVIO;
 	log_debug(log_inst, "Se envio el mensaje");
+	free_msg(&msg);
+
+	if(!recibir_config_storage()) return -10;
+	configurar_storage();
+
 	return instancia.socket_coordinador;
 }
 
@@ -88,76 +96,81 @@ int manejar_operacion(Message * msg) {
 			break;
 	}
 	Message* m_resultado= empaquetar_resultado(INSTANCIA, resultado);
-		if (send_msg(instancia.socket_coordinador, *m_resultado)<0)
-			return ERROR_DE_ENVIO;
-		log_debug(log_inst, "Se envio el mensaje");
-		return OK;
+	if (send_msg(instancia.socket_coordinador, *m_resultado)<0)
+		return ERROR_DE_ENVIO;
+	log_debug(log_inst, "Se envio el mensaje");
+	free_msg(&m_resultado);
+	free_operacion(&operacion);
+	return OK;
 }
 
 int agregar_clave_a_lista(char* clave, int largo_clave){
 	t_clave_valor* clave_valor_existente = buscar_clave_valor (clave);
-	if (clave_valor_existente != NULL)
-		return CLAVE_DUPLICADA;
+	if (clave_valor_existente != NULL) return OK;
 
-	t_clave_valor clave_valor = {.largo_clave = largo_clave, .largo_valor = 0};
-	clave_valor.clave = calloc(1,largo_clave);
-	memcpy(clave_valor.clave, clave, largo_clave);
-	list_add(instancia.tabla_entradas, &clave_valor);
+	t_clave_valor *clave_valor = malloc(sizeof(t_clave_valor));
+	clave_valor->largo_clave=largo_clave;
+	clave_valor->largo_valor=0;
+	clave_valor->clave = malloc(largo_clave);
+	clave_valor->nroEntrada = -1;
+	memcpy(clave_valor->clave, clave, largo_clave);
+	list_add(instancia.tabla_entradas, clave_valor);
 	return OK;
 }
 
 int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_valor){
-	t_clave_valor* clave_valor = buscar_clave_valor (clave);
-	if (clave_valor == NULL)
+	t_clave_valor* entrada = buscar_clave_valor (clave);
+	if (entrada == NULL)
 			return CLAVE_INEXISTENTE;
-	clave_valor->largo_valor = largo_valor;
-	clave_valor->valor = calloc(1, largo_valor+1);
-	memcpy(clave_valor->valor, valor, largo_valor+1);
+
+	entrada->largo_valor = largo_valor;
+
+	switch(instancia.algorimoActual){
+		case CIRC:
+			if(guardar_circular(entrada, valor) < 0) return ERROR_VALOR_NULO;
+			break;
+		default:
+			break;
+	}
 	return OK;
 }
 
 int guardar_entrada(char* clave, int largo_clave){
-	t_clave_valor* clave_valor_existente = buscar_clave_valor (clave);
-	if (clave_valor_existente != NULL)
-		return CLAVE_DUPLICADA;
-
-	t_clave_valor clave_valor = {.largo_clave = largo_clave, .largo_valor = 0};
-	clave_valor.clave = calloc(1,largo_clave);
-	memcpy(clave_valor.clave, clave, largo_clave);
-	list_add(instancia.tabla_entradas, &clave_valor);
+	t_clave_valor* clave_valor_existente = buscar_clave_valor(clave);
+	if (clave_valor_existente == NULL) return CLAVE_INEXISTENTE;
+	guardar(clave_valor_existente);
 	return OK;
 }
 
+bool buscador(void *contenido){
+	t_clave_valor *entrada = contenido;
+	return strcmp(entrada->clave, claveEnBusqueda);
+}
+
 t_clave_valor* buscar_clave_valor (char* clave){
-	t_link_element *element = instancia.tabla_entradas->head;
-	t_clave_valor *fila;
-	while (element != NULL) {
-		fila = (t_clave_valor*) (element->data);
-		if (!strcmp(fila->clave, clave)) {
-			free(element);
-			return fila;
-		}
-		element = element->next;
-	}
-	free(element);
-	return 0;
+	claveEnBusqueda = clave;
+	return list_find(instancia.tabla_entradas, buscador);
 }
 
 void dump(){
-	t_link_element *element = instancia.tabla_entradas->head;
-	t_clave_valor *fila;
-	while (element != NULL) {
-		fila = element->data;
-		guardar(fila);
-		element = element->next;
-	}
-	free(element);
+	list_iterate(instancia.tabla_entradas, guardar);
 }
 
-void guardar(t_clave_valor * entrada){
-	char* ruta = calloc(1, strlen(instancia.path)+entrada->largo_clave);
+void guardar(void * contenido){
+	t_clave_valor *entrada = contenido;
+	char* ruta = calloc(1, strlen(instancia.path)+entrada->largo_clave+1);
 	memcpy(ruta, instancia.path, strlen(instancia.path));
 	memcpy(ruta+strlen(instancia.path), entrada->clave, entrada->largo_clave);
 	FILE* file = fopen(ruta, "w");
-	fwrite(entrada->valor, entrada->largo_valor, 1, file);
+	char *ptrLectura = storage+entrada->nroEntrada*instancia.tamEntrada;
+	fwrite(ptrLectura, sizeof(char), entrada->largo_valor, file);
+	fclose(file);
+	free(ruta);
 }
+
+void eliminar_entrada(void *contenido){
+	t_clave_valor *entrada = contenido;
+	free(entrada->clave);
+	free(entrada);
+}
+

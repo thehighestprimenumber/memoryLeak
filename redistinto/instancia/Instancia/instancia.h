@@ -5,34 +5,58 @@
 #include <commons/config.h>
 #include <commons/txt.h>
 #include <commons/log.h>
-
 #include "../../socket/operacion.h"
 #include "configuracionInstancia.h"
 #include "handlerCoordinador.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <commons/txt.h>
 
 #define OK 0
 
-t_log * log_inst;
+typedef enum algorimoReemplazo{CIRC, LRU, BSU} algorimoReemplazo;
+
+typedef struct{
+	int largo_clave;
+	char* clave;
+	int largo_valor;
+	int nroEntrada;
+} t_clave_valor;
+
+#include "circular.h"
 
 typedef struct {
 	int identificador;
 	char* ip_coordinador;
 	char* puerto_coord;
 	int socket_coordinador;
+	algorimoReemplazo algorimoActual;
 	char* nombre_inst;
 	int int_dump;
 	char* path;
+	int tamEntrada;
+	int cantEntradas;
 	t_list* tabla_entradas;
 } t_instancia;
-t_instancia instancia;
 
-typedef struct {
-	int largo_clave;
-	int largo_valor;
-	char* clave;
-	char* valor;
-} t_clave_valor;
+t_log * log_inst;
+t_instancia instancia;
+char *storage;
+char *claveEnBusqueda;
+struct stat pepito;
+
+
+int inicializar();
+int manejar_operacion(Message * msg);
+t_clave_valor* buscar_clave_valor (char* clave);
+int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_valor);
+int agregar_clave_a_lista(char* clave, int largo_clave);
+void guardar(void * entrada);
+void dump();
+void eliminar_entrada(void *contenido);
+int guardar_entrada(char* clave, int largo_clave);
 
 
 #endif /* INSTANCIA_INSTANCIA_H_ */

@@ -1,6 +1,6 @@
 #include "./conexiones.h"
 #include "./coordinador.h"
-#include "./socket.h"
+#include "../socket/socket.h"
 
 int enviar_mensaje(int socket, Message msg) {
 
