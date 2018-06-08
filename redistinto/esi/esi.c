@@ -61,6 +61,7 @@ char* leer_propiedad_string (t_config *configuracion, char* propiedad){
 }
 
 int conectar_a_planificador(esi_configuracion* pConfig) {
+
 	sleep(2);
 
 	socket_planificador = connect_to_server(pConfig->planificador_ip,pConfig->planificador_puerto);
@@ -72,9 +73,13 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 		log_info(log_esi, "ESI se conecto con el Planificador");
 	}
 
-	enviar_ruta_script_al_planificador(path_script);
+	Message* msg = empaquetar_texto("Envio mensaje al Planificador desde ESI", strlen("Envio mensaje al Planificador desde ESI"), ESI);
 
-	free(path_script);
+	//a confirmar. Habria que cambiar tipo TEST por CONEXION en todos lados
+	msg->header->tipo_mensaje = CONEXION;
+
+	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
+	log_debug(log_esi, "Se envio el mensaje");
 
 	while (1) {
 		Message msg;
@@ -83,21 +88,15 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 		log_debug(log_esi, "llego un mensaje. parseando...");
 		if (resultado<0){
 			log_debug(log_esi, "error de recepcion");
-     	//continue;
 			return ERROR_DE_RECEPCION;
 		}
 
-		//Funcion manejador_mensajes
-		manejador_mensajes(msg);
-
-		//TODO parsear mensaje y hacer algo.
-		//char * request = malloc(msg.header->size);
-		//strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
-		//log_debug(log_esi, "mensaje recibido: %s", request); //FIXME aparecen caracteres de mas al final del mensaje ???
+		char * request = desempaquetar_texto(&msg);
+		log_debug(log_esi, "mensaje recibido: %s", request);
 
 	}
 
-	//free_msg(&msg);
+	free_msg(&msg);
 
 }
 
@@ -112,14 +111,8 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 		log_info(log_esi, "ESI se conecto con el Coordinador");
 	}
 
-	Message* msg= (Message*) malloc(sizeof(Message));
-
-	msg->contenido = (char*) malloc(strlen("Hola coordinador")+1);
-	strcpy(msg->contenido, "Hola coordinador");
-	msg->header = (ContentHeader*) malloc(sizeof(ContentHeader));
-	msg->header->remitente = ESI;
+	Message* msg = empaquetar_texto("Hola coordinador", strlen("Hola coordinador"), ESI);
 	msg->header->tipo_mensaje = TEST;
-	msg->header->size = strlen(msg->contenido) + 1;
 
 	if (send_msg(cliente_coordinador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
 	log_debug(log_esi, "Se envio el mensaje");
@@ -136,8 +129,8 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 	char * request = malloc(msg.header->size);
 	strncpy(request, (char *) msg.contenido, strlen(msg.contenido) + 1);
 	log_debug(log_esi, "mensaje recibido: %s", request);
-	//log_debug(log_inst, "%s", request);
-	return OK; //TODO que devuelva lo que corresponda
+
+	return OK;
 	}
 }
 
@@ -254,7 +247,7 @@ void manejador_mensajes(Message mensaje) {
 
 	if(mensaje.header->remitente == COORDINADOR) {
 		if (mensaje.header->tipo_mensaje == RESULTADO) {
-
+			send_msg(socket_planificador, mensaje);
 		}
 	}
 }
