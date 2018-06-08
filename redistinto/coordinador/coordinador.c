@@ -38,10 +38,11 @@ int manejar_conexion(Message * m, int socket){
 	if (m->header->remitente == INSTANCIA) {
 		char* nombre_instancia = desempaquetar_conexion(m);
 		loguear_conexion(socket);
-		Message * m_ack = empaquetar_ack(COORDINADOR);
-		enviar_mensaje(socket, *m_ack);
-		free_msg(&m_ack);
-		registar_instancia_y_quedar_esperando(nombre_instancia, socket);
+		fila_tabla_instancias * fila = registrar_instancia(nombre_instancia, socket);
+		Message * configuracion_instancia = empaquetar_config_storage(COORDINADOR, coordinador.cantidad_entradas, coordinador.tamanio_entrada);
+		if (enviar_mensaje(socket, *configuracion_instancia)<0)
+			return ERROR_DE_ENVIO;
+		esperar_operacion(fila);
 	} else if (m->header->remitente == PLANIFICADOR) {
 		registrar_coordinador_y_quedar_esperando(socket);
 	}
@@ -50,9 +51,9 @@ int manejar_conexion(Message * m, int socket){
 
 
 void manejar_desconexion(int socket){
-	close(socket);
 	loguear_desconexion(socket);
 	desconectar_instancia(socket);
+	close(socket);
 }
 
 int manejar_operacion(Message * msg, int socket){
@@ -63,9 +64,9 @@ enum tipoRemitente remitente = msg->header->remitente;
 		res = procesarSolicitudDeEsi(msg, socket);
 		break;
 	default:
-		break; //TODO
+		break; //TODO ERROR
 	}
-	//FIXME free(&msg);
+	free(&msg);
 
 	return res;
 }
@@ -151,7 +152,7 @@ int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* ins
 
 	coordinador.operacion_global_threads = operacion;
 	sem_post(&instancia->lock);
-
+	//ACA SE ACTIVA EL esperar_operacion de tabla_instancias.c
 	sem_wait(&coordinador.lock_operaciones);
 
 	return coordinador.resultado_global;
