@@ -71,7 +71,6 @@ void leer_script_completo(char* nombreArchivo) {
 				//exit(EXIT_FAILURE);
 				contenidoScript = malloc(strlen(" "));
 				memcpy(contenidoScript," ",strlen(" "));
-				return ERROR_ARCHIVO_NO_ENCONTRADO;
 			}
 		}
 

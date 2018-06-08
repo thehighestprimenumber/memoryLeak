@@ -112,12 +112,12 @@ void esperar_operacion(fila_tabla_instancias* instancia){
 		free(mensaje);
 			//log_debug(logger_coordinador, "se solicita %s %s %s", tipoMensajeNombre[operacion->header->tipo], operacion->clave, operacion->valor);
 
-		Message *respuesta;
+		Message *respuesta = malloc(sizeof(Message));
 			if (await_msg(instancia->socket_instancia, respuesta)<0){
 				coordinador.resultado_global = ERROR_DE_RECEPCION;
 				log_error(log_coordinador, "error al recibir respuesta de la instancia");
 			}
-			else if (respuesta->header->tipo_mensaje != ACK)
+			else if (respuesta->header->tipo_mensaje != ACK && respuesta->header->tipo_mensaje != RESULTADO)
 				log_error(log_coordinador, "error, se esperaba ACK pero se recibio: %s", respuesta->header->tipo_mensaje);
 			log_debug(log_coordinador, "se recibio ACK");
 			coordinador.resultado_global = 0;

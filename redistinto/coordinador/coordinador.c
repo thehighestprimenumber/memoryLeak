@@ -38,9 +38,12 @@ int manejar_conexion(Message * m, int socket){
 	if (m->header->remitente == INSTANCIA) {
 		char* nombre_instancia = desempaquetar_conexion(m);
 		loguear_conexion(socket);
-		Message * m_ack = empaquetar_ack(COORDINADOR);
-		enviar_mensaje(socket, *m_ack);
-		free_msg(&m_ack);
+		//Message * m_ack = empaquetar_ack(COORDINADOR);
+		//enviar_mensaje(socket, *m_ack);
+		//free_msg(&m_ack);
+		Message * m_stor = empaquetar_config_storage(COORDINADOR, 10, 2);
+		enviar_mensaje(socket, *m_stor);
+		free_msg(&m_stor);
 		registar_instancia_y_quedar_esperando(nombre_instancia, socket);
 	} else if (m->header->remitente == PLANIFICADOR) {
 		registrar_coordinador_y_quedar_esperando(socket);
@@ -116,11 +119,11 @@ int validar_bloqueo_con_planificador(t_operacion* operacion){
 	interna.clave = operacion->clave;
 	interna.valor = operacion->valor;
 
-	if (interna.tipo==op_SET) { //para no mandar el valor de la clave que podria ser bastante largo al pedo
-		free (interna.valor);
-		interna.valor = calloc(1,1);
-		interna.largo_valor = 0;
-	}
+	//if (interna.tipo==op_SET) { //para no mandar el valor de la clave que podria ser bastante largo al pedo
+	//	free (interna.valor);
+	//	interna.valor = calloc(1,1);
+	//	interna.largo_valor = 0;
+	//}
 
 	Message * mensaje = empaquetar_op_en_mensaje(&interna, COORDINADOR);
 
