@@ -23,12 +23,16 @@ int main(){
 			return ERROR_DE_RECEPCION;
 			//continue;
 		}
+
+		resultado = 0;
+		Message * m;
+
 		switch (msg.header->tipo_mensaje){
 		case ACK : printf("ok");
 					break;
-		case OPERACION:;
-			int resultado = manejar_operacion(&msg);
-			Message * m = empaquetar_resultado(INSTANCIA, resultado);
+		case OPERACION:
+			resultado = manejar_operacion(&msg);
+			m = empaquetar_resultado(INSTANCIA, resultado);
 			if (send_msg(socket_coordinador, *m)<0)
 				return ERROR_DE_ENVIO;
 			log_debug(log_inst, "Se envio el mensaje");
