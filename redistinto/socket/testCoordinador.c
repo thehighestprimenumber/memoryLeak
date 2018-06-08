@@ -12,27 +12,16 @@ int enviar_mensaje_test(int socket, Message msg) {
 
 int correr_tests_instancia(){
 	connect_to_server(IP, PUERTO_COORDINADOR);
-	pthread_t i1;//, i2, i3;
 
-	//char* inst1 = "inst1";
 	char* inst2 = "inst2";
-	//char* inst3 = "inst3";
+
 
 	test_INST_connect(inst2);
-//	pthread_create(&i1, NULL, test_INST_connect, inst1);
-//	pthread_create(&i2, NULL, test_INST_connect, inst2);
-//	pthread_create(&i3, NULL, test_INST_connect, inst3);
+
 	return 0;
 }
 
 int test_operacion(){
-//	t_operacion op = {.tipo = op_GET};
-//	op.largo_clave = strlen("unaClave")+1;
-//	op.largo_valor = strlen("unValor")+1;
-//	op.clave = calloc(1, op.largo_clave);
-//	op.valor = calloc(1, op.largo_valor);
-//	strcpy(op.clave, "unaClave");
-//	strcpy(op.valor, "unValor");
 	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), "unValor12345", strlen("unValor12345"), op_GET);
 	Message * m = empaquetar_op_en_mensaje(op, ESI);
 	t_operacion * desemp = desempaquetar_operacion(m);
@@ -51,12 +40,12 @@ int mandar_operaciones_test(t_operacion * op){
 	Message * m = empaquetar_op_en_mensaje(op, ESI);
 	int res = enviar_mensaje_test(socket_coordinador, *m);
 			if (res<0) return ERROR_DE_ENVIO;
-			//free_msg(m); FIXME
+			free_msg(m);
 
 		while (1) {
 			Message *msg;
 			int resultado = await_msg(socket_coordinador, msg);
-			//free_msg(&msg);
+			free_msg(&msg);
 			if (resultado<0){
 				return ERROR_DE_RECEPCION;
 			}
@@ -105,7 +94,7 @@ int test_INST_connect(char* nombre_instancia){
 		default: printf("%s: mensaje recibido: %s", nombre_instancia, (char*) msg.contenido);
 				break;
 		}
-		//free(&msg);
+		free(&msg);
 
 	}
 	return res;

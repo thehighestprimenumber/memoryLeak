@@ -48,7 +48,7 @@ int criterio_clave(fila_tabla_instancias* fila, void* nombre_clave){
 fila_tabla_instancias * buscar_instancia_por_valor_criterio (void* valor, int criterio (fila_tabla_instancias*, void*)){
 	t_link_element *element = coordinador.tabla_instancias->head;
 	fila_tabla_instancias *fila;
-		while (element != NULL) {
+		while (element != NULL && element->data != NULL) {
 			fila = (fila_tabla_instancias*) (element->data);
 			if (criterio(fila, valor)) {
 				free(element);
@@ -117,10 +117,9 @@ void esperar_operacion(fila_tabla_instancias* instancia){
 				coordinador.resultado_global = ERROR_DE_RECEPCION;
 				log_error(log_coordinador, "error al recibir respuesta de la instancia");
 			}
-			else if (respuesta->header->tipo_mensaje != ACK && respuesta->header->tipo_mensaje != RESULTADO)
-				log_error(log_coordinador, "error, se esperaba ACK pero se recibio: %s", respuesta->header->tipo_mensaje);
-			log_debug(log_coordinador, "se recibio ACK");
-			coordinador.resultado_global = 0;
+
+			else coordinador.resultado_global = desempaquetar_resultado(respuesta);
+
 			free(respuesta);
 
 		sem_post(&coordinador.lock_operaciones);
@@ -130,7 +129,7 @@ void esperar_operacion(fila_tabla_instancias* instancia){
 	}
 }
 
-void registar_instancia_y_quedar_esperando(char* nombre_instancia, int socket_instancia) {
+fila_tabla_instancias* registrar_instancia(char* nombre_instancia, int socket_instancia) {
 	fila_tabla_instancias* fila = buscar_instancia_por_valor_criterio(nombre_instancia, criterio_nombre);
 	if (fila !=NULL)
 		cambiar_estado_instancia(fila, 1);
@@ -144,8 +143,7 @@ void registar_instancia_y_quedar_esperando(char* nombre_instancia, int socket_in
 			sem_init(&(fila->lock), 0, 0);
 			list_add(coordinador.tabla_instancias, fila);
 	}
-	esperar_operacion(fila);
-	//free_fila_tabla_instancias(&fila);
+	return fila;
 }
 
 int desconectar_instancia(int socket){

@@ -24,7 +24,7 @@ int cambiar_estado_instancia(fila_tabla_instancias* fila, int esta_activa);
 
 fila_tabla_instancias* seleccionar_instancia(char* clave);
 
-void registar_instancia_y_quedar_esperando(char* nombre_instancia, int socket_instancia);
+fila_tabla_instancias* registrar_instancia(char* nombre_instancia, int socket_instancia);
 
 int desconectar_instancia(int socket);
 

@@ -49,11 +49,13 @@ void* recibir_conexion(void* con) {
 			case OPERACION:
 				manejar_operacion(msg, conexion->socket);
 				break;
+			case CONFSTORAGE:
+				//TODO
 			case EJECUTAR:
 				//TODO ERROR
 				break;
 		}
-		//free_msg(&msg);//FIXME
+		free_msg(&msg);
 	}
 free(conexion);
 

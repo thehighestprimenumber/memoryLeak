@@ -7,7 +7,8 @@ int conectar_a_coordinador(char* ip, char* puerto){
 bool recibir_config_storage(){
 	Message *msg = malloc(sizeof(msg));
 	await_msg(instancia.socket_coordinador, msg);
-	if(msg->header->tipo_mensaje != CONFSTORAGE) return false;
+	if(msg->header->tipo_mensaje != CONFSTORAGE)
+		return false;
 	ConfigStorage *cs = desempaquetar_config_storage(msg);
 	instancia.cantEntradas = cs->cantEntradas;
 	instancia.tamEntrada = cs->tamEntrada;
