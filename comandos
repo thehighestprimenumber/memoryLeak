@@ -1,0 +1,40 @@
+Descargar commons
+curl -u 'thehighestprimenumber' -L -o commons.tar https://api.github.com/repos/sisoputnfrba/so-commons-library/tarball/master
+Verificar find /home/ -name "commons.tar"
+
+Descargar redistinto
+curl -u 'thehighestprimenumber' -L -o master.zip https://github.com/sisoputnfrba/tp-2018-1c-Memory-leak/archive/master.zip
+Verificar find /home/ -name "master.zip"
+mv "master.zip" "redistinto.zip"
+
+Descargar scripts
+curl -u 'thehighestprimenumber' -L -o master.zip https://github.com/sisoputnfrba/Pruebas-ESI/archive/master.zip
+mv "master.zip" "scripts.zip"
+
+Instalar unzip
+sudo apt install unzip 
+
+Organizas las carpetas
+unzip redistinto.zip && unzip scripts.zip && cd tp-2018-1c-Memory-leak-master/redistinto/ && mv ../../Pruebas-ESI-master ./ && cd Pruebas-ESI-master  && mv * ../ && cd ..
+
+OBTENER IP DE LA MAQUINA
+ifconfig
+
+EDITAR IPs
+nano esi/configESI.txt 
+nano Planificador/configPlanificador.txt 
+nano coordinador/config_coordinador.txt
+nano coordinador/config_coordinador.txt
+guardar con ctrlX
+
+COMPILAR COORDINADOR
+gcc -o coordinador.o configuracion.c  coordinador.c  logger_coordinador.c  tabla_instancias.c conexiones.c ../socket/operacion.c ../socket/socket.c ../socket/common.c -I"/home/utnso/tp-2018-1c-Memory-leak/redistinto/socket" -I"./" -L/usr/lib -lcommons -lpthread
+
+COMPILAR PLANIFICADOR
+gcc -o planificador.o consola.c logger_planificador.c planificador.c   ../socket/operacion.c ../socket/socket.c ../socket/common.c -I"/home/utnso/tp-2018-1c-Memory-leak/redistinto/socket" -I"./" -L/usr/lib -lcommons -lpthread -lreadline
+
+COMPILAR INSTANCIA
+gcc -o instancia.o circular.c  configuracionInstancia.c  handlerCoordinador.c  instancia.c ../../socket/operacion.c ../../socket/socket.c ../../socket/common.c -I"/home/utnso/tp-2018-1c-Memory-leak/redistinto/socket" -I"./" -L/usr/lib -lcommons -lpthread -lreadline
+
+COMPILAR ESI
+gcc -o esi.o esi.c ../parsi/src/parsi/parser.c ../socket/operacion.c ../socket/socket.c ../socket/common.c -I"/home/utnso/tp-2018-1c-Memory-leak/redistinto/socket" -I"./" -L/usr/lib -lcommons -lpthread -lreadline
