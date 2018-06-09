@@ -141,7 +141,8 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 int guardar_entrada(char* clave, int largo_clave){
 	log_debug(log_inst, "Hola amiguitos, estoy ejecutando un STORE");
 	t_clave_valor* clave_valor_existente = buscar_clave_valor(clave);
-	if (clave_valor_existente == NULL) return CLAVE_INEXISTENTE;
+	if (clave_valor_existente == NULL)
+		return CLAVE_INEXISTENTE;
 	guardar(clave_valor_existente);
 	return OK;
 }

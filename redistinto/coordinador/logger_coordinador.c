@@ -64,8 +64,8 @@ void loguear_resultado(int resultado) {
 
 void loguear_inst_op(char* nombre, t_operacion* op) {
 	log_info(log_coordinador,
-			"se selecciona la instancia '%s' para la operacion %s %s %s", nombre,
-			nombres_operacion[op->tipo], op->clave, op->valor);
+			"se selecciona la instancia '%s' para la operacion %s %s", nombre,
+			nombres_operacion[op->tipo], op->clave);
 }
 
 void loguear_error_envio(Message * m, int socket) {
@@ -85,8 +85,8 @@ void loguear_envio_OK(Message * m, int socket) {
 	if (m->header->tipo_mensaje == OPERACION) {
 		t_operacion * op = desempaquetar_operacion(m);
 		log_info(log_coordinador,
-				"error al enviar el mensaje a %s para la operacion: %s %s %s",
-				buscar_id_conexion(socket), nombres_operacion[op->tipo], op->clave, op->valor);
+				"error al enviar el mensaje a %s para la operacion: %s %s",
+				buscar_id_conexion(socket), nombres_operacion[op->tipo], op->clave);
 		free_operacion(&op);
 	} else {
 		char* contenido = desempaquetar_varios(m);

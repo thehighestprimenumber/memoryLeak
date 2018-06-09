@@ -208,8 +208,15 @@ void correr_script(){
 		enviar_operacion_a_coordinador(op);
 		free_operacion(&op);
 		Message *rta = malloc(sizeof(Message));
-		if(await_msg(cliente_coordinador, rta) < 0) exit(-1);
-		if(desempaquetar_resultado(rta) != OK) exit(-1);
+		if(await_msg(cliente_coordinador, rta) < 0){
+			log_info(log_esi, "error al recibir resultado");
+			exit(-1);
+		}
+		if(desempaquetar_resultado(rta) != OK){
+			log_info(log_esi, "error en la operacion: %d", desempaquetar_resultado(rta));
+			exit(-1);
+		}
+		log_info(log_esi, "operacion OK: %d", desempaquetar_resultado(rta));
 	}
 
 }

@@ -99,6 +99,7 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 			despertar_hilo_instancia(op, instancia);
 		}
 	}
+	resultado = coordinador.resultado_global;
 	Message* rta_a_esi = empaquetar_resultado(COORDINADOR, resultado);
 	enviar_mensaje(socket_solicitante, *rta_a_esi);
 

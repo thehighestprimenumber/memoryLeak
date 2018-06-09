@@ -266,3 +266,23 @@ STORE futbol:messi
 [DEBUG] 02:29:43:109 ESI/(18039:18039): esperando mensaje
 [DEBUG] 02:29:43:109 ESI/(18039:18039): llego un mensaje. parseando...
 [INFO] 02:29:43:109 ESI/(18039:18039): LLegó un mensaje
+[TRACE] 02:50:05:939 ESI/(18965:18965): Inicia el proceso ESI
+[TRACE] 02:50:05:939 ESI/(18965:18965): El puerto del coordinador es: 8086
+[TRACE] 02:50:05:939 ESI/(18965:18965): La ip del coordinador es: 127.0.0.1
+[TRACE] 02:50:05:939 ESI/(18965:18965): El puerto del planificador es: 8002
+[TRACE] 02:50:05:939 ESI/(18965:18965): La ip del planificador es: 127.0.0.1
+[TRACE] 02:50:05:939 ESI/(18965:18965): El nombre del script es: ESI_1
+[INFO] 02:50:05:941 ESI/(18965:18965): ESI se conecto con el Coordinador
+[INFO] 02:50:07:943 ESI/(18965:18965): ESI se conecto con el Planificador
+[DEBUG] 02:50:07:943 ESI/(18965:18965): Se envio la ruta del script.
+[DEBUG] 02:50:07:944 ESI/(18965:18965): esperando mensaje
+[DEBUG] 02:50:07:944 ESI/(18965:18965): llego un mensaje. parseando...
+[INFO] 02:50:07:944 ESI/(18965:18965): LLegó un mensaje
+[INFO] 02:50:07:944 ESI/(18965:18965): Recibido el contenido del script
+[DEBUG] 02:50:07:944 ESI/(18965:18965): mensaje recibido: 1
+[DEBUG] 02:50:07:945 ESI/(18965:18965): esperando mensaje
+[DEBUG] 02:50:07:945 ESI/(18965:18965): llego un mensaje. parseando...
+[INFO] 02:50:07:945 ESI/(18965:18965): LLegó un mensaje
+[INFO] 02:50:51:660 ESI/(18965:18965): operacion OK: 0
+[INFO] 02:53:08:898 ESI/(18965:18965): operacion OK: 0
+[INFO] 02:55:00:363 ESI/(18965:18965): error al recibir resultado
