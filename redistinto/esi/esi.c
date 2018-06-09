@@ -12,7 +12,9 @@ int main(int argc,char *argv[]) {
 	if (config == NULL) {
 		config = config_create("../configESI.txt");
 	}
-
+	if (argv==NULL || argv[1]==NULL) {
+		argv[1] = "ESI_1";
+	}
 	path_script = malloc(strlen(argv[1]) + 1);
 	memcpy(path_script,argv[1],strlen(argv[1]));
 	((char*) path_script)[strlen(argv[1])] = '\0';
@@ -116,28 +118,8 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 	} else {
 		log_info(log_esi, "ESI se conecto con el Coordinador");
 	}
+		return OK;
 
-	Message* msg = empaquetar_texto("Hola coordinador", strlen("Hola coordinador"), ESI);
-	msg->header->tipo_mensaje = CONEXION;
-
-	if (send_msg(cliente_coordinador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
-	log_debug(log_esi, "Se envio el mensaje");
-	while (1) {
-		Message msg;
-		log_debug(log_esi, "esperando mensaje");
-		int result = await_msg(cliente_coordinador, &msg);
-		log_debug(log_esi, "llego un mensaje. parseando...");
-		if (result<0){
-			log_debug(log_esi, "error de recepcion");
-			continue;
-			return ERROR_DE_RECEPCION;
-		}
-
-		manejador_mensajes(msg);
-
-		char * request = desempaquetar_texto(&msg);
-		log_debug(log_esi, "mensaje recibido: %s", request);;
-	}
 }
 
 t_operacion* convertir_operacion(t_esi_operacion operacionOriginal){

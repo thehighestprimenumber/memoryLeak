@@ -25,11 +25,16 @@ char* buscar_id_conexion (int socket){
 			}
 			element = element->next;
 		}
-		free(element);
 	return "desconocido";
 }
 
-void loguear_conexion(t_socket_nombre * dato_conexion) {
+void loguear_conexion(Message * m, int socket) {
+	t_socket_nombre* dato_conexion = calloc(1, sizeof(dato_conexion));
+		char* nombre = desempaquetar_conexion(m);
+		dato_conexion->socket = socket;
+		dato_conexion->nombre = calloc(1, strlen(nombre)+1);
+		strcpy(dato_conexion->nombre, nombre);
+		list_add(coordinador.conexiones, dato_conexion);
 	log_info(log_coordinador,
 			"el coordinador recibe conexion de %s", dato_conexion->nombre);
 }
@@ -99,8 +104,6 @@ char* desempaquetar_varios(Message * m) {
 		contenido = desempaquetar_texto(m);
 		break;
 	case OPERACION:
-		;
-		t_operacion * op = desempaquetar_operacion(m);
 		contenido = "operacion";
 		break;
 	case ACK:
@@ -112,7 +115,10 @@ char* desempaquetar_varios(Message * m) {
 		contenido = nombres_resultados[r];
 		break;
 	case CONEXION:
-		contenido = "conexion"; //TODO ampliar con nombre?
+		contenido = "conexion";
+		break;
+	case CONFSTORAGE:
+		contenido = "storageConfig";
 		break;
 	default:
 		contenido = " ";

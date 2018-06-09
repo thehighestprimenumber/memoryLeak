@@ -1,0 +1,20 @@
+[TRACE] 22:38:20:300 ESI/(5568:5568): Inicia el proceso ESI
+[TRACE] 22:38:20:547 ESI/(5568:5568): El puerto del coordinador es: 8086
+[TRACE] 22:38:21:90 ESI/(5568:5568): La ip del coordinador es: 127.0.0.1
+[TRACE] 22:38:21:454 ESI/(5568:5568): El puerto del planificador es: 8002
+[TRACE] 22:38:21:756 ESI/(5568:5568): La ip del planificador es: 127.0.0.1
+[TRACE] 22:38:22:253 ESI/(5568:5568): El nombre del script es: ESI_1
+[INFO] 22:38:26:605 ESI/(5568:5629): ESI se conecto con el Coordinador
+[INFO] 22:39:02:227 ESI/(5568:5702): ESI se conecto con el Planificador
+[DEBUG] 22:39:02:227 ESI/(5568:5702): Se envio la ruta del script.
+[DEBUG] 22:39:02:230 ESI/(5568:5702): Se envio el mensaje
+[DEBUG] 22:39:02:230 ESI/(5568:5702): esperando mensaje
+[DEBUG] 22:39:02:230 ESI/(5568:5702): llego un mensaje. parseando...
+[INFO] 22:39:02:230 ESI/(5568:5702): LLegó un mensaje
+[INFO] 22:39:02:230 ESI/(5568:5702): Recibido el contenido del script
+[DEBUG] 22:39:02:230 ESI/(5568:5702): mensaje recibido: GET futbol:messi
+SET futbol:messi TraemeLaCopa
+STORE futbol:messi
+[DEBUG] 22:39:02:230 ESI/(5568:5702): esperando mensaje
+[DEBUG] 22:39:20:768 ESI/(5568:5702): llego un mensaje. parseando...
+[DEBUG] 22:39:20:768 ESI/(5568:5702): error de recepcion

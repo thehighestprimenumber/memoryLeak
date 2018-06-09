@@ -36,13 +36,7 @@ void inicializar_configuracion(){
 }
 
 int manejar_conexion(Message * m, int socket){
-	t_socket_nombre* dato_conexion = calloc(1, sizeof(dato_conexion));
-	char* nombre = desempaquetar_conexion(m);
-	dato_conexion->socket = socket;
-	dato_conexion->nombre = calloc(1, strlen(nombre)+1);
-	strcpy(dato_conexion->nombre, nombre);
-	list_add(coordinador.conexiones, dato_conexion);
-	loguear_conexion(dato_conexion);
+	loguear_conexion(m, socket);
 
 	if (m->header->remitente == INSTANCIA) {
 		char* nombre_instancia = desempaquetar_conexion(m);
@@ -120,6 +114,7 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 }
 
 int validar_bloqueo_con_planificador(t_operacion* operacion){
+	return OK;
 	t_operacion interna = {.tipo = operacion->tipo, .largo_clave = operacion->largo_clave, .largo_valor= operacion->largo_valor};
 	interna.clave = operacion->clave;
 	interna.valor = operacion->valor;

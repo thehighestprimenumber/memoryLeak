@@ -30,10 +30,6 @@ void* recibir_conexion(void* con) {
 		loguear_recepcion(msg, conexion->socket);
 
 		switch (tipo){
-			case TEST: ;
-				Message* m = empaquetar_ack(COORDINADOR);
-				enviar_mensaje(conexion->socket, *m);
-				break;
 			case CONEXION:
 				manejar_conexion(msg, conexion->socket);
 				break;

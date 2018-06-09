@@ -121,24 +121,7 @@ int manejador_de_eventos(int socket, Message* msg){
 	//Por ahora agrego caso con test para que siga funcionando, después sacar
 	enum tipoRemitente recipiente = msg->header->remitente;
 
-	if (msg->header->tipo_mensaje==TEST)
-	{
-		char * request = desempaquetar_texto(msg);
-		log_info(log_planificador, "recibi mensaje de %d: %s", recipiente, request);
-
-		Message* mensaje = empaquetar_texto("Hola soy el planificador\0", strlen("Hola soy el planificador\0"), PLANIFICADOR);
-		mensaje->header->tipo_mensaje = ACK;
-		int result = enviar_mensaje(socket, *mensaje);
-		if (result) {
-			log_info(log_planificador, "error al enviar ack");
-			return ERROR_DE_ENVIO;
-		}
-
-		//return enviar_mensaje(socket, "Hola soy el planificador",tipo);
-			//return string_itoa(enviar_mensaje(conexion->socket, "Hola soy el planificador"));
-	}
-
-	else if(msg->header->remitente == ESI){
+	if(msg->header->remitente == ESI){
 		log_info(log_planificador, "Me hablo una ESI");
 		switch(msg->header->tipo_mensaje){
 			case TEXTO:
@@ -333,7 +316,7 @@ void aceptar_conexion(int socket, char* nombreScript) {
 	Message* mensaje = empaquetar_texto(contenidoScript, strlen(contenidoScript), PLANIFICADOR);
 	mensaje->header->tipo_mensaje = CONEXION;
 	enviar_mensaje(socket, *mensaje);
-	free_msg(mensaje);
+	free_msg(&mensaje);
 }
 
 void agregar_ready(int idEsi) {
