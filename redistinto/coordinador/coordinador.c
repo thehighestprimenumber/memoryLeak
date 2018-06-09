@@ -115,7 +115,7 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 }
 
 int validar_bloqueo_con_planificador(t_operacion* operacion){
-	/*t_operacion interna = {.tipo = operacion->tipo, .largo_clave = operacion->largo_clave, .largo_valor= operacion->largo_valor};
+	t_operacion interna = {.tipo = operacion->tipo, .largo_clave = operacion->largo_clave, .largo_valor= operacion->largo_valor};
 	interna.clave = operacion->clave;
 	interna.valor = operacion->valor;
 
@@ -134,8 +134,8 @@ int validar_bloqueo_con_planificador(t_operacion* operacion){
 	Message * respuesta;
 	if (await_msg(coordinador.socket_planificador, respuesta)<0)
 		return ERROR_DE_RECEPCION;
-	int contenido_respuesta = desempaquetar_resultado(respuesta);*/
-	int contenido_respuesta = OK;
+	int contenido_respuesta = desempaquetar_resultado(respuesta);
+	//int contenido_respuesta = OK;
 	loguear_resultado(contenido_respuesta);
 	coordinador.resultado_global = contenido_respuesta;
 	return contenido_respuesta; ////CLAVE_DUPLICADA o OK */

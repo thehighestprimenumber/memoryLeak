@@ -33,21 +33,24 @@ int main(int argc,char *argv[]) {
 	log_trace(log_esi,"La ip del planificador es: %s",pConfig->planificador_ip);
 	log_trace(log_esi,"El nombre del script es: %s",argv[1]);
 
-	pidcoordinador = pthread_create(&threadCoordinador, NULL, (void*)&conectar_a_coordinador, (void*) pConfig);
-		if (pidcoordinador < 0) {
-			log_error(log_esi,"Error al intentar conectar al coordinador");
-			exit(EXIT_FAILURE);
+	conectar_a_coordinador(pConfig);
+	conectar_a_planificador(pConfig);
+	while (1) {
+			Message msg;
+			log_debug(log_esi, "esperando mensaje");
+			int resultado = await_msg(socket_planificador, &msg);
+			log_debug(log_esi, "llego un mensaje. parseando...");
+			if (resultado<0){
+				log_debug(log_esi, "error de recepcion");
+				return ERROR_DE_RECEPCION;
+			}
+
+			manejador_mensajes(msg);
+
+			//char * request = desempaquetar_texto(&msg);
+			log_debug(log_esi, "mensaje recibido: %i", msg.header->tipo_mensaje);
+
 		}
-
-	pidplanificador = pthread_create(&threadPlanificador, NULL, (void*)&conectar_a_planificador, (void*) pConfig);
-	if (pidplanificador < 0) {
-			log_error(log_esi,"Error al intentar conectar al planificador");
-			exit(EXIT_FAILURE);
-		}
-
-	pthread_join(threadPlanificador,NULL);
-	pthread_join(threadCoordinador,NULL);
-
 	//Recibo la ruta del script a ejecutar y se la envio al planificador
 	//char* path_script = argv[1];
 	//enviar_ruta_script_al_planificador(path_script);
@@ -87,22 +90,7 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 	//if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar el mensaje");
 	//log_debug(log_esi, "Se envio el mensaje");
 
-	while (1) {
-		Message msg;
-		log_debug(log_esi, "esperando mensaje");
-		int resultado = await_msg(socket_planificador, &msg);
-		log_debug(log_esi, "llego un mensaje. parseando...");
-		if (resultado<0){
-			log_debug(log_esi, "error de recepcion");
-			return ERROR_DE_RECEPCION;
-		}
 
-		manejador_mensajes(msg);
-
-		char * request = desempaquetar_texto(&msg);
-		log_debug(log_esi, "mensaje recibido: %s", request);
-
-	}
 
 	//free_msg(&msg);
 
