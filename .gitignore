@@ -40,7 +40,6 @@
 *.hex
 
 # Debug
-Debug/
 *.dSYM/
 *.su
 *.idb
