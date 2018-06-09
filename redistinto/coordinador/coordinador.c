@@ -1,15 +1,15 @@
 # include "coordinador.h"
 # include "configuracion.h"
+# include "conexiones.h"
 
 
 int procesarSolicitudDeEsi(Message * msg, int socket_solicitante);
 int validar_bloqueo_con_planificador(t_operacion* operacion);
 int informar_resultado_al_planificador(int resultado);
-extern int iniciar_servicio();
-void inicializar_configuracion();
 void manejar_kill(int signal);
 int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* instancia);
 void registrar_coordinador_y_quedar_esperando(int socket);
+void inicializar_configuracion();
 
 int main() {
 	inicializar_configuracion();
