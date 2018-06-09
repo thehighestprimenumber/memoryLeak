@@ -95,10 +95,8 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 		if (instancia == NULL) {
 			resultado = NO_HAY_INSTANCIAS;
 		} else {
-		loguear_inst_op(instancia->nombre_instancia, op);
-		if (op->tipo != op_GET){
+			loguear_inst_op(instancia->nombre_instancia, op);
 			despertar_hilo_instancia(op, instancia);
-		}
 		}
 	}
 	Message* rta_a_esi = empaquetar_resultado(COORDINADOR, resultado);
