@@ -1,0 +1,1 @@
+gcc -o coordinador.o configuracion.c  coordinador.c  logger_coordinador.c  tabla_instancias.c conexiones.c ../socket/operacion.c ../socket/socket.c ../socket/common.c -I"/home/utnso/tp-2018-1c-Memory-leak/redistinto/socket" -I"./" -L/usr/lib -lcommons -lpthread
