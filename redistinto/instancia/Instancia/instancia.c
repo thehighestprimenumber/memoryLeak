@@ -148,7 +148,7 @@ int guardar_entrada(char* clave, int largo_clave){
 
 bool buscador(void *contenido){
 	t_clave_valor *entrada = contenido;
-	return strcmp(entrada->clave, claveEnBusqueda);
+	return strcmp(entrada->clave, claveEnBusqueda) == 0 ? true:false;
 }
 
 t_clave_valor* buscar_clave_valor (char* clave){
