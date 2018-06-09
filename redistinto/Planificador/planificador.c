@@ -71,6 +71,8 @@ void leer_script_completo(char* nombreArchivo) {
 				//exit(EXIT_FAILURE);
 				contenidoScript = malloc(strlen(" "));
 				memcpy(contenidoScript," ",strlen(" "));
+
+				return;
 			}
 		}
 
@@ -331,7 +333,7 @@ void aceptar_conexion(int socket, char* nombreScript) {
 	Message* mensaje = empaquetar_texto(contenidoScript, strlen(contenidoScript), PLANIFICADOR);
 	mensaje->header->tipo_mensaje = CONEXION;
 	enviar_mensaje(socket, *mensaje);
-	free(mensaje);
+	free_msg(mensaje);
 }
 
 void agregar_ready(int idEsi) {
