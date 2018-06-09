@@ -161,7 +161,8 @@ void* enviar_operacion_a_coordinador(t_operacion* operacion){
 	Message * msg = empaquetar_op_en_mensaje(operacion, ESI);
 
 	int res = send_msg(cliente_coordinador, *msg);
-	if (res < 0) return ERROR_DE_ENVIO;
+	if (res < 0) exit(-1);
+	return NULL;
 
 	//Message *rta;
 	//int resultado = await_msg(cliente_coordinador, rta);
@@ -200,8 +201,10 @@ void correr_script(){
 	char** split = string_n_split(script.script_contenido, script.script_largo,(char*) "\n");
 
 	for(int i = 0; split[i] != NULL; i++){
-		sem_wait(&lock_resultados);
 		enviar_operacion_a_coordinador(convertir_operacion(parse(split[i])));
+		Message *rta = malloc(sizeof(Message));
+		if(await_msg(cliente_coordinador, rta) < 0) exit(-1);
+		if(desempaquetar_resultado(rta) != OK) exit(-1);
 	}
 
 }
