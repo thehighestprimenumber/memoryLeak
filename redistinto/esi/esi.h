@@ -6,6 +6,7 @@
 #define puerto_coordinador "puerto_coordinador"
 #define IP_coordinador "IP_coordinador"
 
+#include <stdbool.h>
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/log.h>
@@ -27,6 +28,8 @@ int pidplanificador;
 int pidcoordinador;
 
 char* path_script;
+
+bool esi_correr;
 
 pthread_t threadPlanificador;
 pthread_t threadCoordinador;

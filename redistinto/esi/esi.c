@@ -35,7 +35,10 @@ int main(int argc,char *argv[]) {
 
 	conectar_a_coordinador(pConfig);
 	conectar_a_planificador(pConfig);
-	while (1) {
+
+	esi_correr = true;
+
+	while (esi_correr) {
 			Message msg;
 			log_debug(log_esi, "esperando mensaje");
 			int resultado = await_msg(socket_planificador, &msg);
@@ -219,6 +222,7 @@ void correr_script(){
 		log_info(log_esi, "operacion OK: %d", desempaquetar_resultado(rta));
 	}
 
+	esi_correr = false;
 }
 
 void manejador_mensajes(Message mensaje) {
@@ -241,7 +245,16 @@ void manejador_mensajes(Message mensaje) {
 	if(mensaje.header->remitente == COORDINADOR) {
 		if (mensaje.header->tipo_mensaje == RESULTADO) {
 			mensaje.header->remitente = ESI;
-			send_msg(socket_planificador, mensaje);
+
+			int contenido_respuesta = desempaquetar_resultado(&mensaje);
+			if (contenido_respuesta == OK)
+			{
+				send_msg(socket_planificador, mensaje);
+			}
+			else
+			{
+				esi_correr = false;
+			}
 			sem_post(&lock_resultados);
 		}
 	}
