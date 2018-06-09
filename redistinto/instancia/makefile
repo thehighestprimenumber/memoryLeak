@@ -1,0 +1,2 @@
+instancia: Instancia/circular.c  Instancia/configuracionInstancia.c  Instancia/handlerCoordinador.c  Instancia/instancia.c ../socket/operacion.c ../socket/socket.c ../socket/common.c
+	gcc -o instancia Instancia/circular.c  Instancia/configuracionInstancia.c  Instancia/handlerCoordinador.c  Instancia/instancia.c ../socket/operacion.c ../socket/socket.c ../socket/common.c -I"../socket" -I"./" -L/usr/lib -lcommons -lpthread -lreadline
