@@ -14,7 +14,7 @@
 #include "common.h"
 
 //Defines
-#define IP "127.0.0.1"//todas estaran dentro de la maquina
+#define IP "192.168.3.94"//todas estaran dentro de la maquina
 #define PUERTO_COORDINADOR "8086"
 #define PUERTO_PLANIFICADOR "8002"
 
