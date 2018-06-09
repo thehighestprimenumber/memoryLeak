@@ -51,12 +51,10 @@ fila_tabla_instancias * buscar_instancia_por_valor_criterio (void* valor, int cr
 		while (element != NULL && element->data != NULL) {
 			fila = (fila_tabla_instancias*) (element->data);
 			if (criterio(fila, valor)) {
-				free(element);
 				return fila;
 			}
 			element = element->next;
 		}
-	free(element);
 	return 0;
 }
 

@@ -204,7 +204,9 @@ void correr_script(){
 	char** split = string_n_split(script.script_contenido, script.script_largo,(char*) "\n");
 
 	for(int i = 0; split[i] != NULL; i++){
-		enviar_operacion_a_coordinador(convertir_operacion(parse(split[i])));
+		t_operacion * op = convertir_operacion(parse(split[i]));
+		enviar_operacion_a_coordinador(op);
+		free_operacion(&op);
 		Message *rta = malloc(sizeof(Message));
 		if(await_msg(cliente_coordinador, rta) < 0) exit(-1);
 		if(desempaquetar_resultado(rta) != OK) exit(-1);
