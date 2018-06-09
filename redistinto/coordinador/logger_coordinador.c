@@ -80,7 +80,6 @@ void loguear_envio_OK(Message * m, int socket) {
 	if (m->header->tipo_mensaje == OPERACION) {
 		t_operacion * op = desempaquetar_operacion(m);
 		log_info(log_coordinador,
-
 				"error al enviar el mensaje a %s para la operacion: %s %s %s",
 				buscar_id_conexion(socket), nombres_operacion[op->tipo], op->clave, op->valor);
 		free_operacion(&op);

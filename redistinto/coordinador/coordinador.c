@@ -46,8 +46,6 @@ int manejar_conexion(Message * m, int socket){
 
 	if (m->header->remitente == INSTANCIA) {
 		char* nombre_instancia = desempaquetar_conexion(m);
-
-		loguear_conexion(socket);
 		fila_tabla_instancias * fila = registrar_instancia(nombre_instancia, socket);
 		Message * configuracion_instancia = empaquetar_config_storage(COORDINADOR, coordinador.cantidad_entradas, coordinador.tamanio_entrada);
 		if (enviar_mensaje(socket, *configuracion_instancia)<0)
