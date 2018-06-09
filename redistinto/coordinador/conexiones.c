@@ -22,7 +22,7 @@ void* recibir_conexion(void* con) {
 		if (res < 0) {
 			manejar_desconexion(conexion->socket);
 			free_msg(&msg);
-			break;
+			continue;
 
 		}
 		enum tipoMensaje tipo = msg->header->tipo_mensaje;

@@ -33,39 +33,34 @@ int test_operacion(){
 	return 0;
 }
 
-int mandar_operaciones_test(t_operacion * op){
-	int socket_coordinador =  connect_to_server(IP, PUERTO_COORDINADOR);
-	if(socket_coordinador == -1)
-		return -10;
+int mandar_operaciones_test(t_operacion * op, int socket_coordinador){
 	Message * m = empaquetar_op_en_mensaje(op, ESI);
 	int res = enviar_mensaje_test(socket_coordinador, *m);
 			if (res<0) return ERROR_DE_ENVIO;
 			free_msg(m);
 
-		while (1) {
-			Message *msg;
-			int resultado = await_msg(socket_coordinador, msg);
-			free_msg(&msg);
-			if (resultado<0){
-				return ERROR_DE_RECEPCION;
-			}
+	Message *msg;
+		int resultado = await_msg(socket_coordinador, msg);
+		free_msg(&msg);
+		if (resultado<0){
+			return ERROR_DE_RECEPCION;
 
-		}
+	}return desempaquetar_resultado(resultado);
 
 }
-int test_ESI_get(){
+int test_ESI_get(int socket){
 	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), " ", 1, op_GET);
-	return mandar_operaciones_test(op);
+	return mandar_operaciones_test(op, socket);
 }
 
-int test_ESI_set(){
+int test_ESI_set(int socket){
 	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), "unvalor12345", strlen("unvalor12345")+1, op_SET);
-	return mandar_operaciones_test(op);
+	return mandar_operaciones_test(op, socket);
 }
 
-int test_ESI_store(){
+int test_ESI_store(int socket){
 	t_operacion * op = crear_operacion("una:clave", strlen("una:clave"), " ", 1, op_STORE);
-	return mandar_operaciones_test(op);
+	return mandar_operaciones_test(op, socket);
 }
 
 

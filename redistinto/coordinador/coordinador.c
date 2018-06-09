@@ -31,13 +31,21 @@ void inicializar_configuracion(){
 			coordinador.retardo, coordinador.cantidad_entradas, coordinador.tamanio_entrada, coordinador.puerto_escucha, coordinador.algoritmo);
 
 	coordinador.tabla_instancias = list_create();
+	coordinador.conexiones = list_create();
 	ultima_instancia_usada=0;
 }
 
 int manejar_conexion(Message * m, int socket){
+	t_socket_nombre* dato_conexion = calloc(1, sizeof(dato_conexion));
+	char* nombre = desempaquetar_conexion(m);
+	dato_conexion->socket = socket;
+	dato_conexion->nombre = calloc(1, strlen(nombre)+1);
+	strcpy(dato_conexion->nombre, nombre);
+	list_add(coordinador.conexiones, dato_conexion);
+	loguear_conexion(dato_conexion);
+
 	if (m->header->remitente == INSTANCIA) {
 		char* nombre_instancia = desempaquetar_conexion(m);
-		loguear_conexion(socket);
 		fila_tabla_instancias * fila = registrar_instancia(nombre_instancia, socket);
 		Message * configuracion_instancia = empaquetar_config_storage(COORDINADOR, coordinador.cantidad_entradas, coordinador.tamanio_entrada);
 		if (enviar_mensaje(socket, *configuracion_instancia)<0)
@@ -66,8 +74,6 @@ enum tipoRemitente remitente = msg->header->remitente;
 	default:
 		break; //TODO ERROR
 	}
-	free(&msg);
-
 	return res;
 }
 
@@ -77,7 +83,7 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 	//enviar_mensaje(socket_solicitante, *empaquetar_ack(COORDINADOR));
 	char* clave = op->clave;
 	coordinador.operacion_global_threads = op;
-	sem_post(&coordinador.lock_planificador);
+	sem_post(&coordinador.lock_planificador); //ESTO DEBE DESPERTAR A registrar_coordinador_y_quedar_esperando
 	sem_wait(&coordinador.lock_operaciones);
 	int resultado = coordinador.resultado_global;
 	if (resultado == OK) {
