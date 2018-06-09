@@ -123,9 +123,6 @@ void esperar_operacion(fila_tabla_instancias* instancia){
 			free(respuesta);
 
 		sem_post(&coordinador.lock_operaciones);
-		sem_wait(&instancia->lock);
-
-
 	}
 }
 

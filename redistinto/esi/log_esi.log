@@ -140,3 +140,54 @@ STORE futbol:messi
 [DEBUG] 01:37:44:609 ESI/(14868:14868): esperando mensaje
 [DEBUG] 01:37:44:609 ESI/(14868:14868): llego un mensaje. parseando...
 [INFO] 01:37:44:609 ESI/(14868:14868): LLegó un mensaje
+[TRACE] 01:49:43:113 ESI/(15275:15275): Inicia el proceso ESI
+[TRACE] 01:49:43:114 ESI/(15275:15275): El puerto del coordinador es: 8086
+[TRACE] 01:49:43:114 ESI/(15275:15275): La ip del coordinador es: 127.0.0.1
+[TRACE] 01:49:43:114 ESI/(15275:15275): El puerto del planificador es: 8002
+[TRACE] 01:49:43:115 ESI/(15275:15275): La ip del planificador es: 127.0.0.1
+[TRACE] 01:49:43:115 ESI/(15275:15275): El nombre del script es: ESI_1
+[INFO] 01:49:43:115 ESI/(15275:15275): ESI se conecto con el Coordinador
+[INFO] 01:49:45:116 ESI/(15275:15275): ESI se conecto con el Planificador
+[DEBUG] 01:49:45:117 ESI/(15275:15275): Se envio la ruta del script.
+[DEBUG] 01:49:45:117 ESI/(15275:15275): esperando mensaje
+[DEBUG] 01:49:45:118 ESI/(15275:15275): llego un mensaje. parseando...
+[INFO] 01:49:45:118 ESI/(15275:15275): LLegó un mensaje
+[INFO] 01:49:45:119 ESI/(15275:15275): Recibido el contenido del script
+[DEBUG] 01:49:47:991 ESI/(15275:15275): mensaje recibido: 1
+[DEBUG] 01:49:47:991 ESI/(15275:15275): esperando mensaje
+[DEBUG] 01:49:47:991 ESI/(15275:15275): llego un mensaje. parseando...
+[INFO] 01:49:47:991 ESI/(15275:15275): LLegó un mensaje
+[TRACE] 01:53:31:513 ESI/(15604:15604): Inicia el proceso ESI
+[TRACE] 01:53:31:514 ESI/(15604:15604): El puerto del coordinador es: 8086
+[TRACE] 01:53:31:514 ESI/(15604:15604): La ip del coordinador es: 127.0.0.1
+[TRACE] 01:53:31:514 ESI/(15604:15604): El puerto del planificador es: 8002
+[TRACE] 01:53:31:514 ESI/(15604:15604): La ip del planificador es: 127.0.0.1
+[TRACE] 01:53:31:514 ESI/(15604:15604): El nombre del script es: ESI_1
+[INFO] 01:53:31:514 ESI/(15604:15604): ESI se conecto con el Coordinador
+[INFO] 01:53:33:516 ESI/(15604:15604): ESI se conecto con el Planificador
+[DEBUG] 01:53:33:516 ESI/(15604:15604): Se envio la ruta del script.
+[DEBUG] 01:53:33:517 ESI/(15604:15604): esperando mensaje
+[DEBUG] 01:53:33:517 ESI/(15604:15604): llego un mensaje. parseando...
+[INFO] 01:53:33:517 ESI/(15604:15604): LLegó un mensaje
+[INFO] 01:53:33:517 ESI/(15604:15604): Recibido el contenido del script
+[DEBUG] 01:53:33:518 ESI/(15604:15604): mensaje recibido: 1
+[DEBUG] 01:53:33:519 ESI/(15604:15604): esperando mensaje
+[DEBUG] 01:53:33:519 ESI/(15604:15604): llego un mensaje. parseando...
+[INFO] 01:53:33:519 ESI/(15604:15604): LLegó un mensaje
+[TRACE] 02:01:49:973 ESI/(16198:16198): Inicia el proceso ESI
+[TRACE] 02:01:49:974 ESI/(16198:16198): El puerto del coordinador es: 8086
+[TRACE] 02:01:49:974 ESI/(16198:16198): La ip del coordinador es: 127.0.0.1
+[TRACE] 02:01:49:974 ESI/(16198:16198): El puerto del planificador es: 8002
+[TRACE] 02:01:49:974 ESI/(16198:16198): La ip del planificador es: 127.0.0.1
+[TRACE] 02:01:49:974 ESI/(16198:16198): El nombre del script es: ESI_1
+[INFO] 02:01:49:976 ESI/(16198:16198): ESI se conecto con el Coordinador
+[INFO] 02:01:51:977 ESI/(16198:16198): ESI se conecto con el Planificador
+[DEBUG] 02:01:51:978 ESI/(16198:16198): Se envio la ruta del script.
+[DEBUG] 02:01:51:979 ESI/(16198:16198): esperando mensaje
+[DEBUG] 02:01:51:979 ESI/(16198:16198): llego un mensaje. parseando...
+[INFO] 02:01:51:979 ESI/(16198:16198): LLegó un mensaje
+[INFO] 02:01:51:980 ESI/(16198:16198): Recibido el contenido del script
+[DEBUG] 02:01:51:980 ESI/(16198:16198): mensaje recibido: 1
+[DEBUG] 02:01:51:980 ESI/(16198:16198): esperando mensaje
+[DEBUG] 02:01:51:980 ESI/(16198:16198): llego un mensaje. parseando...
+[INFO] 02:01:51:981 ESI/(16198:16198): LLegó un mensaje

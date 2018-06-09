@@ -44,8 +44,8 @@ void loguear_recepcion(Message * m, int socket) {
 	if (m->header->tipo_mensaje == OPERACION) {
 		t_operacion * op = desempaquetar_operacion(m);
 		log_info(log_coordinador,
-				"el coordinador recibio un mensaje de %s para la operacion %s %s %s", buscar_id_conexion(socket),
-				nombres_operacion[op->tipo], op->clave, op->valor);
+				"el coordinador recibio un mensaje de %s para la operacion %s %s", buscar_id_conexion(socket),
+				nombres_operacion[op->tipo], op->clave);
 	} else {
 		char* contenido = desempaquetar_varios(m);
 		log_info(log_coordinador,
@@ -72,8 +72,8 @@ void loguear_error_envio(Message * m, int socket) {
 	if (m->header->tipo_mensaje == OPERACION) {
 		t_operacion * op = desempaquetar_operacion(m);
 		log_info(log_coordinador,
-				"error al enviar el mensaje a %s para la operacion: %s %s %s",
-				buscar_id_conexion(socket), nombres_operacion[op->tipo], op->clave, op->valor);
+				"error al enviar el mensaje a %s para la operacion: %s %s",
+				buscar_id_conexion(socket), nombres_operacion[op->tipo], op->clave);
 	} else {
 		char* contenido = desempaquetar_varios(m);
 		log_warning(log_coordinador, "error al enviar mensaje a %s: %s", buscar_id_conexion(socket),
