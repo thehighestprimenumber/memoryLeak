@@ -146,6 +146,9 @@ t_operacion* convertir_operacion(t_esi_operacion operacionOriginal){
 		operacionNueva->clave = calloc(1, strlen(operacionOriginal.argumentos.STORE.clave)+1);
 		memcpy(operacionNueva->clave, operacionOriginal.argumentos.STORE.clave, strlen(operacionOriginal.argumentos.STORE.clave));
 		operacionNueva->largo_clave = strlen(operacionNueva->clave)+1;
+		operacionNueva->valor = calloc(1, 1);
+		strcpy(operacionNueva->valor, "\0");
+		operacionNueva->largo_valor=strlen(operacionNueva->valor)+1;
 		break;
 	default:
 		log_error(log_esi, "Error al convertir la operacion solicitada.");
