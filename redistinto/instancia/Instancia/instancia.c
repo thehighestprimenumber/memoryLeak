@@ -106,6 +106,7 @@ int manejar_operacion(Message * msg) {
 }
 
 int agregar_clave_a_lista(char* clave, int largo_clave){
+	log_debug(log_inst, "Hola amiguitos, estoy ejecutando un GET");
 	t_clave_valor* clave_valor_existente = buscar_clave_valor (clave);
 	if (clave_valor_existente != NULL) return OK;
 
@@ -120,6 +121,7 @@ int agregar_clave_a_lista(char* clave, int largo_clave){
 }
 
 int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_valor){
+	log_debug(log_inst, "Hola amiguitos, estoy ejecutando un SET");
 	t_clave_valor* entrada = buscar_clave_valor (clave);
 	if (entrada == NULL)
 			return CLAVE_INEXISTENTE;
@@ -137,6 +139,7 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 }
 
 int guardar_entrada(char* clave, int largo_clave){
+	log_debug(log_inst, "Hola amiguitos, estoy ejecutando un STORE");
 	t_clave_valor* clave_valor_existente = buscar_clave_valor(clave);
 	if (clave_valor_existente == NULL) return CLAVE_INEXISTENTE;
 	guardar(clave_valor_existente);
