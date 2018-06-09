@@ -313,7 +313,7 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 		log_info(log_planificador, "Planificador se conecto con el Coordinador");
 	}
 
-	Message * mensaje = empaquetar_texto("Planificador conecta a coordinador\0", strlen("Planificador conecta a coordinador\0"), PLANIFICADOR);
+	Message * mensaje = empaquetar_texto("Planificador\0", strlen("Planificador\0"), PLANIFICADOR);
 	mensaje->header->tipo_mensaje = CONEXION;
 	int resultado = enviar_mensaje(pidCoordinador, *mensaje);
 
