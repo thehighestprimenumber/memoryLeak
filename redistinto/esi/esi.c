@@ -125,7 +125,10 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 t_operacion* convertir_operacion(t_esi_operacion operacionOriginal){
 
 	if (operacionOriginal.valido == false) {
-		return CLAVE_MUY_GRANDE;
+		return CLAVE_MUY_GRANDE; //FIXME acá estás devolviendo un int, no un t_operacion*.
+								// la solución sería recibir un t_operacion* como parámetro
+								// al que le editas el contenido. y devolver un OK cuando sale bien
+								// y sino, los mensajes de error que correspondan
 	}
 
 	t_operacion* operacionNueva = (t_operacion*) malloc(sizeof(t_operacion));
@@ -165,7 +168,8 @@ t_operacion* convertir_operacion(t_esi_operacion operacionOriginal){
 }
 
 void* enviar_operacion_a_coordinador(t_operacion* operacion){
-
+	//FIXME acá devovles un int, pero la función declara return tipo void*
+	// y aparte la función que llama a esta no mira el resultado.
 	Message * msg = empaquetar_op_en_mensaje(operacion, ESI);
 
 	int res = send_msg(cliente_coordinador, *msg);
