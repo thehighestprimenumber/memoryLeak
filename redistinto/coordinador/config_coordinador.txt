@@ -1,4 +1,4 @@
-puerto=un puerto
+puerto=8086
 retardo=1
 algoritmo=EL
 cantidad_entradas=10

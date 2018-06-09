@@ -34,6 +34,7 @@ enum algoritmo_coordinador {
 typedef struct {
 	t_list* operaciones;
 	t_list* tabla_instancias;
+	t_list* conexiones;
 	char* puerto_escucha;
 	enum algoritmo_coordinador algoritmo;
 	int cantidad_entradas;
@@ -50,6 +51,7 @@ t_coordinador coordinador;
 typedef struct {
 	int identificador;
 } proceso_esi;
+
 
 char* arch_config;
 
