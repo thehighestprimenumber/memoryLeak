@@ -67,7 +67,7 @@ int inicializar(){
 	 return -10;
 	}
 	log_debug(log_inst, "Se pudo conectar con el coordinador");
-	Message* msg= empaquetar_conexion(INSTANCIA, "id de instancia"); //TODO reemplazar por un valor que se obtiene de configuracion
+	Message* msg= empaquetar_conexion(INSTANCIA, instancia.nombre_inst);
 
 	if (send_msg(instancia.socket_coordinador, (*msg))<0)
 		return ERROR_DE_ENVIO;
