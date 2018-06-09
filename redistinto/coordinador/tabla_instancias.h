@@ -33,6 +33,6 @@ int criterio_nombre(fila_tabla_instancias* fila, void* nombre_instancia);
 int criterio_socket(fila_tabla_instancias* fila, void* numero_socket);
 
 fila_tabla_instancias * buscar_instancia_por_valor_criterio (void* valor, int criterio (fila_tabla_instancias*, void*));
-
+void esperar_operacion(fila_tabla_instancias* instancia);
 
 #endif

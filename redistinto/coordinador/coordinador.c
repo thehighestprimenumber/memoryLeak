@@ -94,10 +94,11 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 		}
 		if (instancia == NULL) {
 			resultado = NO_HAY_INSTANCIAS;
-		}
+		} else {
 		loguear_inst_op(instancia->nombre_instancia, op);
 		if (op->tipo != op_GET){
 			despertar_hilo_instancia(op, instancia);
+		}
 		}
 	}
 	Message* rta_a_esi = empaquetar_resultado(COORDINADOR, resultado);
@@ -109,13 +110,12 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 	*/
 
 	loguear_resultado(resultado);
-	free_msg(&msg);
+	free_msg(&rta_a_esi);
 	return resultado;
 }
 
 int validar_bloqueo_con_planificador(t_operacion* operacion){
-	return OK;
-	t_operacion interna = {.tipo = operacion->tipo, .largo_clave = operacion->largo_clave, .largo_valor= operacion->largo_valor};
+	/*t_operacion interna = {.tipo = operacion->tipo, .largo_clave = operacion->largo_clave, .largo_valor= operacion->largo_valor};
 	interna.clave = operacion->clave;
 	interna.valor = operacion->valor;
 
@@ -134,7 +134,8 @@ int validar_bloqueo_con_planificador(t_operacion* operacion){
 	Message * respuesta;
 	if (await_msg(coordinador.socket_planificador, respuesta)<0)
 		return ERROR_DE_RECEPCION;
-	int contenido_respuesta = desempaquetar_resultado(respuesta);
+	int contenido_respuesta = desempaquetar_resultado(respuesta);*/
+	int contenido_respuesta = OK;
 	loguear_resultado(contenido_respuesta);
 	coordinador.resultado_global = contenido_respuesta;
 	return contenido_respuesta; ////CLAVE_DUPLICADA o OK */
