@@ -36,6 +36,7 @@ typedef struct {
 	t_list* tabla_instancias;
 	t_list* conexiones;
 	char* puerto_escucha;
+	char* ip_coordinador;
 	enum algoritmo_coordinador algoritmo;
 	int cantidad_entradas;
 	int tamanio_entrada;

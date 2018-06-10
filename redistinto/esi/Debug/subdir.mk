@@ -6,9 +6,6 @@
 C_SRCS += \
 ../esi.c 
 
-O_SRCS += \
-../esi.o 
-
 OBJS += \
 ./esi.o 
 

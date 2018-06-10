@@ -9,9 +9,6 @@ C_SRCS += \
 ../Instancia/handlerCoordinador.c \
 ../Instancia/instancia.c 
 
-O_SRCS += \
-../Instancia/instancia.o 
-
 OBJS += \
 ./Instancia/circular.o \
 ./Instancia/configuracionInstancia.o \

@@ -9,30 +9,14 @@ int informar_resultado_al_planificador(int resultado);
 void manejar_kill(int signal);
 int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* instancia);
 void registrar_coordinador_y_quedar_esperando(int socket);
-void inicializar_configuracion();
 
 int main() {
 	inicializar_configuracion();
-	if (signal(SIGINT, manejar_kill) == SIG_ERR)
-		log_error(log_coordinador, "error en registrar manejador de kill");
 	iniciar_servicio();//cuando llegue un mensaje se va a correr recibir_mensaje (en conexiones.c)
 	sem_init(&coordinador.lock_operaciones, 0, 1);
 	sem_init(&coordinador.lock_planificador, 0, 1);
 
 	//sem_post(&coordinador.lock_operaciones);
-}
-
-void inicializar_configuracion(){
-	log_coordinador = log_create("./log_de_operaciones.log", "log_operaciones", true, LOG_LEVEL_DEBUG);
-	log_debug(log_coordinador, "cargando configuracion\n");
-	cargar_configuracion();
-
-	log_debug(log_coordinador, "\nretardo: %d\ncantidad_entradas: %d\ntamanio_entrada: %d\npuerto_escucha: %s\nalgoritmo: %s\n",
-			coordinador.retardo, coordinador.cantidad_entradas, coordinador.tamanio_entrada, coordinador.puerto_escucha, coordinador.algoritmo);
-
-	coordinador.tabla_instancias = list_create();
-	coordinador.conexiones = list_create();
-	ultima_instancia_usada=0;
 }
 
 int manejar_conexion(Message * m, int socket){

@@ -46,7 +46,7 @@ int main(void) {
 }
 
 void inicializar_logger() {
-	log_planificador = log_create("/home/utnso/tp/Planificador.log", "Planificador: ", true, LOG_LEVEL_INFO);
+	log_planificador = log_create("./Planificador.log", "Planificador: ", true, LOG_LEVEL_INFO);
 }
 
 char* armarPathScript(char* cadenaPath,char* nombreScript) {

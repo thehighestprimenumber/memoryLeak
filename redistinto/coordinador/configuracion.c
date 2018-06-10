@@ -1,9 +1,4 @@
-#define m_puerto_escucha "puerto"
-#define m_algoritmo "algoritmo"
-#define m_cantidad_entradas "cantidad_entradas"
-#define m_tamanio_entrada "tamanio_entrada"
-#define m_retardo "retardo"
-
+# include "configuracion.h"
 # include "coordinador.h"
 
 char* ruta_arch_config = "./config_coordinador.txt";
@@ -23,6 +18,14 @@ void leer_propiedad_puerto_escucha (t_config *configuracion){
 	}
 }
 
+void leer_propiedad_ip (t_config *configuracion){
+	if (config_has_property(configuracion, m_ip_coordinador)){
+		coordinador.ip_coordinador = malloc(strlen(config_get_string_value(configuracion,m_ip_coordinador)) + 1);
+		strcpy(coordinador.ip_coordinador, config_get_string_value(configuracion,m_ip_coordinador));
+	}
+}
+
+
 void leer_propiedad_algoritmo (t_config *configuracion){
 	if (config_has_property(configuracion, m_algoritmo)){
 		char* valor = config_get_string_value(configuracion,m_algoritmo);
@@ -32,7 +35,20 @@ void leer_propiedad_algoritmo (t_config *configuracion){
 	}
 }
 
-int cargar_configuracion(){
+void inicializar_configuracion(){
+	log_coordinador = log_create("./log_de_operaciones.log", "log_operaciones", true, LOG_LEVEL_DEBUG);
+	log_debug(log_coordinador, "cargando configuracion\n");
+	leer_configuracion();
+
+	log_debug(log_coordinador, "\nretardo: %d\ncantidad_entradas: %d\ntamanio_entrada: %d\npuerto_escucha: %s\nalgoritmo: %s\n",
+			coordinador.retardo, coordinador.cantidad_entradas, coordinador.tamanio_entrada, coordinador.puerto_escucha, coordinador.algoritmo);
+
+	coordinador.tabla_instancias = list_create();
+	coordinador.conexiones = list_create();
+	ultima_instancia_usada=0;
+}
+
+int leer_configuracion(char* ip, char* puerto){
 	t_config* configuracion;
 	configuracion = config_create(ruta_arch_config);
 
@@ -42,6 +58,8 @@ int cargar_configuracion(){
 	coordinador.retardo = leer_propiedad_int(configuracion, m_retardo);
 	coordinador.cantidad_entradas = leer_propiedad_int(configuracion, m_cantidad_entradas);
 	coordinador.tamanio_entrada = leer_propiedad_int(configuracion, m_tamanio_entrada);
+
+	leer_propiedad_ip(configuracion);
 	leer_propiedad_puerto_escucha(configuracion);
 	leer_propiedad_algoritmo(configuracion);
 	config_destroy(configuracion);

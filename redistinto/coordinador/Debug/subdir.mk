@@ -10,9 +10,6 @@ C_SRCS += \
 ../logger_coordinador.c \
 ../tabla_instancias.c 
 
-O_SRCS += \
-../algo.o 
-
 OBJS += \
 ./conexiones.o \
 ./configuracion.o \

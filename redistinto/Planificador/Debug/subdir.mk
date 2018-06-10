@@ -8,9 +8,6 @@ C_SRCS += \
 ../logger_planificador.c \
 ../planificador.c 
 
-O_SRCS += \
-../planificador.o 
-
 OBJS += \
 ./consola.o \
 ./logger_planificador.o \
