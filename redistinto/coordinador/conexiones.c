@@ -60,7 +60,11 @@ return 0;
 
 int iniciar_servicio() {
 
-	socket_fd = create_listener(IP, PUERTO_COORDINADOR);
+	char* ipLocal = get_local_ip();
+	log_info(log_coordinador, "IP Local: %s", ipLocal);
+	socket_fd = create_listener(ipLocal, PUERTO_COORDINADOR);
+	free(ipLocal);
+
 	if (socket_fd < 0) {
 		log_info(log_coordinador, "error al obtener socket");
 		return ERROR_DE_CONEXION;
