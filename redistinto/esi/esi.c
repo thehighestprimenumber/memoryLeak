@@ -95,14 +95,14 @@ t_operacion * crearOperacion(tipoOperacion tipo, char* clave, int largoClave, ch
 t_operacion * convertir_operacion(t_esi_operacion operacionOriginal){
 	switch(operacionOriginal.keyword){
 	case GET:
-		return crearOperacion(op_GET, operacionOriginal.argumentos.GET.clave, strlen(operacionOriginal.argumentos.GET.clave), "_", 1);
+		return crearOperacion(op_GET, operacionOriginal.argumentos.GET.clave, strlen(operacionOriginal.argumentos.GET.clave) + 1, "__", 2);
 		break;
 	case SET:
-		return crearOperacion(op_SET, operacionOriginal.argumentos.SET.clave, strlen(operacionOriginal.argumentos.SET.clave),
+		return crearOperacion(op_SET, operacionOriginal.argumentos.SET.clave, strlen(operacionOriginal.argumentos.SET.clave) + 1,
 				operacionOriginal.argumentos.SET.valor, strlen(operacionOriginal.argumentos.SET.valor));
 		break;
 	case STORE:
-		return crearOperacion(op_STORE, operacionOriginal.argumentos.STORE.clave, strlen(operacionOriginal.argumentos.STORE.clave), "_", 1);
+		return crearOperacion(op_STORE, operacionOriginal.argumentos.STORE.clave, strlen(operacionOriginal.argumentos.STORE.clave) + 1, "__", 2);
 		break;
 	}
 
@@ -161,6 +161,11 @@ int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
 }
 
 int ejecutar_proxima_operacion(){
+	if (operaciones->head == NULL) {
+		esi_correr = false;
+		return OK;
+	}
+
 	t_link_element *element = operaciones->head;
 	t_operacion * op = element->data;
 		enviar_operacion_a_coordinador(op);
@@ -197,8 +202,11 @@ void manejar_mensajes(Message mensaje) {
 		case EJECUTAR:
 			log_info(log_esi, "Recibida instruccion de ejecutar");
 			res = ejecutar_proxima_operacion();
-			Message * m = empaquetar_resultado(ESI, res);
-			enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
+			if (esi_correr == true)
+			{
+				Message * m = empaquetar_resultado(ESI, res);
+				enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
+			}
 			break;
 
 		case RESULTADO:
