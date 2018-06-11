@@ -143,7 +143,7 @@ void desbloquear_esi();
 void kill_esi();
 
 bool clave_ya_bloqueada_config(char*clave1);
-bool clave_ya_bloqueada(struct_blocked elemento);
+bool clave_ya_bloqueada(struct_blocked* elemento);
 bool clave_set_disponible(struct_blocked* elemento);
 
 #endif /* PRUEBA_H_ */

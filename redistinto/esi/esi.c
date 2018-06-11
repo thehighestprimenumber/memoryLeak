@@ -183,10 +183,11 @@ int ejecutar_proxima_operacion(){
 
 void manejar_mensajes(Message mensaje) {
 	//loguear_recepcion(log_esi, &mensaje, nombres_modulos[mensaje.header->remitente]);
+	int res;
 	switch (mensaje.header->tipo_mensaje) {
 		case CONEXION:
 			log_info(log_esi, "Recibido el contenido del script");
-			int res = armar_estructura_script(mensaje.contenido);
+			res = armar_estructura_script(mensaje.contenido);
 			if (res<0){
 				Message * m = empaquetar_resultado(ESI, res);
 				enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
@@ -195,7 +196,7 @@ void manejar_mensajes(Message mensaje) {
 
 		case EJECUTAR:
 			log_info(log_esi, "Recibida instruccion de ejecutar");
-			int res = ejecutar_proxima_operacion();
+			res = ejecutar_proxima_operacion();
 			Message * m = empaquetar_resultado(ESI, res);
 			enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
 			break;

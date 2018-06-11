@@ -557,8 +557,8 @@ bool clave_ya_bloqueada_config(char* clave) {
 	return (strcmp(operacionEnMemoria->clave,clave) == 0);
 }
 
-bool clave_ya_bloqueada(struct_blocked elemento) {
-	return (strcmp(operacionEnMemoria->clave,elemento.clave) == 0);
+bool clave_ya_bloqueada(struct_blocked* elemento) {
+	return (strcmp(operacionEnMemoria->clave,elemento->clave) == 0);
 }
 
 bool clave_set_disponible(struct_blocked* elemento) {
