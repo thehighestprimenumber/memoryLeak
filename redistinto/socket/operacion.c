@@ -58,7 +58,7 @@ Message* empaquetar_resultado(tipoRemitente remitente, int resultado){
 
 int desempaquetar_resultado(Message* msg){
 	if (msg == NULL || msg->header == NULL || msg->header->size < 1|| msg->contenido == NULL)
-		return NULL;
+		return 0;
 	int* resultado = calloc (1, sizeof(int));
 	memcpy (resultado, (int*) msg->contenido,  sizeof(int));
 	return *resultado;

@@ -5,6 +5,7 @@
 #define NO_USE_FSEEK 0
 
 #define puerto_planificador "puerto"
+#define ip_planificador "ip_planificador"
 #define algoritmo_planificador "algoritmo"
 #define estimacion_planificador "estimacion"
 #define IPCoord_planificador "IP_coordinador"
@@ -42,8 +43,8 @@ typedef enum algorimoPrioridad {FIFO} algorimoPrioridad;
 typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
 
 typedef struct {
-        //operacion* operacion, TODO crear struct
-	    char* puerto_planif;
+        char* puerto_planif;
+	    char* IP_planificador;
 	   	char* algoritmo_planif;
 	   	int estimacion_inicial;
 	   	char* IP_coordinador;
@@ -116,7 +117,7 @@ void liberar_split(char** array);
 int conectar_a_coordinador(t_planificador* pConfig);
 int manejador_de_eventos(int socket, Message* msj);
 int realizar_evento(Conexion* con, Message* msj);
-int enviar_mensaje(int socket, Message msg);
+int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) ;
 
 //Firmas de las funciones para agregar a las listas
 void agregar_ready(int idEsi);

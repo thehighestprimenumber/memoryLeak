@@ -20,13 +20,13 @@ int main() {
 }
 
 int manejar_conexion(Message * m, int socket){
-	loguear_conexion(m, socket);
+	registrar_conexion(m, socket);
 
 	if (m->header->remitente == INSTANCIA) {
 		char* nombre_instancia = desempaquetar_conexion(m);
 		fila_tabla_instancias * fila = registrar_instancia(nombre_instancia, socket);
 		Message * configuracion_instancia = empaquetar_config_storage(COORDINADOR, coordinador.cantidad_entradas, coordinador.tamanio_entrada);
-		if (enviar_mensaje(socket, *configuracion_instancia)<0)
+		if (enviar_y_loguear_mensaje(socket, *configuracion_instancia)<0)
 			return ERROR_DE_ENVIO;
 		esperar_operacion(fila);
 
@@ -38,7 +38,7 @@ int manejar_conexion(Message * m, int socket){
 
 
 void manejar_desconexion(int socket){
-	loguear_desconexion(socket);
+	loguear_desconexion(log_coordinador, buscar_id_conexion(socket));
 	desconectar_instancia(socket);
 	close(socket);
 }
@@ -79,20 +79,20 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 		if (instancia == NULL) {
 			resultado = NO_HAY_INSTANCIAS;
 		} else {
-			loguear_inst_op(instancia->nombre_instancia, op);
+			loguear_inst_op(log_coordinador, instancia->nombre_instancia, op);
 			despertar_hilo_instancia(op, instancia);
 		}
 	}
 	resultado = coordinador.resultado_global;
 	Message* rta_a_esi = empaquetar_resultado(COORDINADOR, resultado);
-	enviar_mensaje(socket_solicitante, *rta_a_esi);
+	enviar_y_loguear_mensaje(socket_solicitante, *rta_a_esi);
 
 	/*informar_resultado_al_planificador(coordinador.resultado_global);
 		resultado = coordinador.resultado_global;
 		//free(instancia);
 	*/
 
-	loguear_resultado(resultado);
+	loguear_resultado(log_coordinador, resultado);
 	free_msg(&rta_a_esi);
 	return resultado;
 }
@@ -110,7 +110,7 @@ int validar_bloqueo_con_planificador(t_operacion* operacion){
 
 	Message * mensaje = empaquetar_op_en_mensaje(&interna, COORDINADOR);
 
-	if (enviar_mensaje(coordinador.socket_planificador, *mensaje)<0)
+	if (enviar_y_loguear_mensaje(coordinador.socket_planificador, *mensaje)<0)
 		return ERROR_DE_ENVIO;
 		//log_debug(logger_coordinador, "se solicita bloqueo de clave %s", (char*) operacion->clave);
 
@@ -119,7 +119,7 @@ int validar_bloqueo_con_planificador(t_operacion* operacion){
 		return ERROR_DE_RECEPCION;
 	int contenido_respuesta = desempaquetar_resultado(respuesta);
 	//int contenido_respuesta = OK;
-	loguear_resultado(contenido_respuesta);
+	loguear_resultado(log_coordinador, contenido_respuesta);
 	coordinador.resultado_global = contenido_respuesta;
 	return contenido_respuesta; ////CLAVE_DUPLICADA o OK */
 }
@@ -146,7 +146,7 @@ int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* ins
 
 int informar_resultado_al_planificador(int resultado){
 	Message * rta_a_planif = empaquetar_resultado(COORDINADOR, coordinador.resultado_global);
-		if (enviar_mensaje(socket_planificador, *rta_a_planif)) {
+		if (enviar_y_loguear_mensaje(socket_planificador, *rta_a_planif)) {
 			log_warning(log_coordinador, "error al enviar resultado al coordinador");
 			return ERROR_DE_ENVIO;
 		}

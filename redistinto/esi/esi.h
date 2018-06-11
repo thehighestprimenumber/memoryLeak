@@ -11,6 +11,7 @@
 #include <commons/config.h>
 #include <commons/log.h>
 #include "../socket/socket.h"
+#include "../socket/logger_comun.h"
 #include <stdlib.h>
 #include "../socket/operacion.h"
 #include "../parsi/src/parsi/parser.h"
@@ -47,17 +48,17 @@ typedef struct {
 } esi_configuracion;
 
 esi_script script;
-sem_t lock_resultados;
+t_list * operaciones;
 
 char* leer_propiedad_string (t_config *configuracion, char* propiedad);
-int conectar_a_planificador(esi_configuracion* pConfig);
-int conectar_a_coordinador(esi_configuracion* pConfig);
-t_operacion* convertir_operacion(t_esi_operacion operacionOriginal);
+void conectar_a_planificador(esi_configuracion* pConfig);
+void conectar_a_coordinador(esi_configuracion* pConfig);
+t_operacion * convertir_operacion(t_esi_operacion operacionOriginal);
 void* enviar_operacion_a_coordinador(t_operacion* operacion);
 void enviar_ruta_script_al_planificador(char* path);
 int cantidad_lineas_script(char* script);
-void correr_script();
-void manejador_mensajes(Message mensaje);
-void armar_estructura_script(char* contenidoScript);
+int ejecutar_proxima_operacion();
+void manejar_mensajes(Message mensaje);
+int armar_estructura_script(char* contenidoScript);
 
 #endif

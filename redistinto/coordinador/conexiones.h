@@ -3,7 +3,7 @@
 
 #include "../socket/operacion.h"
 
-int enviar_mensaje(int socket, Message msg);
+int enviar_y_loguear_mensaje(int socket, Message msg);
 void* recibir_conexion(void* con);
 int iniciar_servicio();
 
