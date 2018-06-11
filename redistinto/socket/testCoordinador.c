@@ -11,7 +11,7 @@ int enviar_mensaje_test(int socket, Message msg) {
 }
 
 int correr_tests_instancia(){
-	connect_to_server("127.0.0.1", "8086"); //TODO arreglar
+	connect_to_server("127.0.0.1", "8087"); //TODO arreglar
 
 	char* inst2 = "inst2";
 
@@ -65,7 +65,7 @@ int test_ESI_store(int socket){
 
 
 int test_INST_connect(char* nombre_instancia){
-	int socket_coordinador = connect_to_server("127.0.0.1", "8086"); //TODO arreglar
+	int socket_coordinador = connect_to_server("127.0.0.1", "8087"); //TODO arreglar
 	if(socket_coordinador == -1)
 		return -10;
 	Message * mensaje = empaquetar_conexion(INSTANCIA, nombre_instancia);
