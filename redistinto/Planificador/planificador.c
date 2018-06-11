@@ -160,6 +160,10 @@ int manejador_de_eventos(int socket, Message* msg){
 				}
 				break;
 
+				case RESULTADO:
+					return manejar_resultado(socket, msg);
+					break;
+
 			default:
 				//fuck
 				return 0;
@@ -599,4 +603,53 @@ void desbloquear_esi() {
 		list_remove_by_condition(cola_esi_blocked, ((void*) clave_set_disponible));
 		agregar_ready(esi_a_desbloquear->pid);
 	}
+}
+
+
+int manejar_resultado(int socket,Message* msg) {
+	int resultado = desempaquetar_resultado(msg);
+	loguear_resultado(log_planificador, resultado);
+
+	switch(resultado){
+		case OK:
+		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
+		//y comenzar a procesar instrucciones
+
+			return envio_ejecutar(socket);
+			break;
+		//En este caso como ya estaría bloqueado en mi lista queda esperando
+		case CLAVE_DUPLICADA:
+			return 0;
+		//En estos casos envío mensaje al esi para que se desconecte saliendo del bucle
+		case CLAVE_INEXISTENTE:
+		case CLAVE_MUY_GRANDE:
+		case ERROR_VALOR_NULO:
+			return envio_desconexion(socket);
+		default:
+		//fuck
+		return -2;
+	}
+
+}
+
+int envio_ejecutar(int socket) {
+	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
+	mensajeEjec->header->tipo_mensaje = EJECUTAR;
+
+	int res_ejecutar = enviar_y_loguear_mensaje(socket, *mensajeEjec, "ESI\0");
+	free(mensajeEjec);
+	if (res_ejecutar < 0) {exit_proceso(-1);}
+
+	return 0;
+}
+
+int envio_desconexion(int socket) {
+	Message* mensajeDesc = empaquetar_texto("Planificador pide desconectar al ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
+	mensajeDesc->header->tipo_mensaje = DESCONEXION;
+
+	int res_desconectar = enviar_y_loguear_mensaje(socket, *mensajeDesc, "ESI\0");
+	free(mensajeDesc);
+	if (res_desconectar < 0) {exit_proceso(-1);}
+
+	return 0;
 }

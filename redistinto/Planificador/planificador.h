@@ -28,6 +28,7 @@
 #include "consola.h"
 #include "../socket/socket.h"
 #include "../socket/operacion.h"
+#include "../socket/operacion.h"
 #include "logger_planificador.h"
 
 #define OK 0
@@ -118,6 +119,9 @@ int conectar_a_coordinador(t_planificador* pConfig);
 int manejador_de_eventos(int socket, Message* msj);
 int realizar_evento(Conexion* con, Message* msj);
 int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) ;
+int manejar_resultado(int socket,Message* msg);
+int envio_ejecutar(int socket);
+int envio_desconexion(int socket);
 
 //Firmas de las funciones para agregar a las listas
 void agregar_ready(int idEsi);
