@@ -560,6 +560,7 @@ int validar_operacion_store() {
 		free_operacion(&operacionEnMemoria);
 	}
 
+
 	return OK;
 }
 
