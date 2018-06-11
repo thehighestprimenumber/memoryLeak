@@ -95,9 +95,14 @@ void leer_script_completo(char* nombreArchivo) {
 
 int iniciar(int socketCoordinador){
 	log_info(log_planificador, "Iniciando proceso planificador");
+	char* ipLocal = get_local_ip();
 
-	int socket_fd = create_listener(IP,planificador.puerto_planif);
+	log_info(log_planificador, "IP Local: %s", ipLocal);
+
+	int socket_fd = create_listener(ipLocal,planificador.puerto_planif);
 	if (socket_fd <0) return ERROR_DE_CONEXION;
+
+	free(ipLocal);
 
 	start_listening_select(socket_fd, socketCoordinador, *manejador_de_eventos);
 
