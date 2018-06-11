@@ -1,38 +1,10 @@
 #include "esi.h"
+esi_configuracion* iniciarlizar_configuracion(char* argv[]);
+int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario);
 
 int main(int argc,char *argv[]) {
-
-	// Levantamos configuracion
-
-	esi_configuracion* pConfig = (esi_configuracion*) malloc(sizeof(esi_configuracion));;
-	t_config* config = config_create("./configESI.txt");
-
-	sem_init(&lock_resultados, 0, 1);
-
-	if (config == NULL) {
-		config = config_create("../configESI.txt");
-	}
-	if (argv==NULL || argv[1]==NULL) {
-		argv[1] = "ESI_1";
-	}
-	path_script = malloc(strlen(argv[1]) + 1);
-	memcpy(path_script,argv[1],strlen(argv[1]));
-	((char*) path_script)[strlen(argv[1])] = '\0';
-
-	pConfig->coordinador_ip = leer_propiedad_string(config, "IP_coordinador");
-	pConfig->coordinador_puerto = leer_propiedad_string(config, "puerto_coordinador");
-	pConfig->planificador_ip = leer_propiedad_string(config, "IP_planificador");
-	pConfig->planificador_puerto = leer_propiedad_string(config, "puerto_planificador");
-
-	// Levantamos el archivo de log y guardamos IP y Puerto
-	log_esi = log_create("log_esi.log", "ESI", true, LOG_LEVEL_TRACE);
-	log_trace(log_esi,"Inicia el proceso ESI");
-	log_trace(log_esi,"El puerto del coordinador es: %s",pConfig->coordinador_puerto);
-	log_trace(log_esi,"La ip del coordinador es: %s",pConfig->coordinador_ip);
-	log_trace(log_esi,"El puerto del planificador es: %s",pConfig->planificador_puerto);
-	log_trace(log_esi,"La ip del planificador es: %s",pConfig->planificador_ip);
-	log_trace(log_esi,"El nombre del script es: %s",argv[1]);
-
+	// Levantamos configuracion -  si argv esta vacio levanta ESI_1
+	esi_configuracion* pConfig = iniciarlizar_configuracion(argv);
 	conectar_a_coordinador(pConfig);
 	conectar_a_planificador(pConfig);
 
@@ -40,20 +12,16 @@ int main(int argc,char *argv[]) {
 
 	while (esi_correr) {
 			Message msg;
-			log_debug(log_esi, "esperando mensaje");
 			int resultado = await_msg(socket_planificador, &msg);
-			log_debug(log_esi, "llego un mensaje. parseando...");
+			//log_info(log_esi, "se recibe un mensaje del planificador");
 			if (resultado<0){
-				log_debug(log_esi, "error de recepcion");
-				return ERROR_DE_RECEPCION;
+				log_error(log_esi, "error de recepcion");
+				break;
 			}
 
-			manejador_mensajes(msg);
+			manejar_mensajes(msg);
 
-			//char * request = desempaquetar_texto(&msg);
-			log_debug(log_esi, "mensaje recibido: %i", msg.header->tipo_mensaje);
-
-		}
+	}
 	//Recibo la ruta del script a ejecutar y se la envio al planificador
 	//char* path_script = argv[1];
 	//enviar_ruta_script_al_planificador(path_script);
@@ -70,7 +38,7 @@ char* leer_propiedad_string (t_config *configuracion, char* propiedad){
 	return "";
 }
 
-int conectar_a_planificador(esi_configuracion* pConfig) {
+void conectar_a_planificador(esi_configuracion* pConfig) {
 
 	sleep(2);
 
@@ -99,7 +67,7 @@ int conectar_a_planificador(esi_configuracion* pConfig) {
 
 }
 
-int conectar_a_coordinador(esi_configuracion* pConfig) {
+void conectar_a_coordinador(esi_configuracion* pConfig) {
 
 	cliente_coordinador = connect_to_server(pConfig->coordinador_ip,pConfig->coordinador_puerto);
 	//Verifico conexion con el coordinador
@@ -109,55 +77,36 @@ int conectar_a_coordinador(esi_configuracion* pConfig) {
 	} else {
 		log_info(log_esi, "ESI se conecto con el Coordinador");
 	}
-		return OK;
 
 }
 
-t_operacion* convertir_operacion(t_esi_operacion operacionOriginal){
+t_operacion * crearOperacion(tipoOperacion tipo, char* clave, int largoClave, char* valor, int largoValor) {
+	t_operacion * operacion = (t_operacion * ) calloc(1, sizeof(t_operacion));
+	operacion->tipo = tipo;
+	operacion->largo_clave = largoClave;
+	operacion->largo_valor = largoValor;
+	operacion->clave = (char*) calloc(1, largoClave+1);
+	operacion->valor = (char*) calloc(1, largoValor+1);
+	memcpy(operacion->clave, clave, largoClave);
+	memcpy(operacion->valor, valor, largoValor);
+	return operacion;
+}
 
-	if (operacionOriginal.valido == false) {
-		return CLAVE_MUY_GRANDE; //FIXME acá estás devolviendo un int, no un t_operacion*.
-								// la solución sería recibir un t_operacion* como parámetro
-								// al que le editas el contenido. y devolver un OK cuando sale bien
-								// y sino, los mensajes de error que correspondan
-	}
-
-	t_operacion* operacionNueva = (t_operacion*) malloc(sizeof(t_operacion));
-
+t_operacion * convertir_operacion(t_esi_operacion operacionOriginal){
 	switch(operacionOriginal.keyword){
 	case GET:
-		operacionNueva->tipo = op_GET;
-		operacionNueva->clave = calloc(1, strlen(operacionOriginal.argumentos.GET.clave)+1);
-		memcpy(operacionNueva->clave, operacionOriginal.argumentos.GET.clave, strlen(operacionOriginal.argumentos.GET.clave));
-		operacionNueva->largo_clave = strlen(operacionNueva->clave)+1;
-		//Asigno valores vacios para que funcione la operacion
-		operacionNueva->valor = calloc(1, 1);
-		strcpy(operacionNueva->valor, "\0");
-		operacionNueva->largo_valor=strlen(operacionNueva->valor)+1;
+		return crearOperacion(op_GET, operacionOriginal.argumentos.GET.clave, strlen(operacionOriginal.argumentos.GET.clave), "_", 1);
 		break;
 	case SET:
-		operacionNueva->tipo = op_SET;
-		operacionNueva->clave = calloc(1, strlen(operacionOriginal.argumentos.SET.clave)+1);
-		memcpy(operacionNueva->clave, operacionOriginal.argumentos.SET.clave, strlen(operacionOriginal.argumentos.SET.clave));
-		operacionNueva->largo_clave = strlen(operacionNueva->clave)+1;
-		operacionNueva->valor = calloc(1, strlen(operacionOriginal.argumentos.SET.valor)+1);
-		strcpy(operacionNueva->valor, operacionOriginal.argumentos.SET.valor);
-		operacionNueva->largo_valor=strlen(operacionNueva->valor)+1;
+		return crearOperacion(op_SET, operacionOriginal.argumentos.SET.clave, strlen(operacionOriginal.argumentos.SET.clave),
+				operacionOriginal.argumentos.SET.valor, strlen(operacionOriginal.argumentos.SET.valor));
 		break;
 	case STORE:
-		operacionNueva->tipo = op_STORE;
-		operacionNueva->clave = calloc(1, strlen(operacionOriginal.argumentos.STORE.clave)+1);
-		memcpy(operacionNueva->clave, operacionOriginal.argumentos.STORE.clave, strlen(operacionOriginal.argumentos.STORE.clave));
-		operacionNueva->largo_clave = strlen(operacionNueva->clave)+1;
-		operacionNueva->valor = calloc(1, 1);
-		strcpy(operacionNueva->valor, "\0");
-		operacionNueva->largo_valor=strlen(operacionNueva->valor)+1;
+		return crearOperacion(op_STORE, operacionOriginal.argumentos.STORE.clave, strlen(operacionOriginal.argumentos.STORE.clave), "_", 1);
 		break;
-	default:
-		log_error(log_esi, "Error al convertir la operacion solicitada.");
 	}
 
-	return operacionNueva;
+	return OK;
 
 }
 
@@ -166,7 +115,7 @@ void* enviar_operacion_a_coordinador(t_operacion* operacion){
 	// y aparte la función que llama a esta no mira el resultado.
 	Message * msg = empaquetar_op_en_mensaje(operacion, ESI);
 
-	int res = send_msg(cliente_coordinador, *msg);
+	int res = enviar_y_loguear_mensaje(cliente_coordinador, *msg, "coordinador\0");
 	if (res < 0) exit(-1);
 	return NULL;
 
@@ -184,8 +133,8 @@ void enviar_ruta_script_al_planificador(char* path){
 	Message* msg = empaquetar_texto(path, strlen(path), ESI);
 	msg->header->tipo_mensaje = CONEXION;
 
-	if (send_msg(socket_planificador, (*msg))<0) log_debug(log_esi, "Error al enviar la ruta del script.");
-	log_debug(log_esi, "Se envio la ruta del script.");
+	if (enviar_y_loguear_mensaje(socket_planificador, (*msg), "planificador\0")<0)
+		exit(ERROR_DE_ENVIO);
 
 }
 
@@ -201,70 +150,116 @@ int cantidad_lineas_script(char* script){
 
 }
 
-void correr_script(){
+int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
+	int res = send_msg(socket, msg);
+	if (res < 0) {
+		loguear_error_envio(log_esi, &msg, destinatario);
+		return ERROR_DE_ENVIO;
+	}
+	loguear_envio_OK(log_esi, &msg, destinatario);
+	return OK;
+}
 
-	//int n_lineas = cantidad_lineas_script(script);
-	char** split = string_n_split(script.script_contenido, script.script_largo,(char*) "\n");
-
-	for(int i = 0; split[i] != NULL; i++){
-		t_operacion * op = convertir_operacion(parse(split[i]));
+int ejecutar_proxima_operacion(){
+	t_link_element *element = operaciones->head;
+	t_operacion * op = element->data;
 		enviar_operacion_a_coordinador(op);
-		free_operacion(&op);
-		Message *rta = malloc(sizeof(Message));
-		if(await_msg(cliente_coordinador, rta) < 0){
-			log_info(log_esi, "error al recibir resultado");
-			exit(-1);
-		}
-		if(desempaquetar_resultado(rta) != OK){
-			log_info(log_esi, "error en la operacion: %d", desempaquetar_resultado(rta));
-			exit(-1);
-		}
-		log_info(log_esi, "operacion OK: %d", desempaquetar_resultado(rta));
+
+	Message *rta = malloc(sizeof(Message));
+	if(await_msg(cliente_coordinador, rta) < 0){
+		log_error(log_esi, "error al recibir resultado");
+		exit(ERROR_DE_RECEPCION);
 	}
 
-	esi_correr = false;
+	int resultado =desempaquetar_resultado(rta);
+	if(resultado != OK){
+		loguear_resultado(log_esi, resultado);
+		return resultado;
+	}
+	loguear_resultado(log_esi, desempaquetar_resultado(rta));
+	list_remove(operaciones, 0);
+	return OK;
 }
 
-void manejador_mensajes(Message mensaje) {
-	log_info(log_esi, "LLegó un mensaje");
-
-	if(mensaje.header->remitente == PLANIFICADOR) {
-		//Recibe contenido del script
-		if (mensaje.header->tipo_mensaje == CONEXION) {
+void manejar_mensajes(Message mensaje) {
+	//loguear_recepcion(log_esi, &mensaje, nombres_modulos[mensaje.header->remitente]);
+	int res;
+	switch (mensaje.header->tipo_mensaje) {
+		case CONEXION:
 			log_info(log_esi, "Recibido el contenido del script");
+			res = armar_estructura_script(mensaje.contenido);
+			if (res<0){
+				Message * m = empaquetar_resultado(ESI, res);
+				enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
+				free_msg(&m);
+			} break;
 
-			armar_estructura_script(mensaje.contenido);
-		}
+		case EJECUTAR:
+			log_info(log_esi, "Recibida instruccion de ejecutar");
+			res = ejecutar_proxima_operacion();
+			Message * m = empaquetar_resultado(ESI, res);
+			enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
+			break;
 
-		//Recibo ok para ejecutar sus instrucciones
-		if (mensaje.header->tipo_mensaje == EJECUTAR) {
-			correr_script();
-		}
-	}
-
-	if(mensaje.header->remitente == COORDINADOR) {
-		if (mensaje.header->tipo_mensaje == RESULTADO) {
+		case RESULTADO:
 			mensaje.header->remitente = ESI;
-
-			int contenido_respuesta = desempaquetar_resultado(&mensaje);
-			if (contenido_respuesta == OK)
-			{
-				send_msg(socket_planificador, mensaje);
-			}
-			else
-			{
-				esi_correr = false;
-			}
-			sem_post(&lock_resultados);
+			enviar_y_loguear_mensaje(socket_planificador, mensaje, "planificador/0");
+			break;
+		default:
+			log_error(log_esi, "se recibio un mensaje de tipo inesperado");
 		}
-	}
 }
 
-void armar_estructura_script(char* contenidoScript) {
+int armar_estructura_script(char* contenidoScript) {
 	script.script_contenido = malloc(strlen(contenidoScript));
 	memcpy(script.script_contenido,"",1);
 	strcat(script.script_contenido,contenidoScript);
 	//memcpy(script.script_contenido,contenidoScript,strlen(contenidoScript));
 	((char*) script.script_contenido)[strlen(script.script_contenido)] = '\0';
 	script.script_largo = cantidad_lineas_script(script.script_contenido);
+	char** split = string_n_split(script.script_contenido, script.script_largo,(char*) "\n");
+	for(int i = 0; split[i] != NULL; i++){
+		t_esi_operacion operacionOriginal = parse(split[i]);
+		if (!operacionOriginal.valido) {
+			return CLAVE_MUY_GRANDE;
+		}
+		t_operacion * op = convertir_operacion(operacionOriginal);
+		list_add(operaciones, op);
+	} return OK;
+}
+
+esi_configuracion* iniciarlizar_configuracion(char* argv[]) {
+	// Levantamos configuracion
+	esi_configuracion* pConfig = (esi_configuracion*) malloc(
+			sizeof(esi_configuracion));
+
+	t_config* config = config_create("./configESI.txt");
+	if (config == NULL) {
+		config = config_create("../configESI.txt");
+	}
+	if (argv == NULL || argv[1] == NULL) {
+		argv[1] = "ESI_1";
+	}
+	path_script = malloc(strlen(argv[1]) + 1);
+	memcpy(path_script, argv[1], strlen(argv[1]));
+	((char*) path_script)[strlen(argv[1])] = '\0';
+	pConfig->coordinador_ip = leer_propiedad_string(config, "IP_coordinador");
+	pConfig->coordinador_puerto = leer_propiedad_string(config,
+			"puerto_coordinador");
+	pConfig->planificador_ip = leer_propiedad_string(config, "IP_planificador");
+	pConfig->planificador_puerto = leer_propiedad_string(config,
+			"puerto_planificador");
+	// Levantamos el archivo de log y guardamos IP y Puerto
+	log_esi = log_create("log_esi.log", "ESI", true, LOG_LEVEL_TRACE);
+	log_trace(log_esi, "Inicia el proceso ESI");
+	log_trace(log_esi, "El puerto del coordinador es: %s",
+			pConfig->coordinador_puerto);
+	log_trace(log_esi, "La ip del coordinador es: %s", pConfig->coordinador_ip);
+	log_trace(log_esi, "El puerto del planificador es: %s",
+			pConfig->planificador_puerto);
+	log_trace(log_esi, "La ip del planificador es: %s",
+			pConfig->planificador_ip);
+	log_trace(log_esi, "El nombre del script es: %s", argv[1]);
+	operaciones = list_create();
+	return pConfig;
 }

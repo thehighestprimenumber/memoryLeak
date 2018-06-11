@@ -149,7 +149,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				break;
 
 			case DESCONEXION:
-				loguear_desconexion(socket);
+				loguear_desconexion_int(socket);
 				switch(algorimoEnUso){
 					case FIFO:
 						manejar_desconexion_esi_fifo(socket);
@@ -177,7 +177,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				int resultado_operacion = manejar_operacion(socket,msg);
 
 				Message* mensaje = empaquetar_resultado(PLANIFICADOR, resultado_operacion);
-				int result = enviar_mensaje(socket, *mensaje);
+				int result = enviar_y_loguear_mensaje(socket, *mensaje, "coordinador\0");
 				if (result) {
 					log_info(log_planificador, "error al enviar resultado al coordinador");
 					return ERROR_DE_ENVIO;
@@ -199,16 +199,16 @@ int manejador_de_eventos(int socket, Message* msg){
 	return ERROR;
 }
 
-int enviar_mensaje(int socket, Message msg) {
+int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
 	//log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg.contenido);
 	int res = send_msg(socket, msg);
 		if (res<0) {
 			//log_info(log_planificador, "error al enviar mensaje a %d", socket);
-			loguear_error_envio(&msg, socket);
+			loguear_error_envio(log_planificador, &msg, destinatario);
 			return ERROR_DE_ENVIO;
 		}
 	//log_info(log_planificador, "se envio el mensaje desde el planificador mensaje a %d: %s", socket, msg.contenido);
-	loguear_envio_OK(&msg, socket);
+	loguear_envio_OK(log_planificador, &msg, destinatario);
 	return OK;
 }
 
@@ -238,6 +238,14 @@ void puerto_planif_read(t_config* configuracion) {
 		char* puertoPlanif = config_get_string_value(configuracion,puerto_planificador);
 		planificador.puerto_planif = malloc(strlen(puertoPlanif) + 1);
 		memcpy(planificador.puerto_planif,puertoPlanif,strlen(puertoPlanif) + 1);
+	}
+}
+
+void ip_planif_read(t_config* configuracion) {
+	if (config_has_property(configuracion, ip_planificador)) {
+		char* ipPlanif = config_get_string_value(configuracion,ip_planificador);
+		planificador.IP_planificador = malloc(strlen(ip_planificador) + 1);
+		memcpy(planificador.IP_planificador,ipPlanif,strlen(ipPlanif) + 1);
 	}
 }
 
@@ -303,9 +311,8 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 		log_info(log_planificador, "Planificador se conecto con el Coordinador");
 	}
 
-	Message * mensaje = empaquetar_texto("Planificador\0", strlen("Planificador\0"), PLANIFICADOR);
-	mensaje->header->tipo_mensaje = CONEXION;
-	int resultado = enviar_mensaje(pidCoordinador, *mensaje);
+	Message * mensaje = empaquetar_conexion(PLANIFICADOR, "planificador\0");
+	int resultado = enviar_y_loguear_mensaje(pidCoordinador, *mensaje, "coordinador\0");
 
 	if (resultado < 0) {
 		log_error(log_planificador, "Fallo envio mensaje conexión al Coordinador");
@@ -320,7 +327,7 @@ void aceptar_conexion(int socket, char* nombreScript) {
 	leer_script_completo(nombreScript);
 	Message* mensaje = empaquetar_texto(contenidoScript, strlen(contenidoScript), PLANIFICADOR);
 	mensaje->header->tipo_mensaje = CONEXION;
-	enviar_mensaje(socket, *mensaje);
+	enviar_y_loguear_mensaje(socket, *mensaje, "desconocido");
 	free_msg(&mensaje);
 }
 
@@ -444,7 +451,7 @@ void manejar_desconexion_esi_fifo(int socket){
 	Message* mensaje = empaquetar_texto("Planificador recibió notificación de desconexión\0", strlen("Planificador recibió notificación de desconexión\0"), PLANIFICADOR);
 	mensaje->header->tipo_mensaje = ACK;
 
-	int res_desconexion = enviar_mensaje(socket, *mensaje);
+	int res_desconexion = enviar_y_loguear_mensaje(socket, *mensaje, "ESI\0");
 
 	free(mensaje);
 
@@ -523,16 +530,36 @@ int validar_operacion_set() {
 }
 
 int validar_operacion_store() {
-	//Si está entre las claves bloqueadas por config lo libero
-	list_remove_by_condition(planificador.clavesBloqueadas, ((void*) clave_ya_bloqueada_config));
+	bool claveExiste = false;
 
-	//quito la clave con el respectivo esi que la tenía bloqueada
-	list_remove_by_condition(cola_blocked, ((void*) clave_set_disponible));
+	if (list_any_satisfy(planificador.clavesBloqueadas, ((void*) clave_ya_bloqueada_config)))
+	{
+		claveExiste = true;
+	}
 
-	//Desbloqueo al primer esi que tuviera la clave tomada
-	desbloquear_esi();
+	//Validar si la clave existe
+	else if (list_any_satisfy(cola_blocked, ((void*) clave_set_disponible)))
+	{
+		claveExiste = true;
+	}
+	else
+	{
+		return CLAVE_INEXISTENTE;
+	}
 
-	free_operacion(&operacionEnMemoria);
+	if (claveExiste) {
+		//Si está entre las claves bloqueadas por config lo libero
+		list_remove_by_condition(planificador.clavesBloqueadas, ((void*) clave_ya_bloqueada_config));
+
+		//quito la clave con el respectivo esi que la tenía bloqueada
+		list_remove_by_condition(cola_blocked, ((void*) clave_set_disponible));
+
+		//Desbloqueo al primer esi que tuviera la clave tomada
+		desbloquear_esi();
+
+		free_operacion(&operacionEnMemoria);
+	}
+
 	return OK;
 }
 
@@ -545,7 +572,7 @@ void ejecutar_nueva_esi() {
 	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
-	int res_ejecutar = enviar_mensaje(esi_seleccionado, *mensajeEjec);
+	int res_ejecutar = enviar_y_loguear_mensaje(esi_seleccionado, *mensajeEjec, "ESI\0");
 	free(mensajeEjec);
 	if (res_ejecutar < 0) {exit_proceso(-1);}
 	}

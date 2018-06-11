@@ -1,7 +1,8 @@
 puerto=8002
 algoritmo=FIFO
 estimacion=10
-IP_coordinador=127.0.0.1
-puerto_coordinador=8086
+ip_planificador=127.0.0.1
+IP_coordinador=190.55.204.22
+puerto_coordinador=8087
 alfa_planificador=40
 claves_bloqueadas=CLAVE1,CLAVE4,CLAVE6

@@ -14,9 +14,6 @@
 #include "common.h"
 
 //Defines
-#define IP "127.0.0.1" //cuando se inicie con parametros vacios, va a usar los valores de prueba
-#define PUERTO_COORDINADOR "8086"
-
 #define ERROR_DE_CONEXION -10
 #define ERROR_DE_ENVIO -11
 #define ERROR_DE_RECEPCION -12

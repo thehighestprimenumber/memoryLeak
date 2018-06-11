@@ -2,14 +2,13 @@
 #include "./coordinador.h"
 #include "../socket/socket.h"
 
-int enviar_mensaje(int socket, Message msg) {
-
+int enviar_y_loguear_mensaje(int socket, Message msg) {
 	int res = send_msg(socket, msg);
 	if (res < 0) {
-		loguear_error_envio(&msg, socket);
+		loguear_error_envio(log_coordinador, &msg, buscar_id_conexion(socket));
 		return ERROR_DE_ENVIO;
 	}
-	loguear_envio_OK(&msg, socket);
+	loguear_envio_OK(log_coordinador, &msg, buscar_id_conexion(socket));
 	return OK;
 }
 
@@ -27,7 +26,7 @@ void* recibir_conexion(void* con) {
 		}
 		enum tipoMensaje tipo = msg->header->tipo_mensaje;
 
-		loguear_recepcion(msg, conexion->socket);
+		loguear_recepcion(log_coordinador, msg, buscar_id_conexion(conexion->socket));
 
 		switch (tipo){
 			case CONEXION:
@@ -62,7 +61,7 @@ int iniciar_servicio() {
 
 	char* ipLocal = get_local_ip();
 	log_info(log_coordinador, "IP Local: %s", ipLocal);
-	socket_fd = create_listener(ipLocal, PUERTO_COORDINADOR);
+	socket_fd = create_listener(ipLocal, coordinador.puerto_escucha);
 	free(ipLocal);
 
 	if (socket_fd < 0) {

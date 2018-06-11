@@ -105,7 +105,7 @@ void esperar_operacion(fila_tabla_instancias* instancia){
 	while (instancia->esta_activa) {
 		sem_wait(&instancia->lock);
 		Message * mensaje = empaquetar_op_en_mensaje(coordinador.operacion_global_threads, COORDINADOR);
-		if (enviar_mensaje(instancia->socket_instancia, *mensaje)<0)
+		if (enviar_y_loguear_mensaje(instancia->socket_instancia, *mensaje)<0)
 			coordinador.resultado_global = ERROR_DE_ENVIO;
 		free(mensaje);
 			//log_debug(logger_coordinador, "se solicita %s %s %s", tipoMensajeNombre[operacion->header->tipo], operacion->clave, operacion->valor);
