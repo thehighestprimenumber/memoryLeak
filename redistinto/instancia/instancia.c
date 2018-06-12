@@ -1,9 +1,10 @@
 #include "instancia.h"
 
-int main(int argc, char *argv[]){
+int main(int argc,char *argv[]) {
+
 	int socket_coordinador = inicializar(argv);
-	if (socket_coordinador<0)
-		return socket_coordinador;
+	if (socket_coordinador < 0) return EXIT_FAILURE;
+
 	while (1) {
 		Message *msg = malloc(sizeof(Message));
 		log_debug(log_inst, "esperando mensaje");
@@ -29,7 +30,8 @@ int main(int argc, char *argv[]){
 
 
 	}
-	return OK;
+
+	return EXIT_SUCCESS;
 }
 
 int inicializar(char* argv[]){
@@ -64,9 +66,8 @@ int inicializar(char* argv[]){
 	log_debug(log_inst, "punto_montaje: %s", instancia.path);
 	char *dir = calloc(1, strlen(instancia.path));
 	memcpy(dir, instancia.path, strlen(instancia.path)-1);
-	int resultado;
 	if (stat(dir, &pepito) == -1) {
-	    resultado = mkdir(dir, 0777);
+	    mkdir(dir, 0777);
 	}
 	free(dir);
 	instancia.int_dump = leer_propiedad_int(config, "dump");
