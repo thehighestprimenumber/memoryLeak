@@ -12,6 +12,7 @@
 #include <commons/collections/list.h>
 #include <pthread.h>
 #include "common.h"
+#include <stdbool.h>
 
 //Defines
 #define ERROR_DE_CONEXION -10
@@ -22,6 +23,7 @@
 #define CLAVE_MUY_GRANDE -15
 #define ERROR_ARCHIVO_NO_ENCONTRADO -16
 #define ERROR_VALOR_NULO -17
+#define FIN_ARCHIVO -18
 
 #define OK 0
 
@@ -53,6 +55,7 @@ typedef struct{
 	__SOCKADDR_ARG addr;
 } Conexion;
 
+int socket_a_destruir;
 
 //Funciones
 int connect_to_server(char * ip, char * serverPort);
@@ -66,6 +69,7 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 void free_msg(Message **msg);
 
 void close_conection(void *conexion);
+bool close_conection_condition(void *conexion);
 
 //Funciones socket instancia y esi
 //int start_listening(int socket, t_list *conexiones);

@@ -251,13 +251,16 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 					msg->header->size = 0;
 					msg->contenido = NULL;
 					manejadorDeEvento(((Conexion*) list_get(conexiones, i))->socket, msg);
-					list_destroy_and_destroy_elements(conexiones, close_conection);
+					//list_destroy_and_destroy_elements(conexiones, close_conection);
+					socket_a_destruir = ((Conexion*) list_get(conexiones, i))->socket;
+					list_remove_and_destroy_by_condition(conexiones, close_conection_condition, close_conection);
 					continue;
 				}else{
 					((Conexion*) list_get(conexiones, i))->conectado = msg->header->remitente;
 					if( manejadorDeEvento(((Conexion*) list_get(conexiones, i))->socket, msg) == -1){//Llamo a la funcion que se encarga de manejar este nuevo mensaje
 						//Si es -1 significa que por alguna razon quiere que cierre la conexion
-						list_destroy_and_destroy_elements(conexiones, close_conection);
+						//list_destroy_and_destroy_elements(conexiones, close_conection);
+						list_remove_and_destroy_by_condition(conexiones, close_conection_condition, close_conection);
 					}
 				}
 				free_msg(&msg);
@@ -274,6 +277,17 @@ void close_conection(void *conexion){
 		free(conexion);
 	}
 	return;
+}
+
+bool close_conection_condition(void *conexion){
+	if(conexion != NULL){
+		if ((((Conexion*)conexion)->socket) == socket_a_destruir)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void free_msg(Message **msg){

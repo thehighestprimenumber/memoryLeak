@@ -162,8 +162,8 @@ int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
 
 int ejecutar_proxima_operacion(){
 	if (operaciones->head == NULL) {
-		esi_correr = false;
-		return OK;
+		envio_desconexion(socket_planificador);
+		return FIN_ARCHIVO;
 	}
 
 	t_link_element *element = operaciones->head;
@@ -198,11 +198,13 @@ void manejar_mensajes(Message mensaje) {
 				enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
 				free_msg(&m);
 			} break;
-
+		case DESCONEXION:
+			esi_correr = false;
+			break;
 		case EJECUTAR:
 			log_info(log_esi, "Recibida instruccion de ejecutar");
 			res = ejecutar_proxima_operacion();
-			if (esi_correr == true)
+			if (res == OK)
 			{
 				Message * m = empaquetar_resultado(ESI, res);
 				enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
@@ -270,4 +272,15 @@ esi_configuracion* iniciarlizar_configuracion(char* argv[]) {
 	log_trace(log_esi, "El nombre del script es: %s", argv[1]);
 	operaciones = list_create();
 	return pConfig;
+}
+
+int envio_desconexion(int socket) {
+	Message* mensajeDesc = empaquetar_texto("ESI confirma desconexión", strlen("ESI confirma desconexión") + 1, ESI);
+	mensajeDesc->header->tipo_mensaje = DESCONEXION;
+
+	int res_desconectar = enviar_y_loguear_mensaje(socket, *mensajeDesc, "PLANIFICADOR\0");
+	free(mensajeDesc);
+	if (res_desconectar < 0) {return -1;}
+
+	return 0;
 }

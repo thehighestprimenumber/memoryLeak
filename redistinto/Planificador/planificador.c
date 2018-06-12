@@ -113,7 +113,7 @@ int manejador_de_eventos(int socket, Message* msg){
 	log_info(log_planificador, "Ocurrio un evento del tipo: %d", msg->header->tipo_mensaje);
 
 	//En el caso de las operaciones el socket ya escucha el mensaje por lo que esto no va
-	if (msg->header->tipo_mensaje != OPERACION && msg->header->tipo_mensaje != RESULTADO)
+	if (msg->header->tipo_mensaje != OPERACION && msg->header->tipo_mensaje != RESULTADO && msg->header->tipo_mensaje != DESCONEXION)
 	{
 		int res = await_msg(socket, msg);
 		if (res<0) {
@@ -149,7 +149,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				break;
 
 			case DESCONEXION:
-				loguear_desconexion_int(socket);
+				//loguear_desconexion_int(socket);
 				switch(algorimoEnUso){
 					case FIFO:
 						manejar_desconexion_esi_fifo(socket);
@@ -373,6 +373,7 @@ struct_ready* seleccionar_esi_ready_fifo() {
 	//Si hay esis esperando, selecciona al primero de la lista
 	if (list_size(cola_ready) > 0) {
 		esi_seleccionado = list_get(cola_ready, 0);
+		list_remove(cola_ready, 0);
 		return esi_seleccionado;
 	}
 
@@ -452,17 +453,7 @@ int manejar_mensaje_esi_fifo(int socket, Message *msg){return 0;}
 
 void manejar_desconexion_esi_fifo(int socket){
 	//Le confirmo al esi que se puede desconectar
-	Message* mensaje = empaquetar_texto("Planificador recibió notificación de desconexión\0", strlen("Planificador recibió notificación de desconexión\0"), PLANIFICADOR);
-	mensaje->header->tipo_mensaje = ACK;
-
-	int res_desconexion = enviar_y_loguear_mensaje(socket, *mensaje, "ESI\0");
-
-	free(mensaje);
-
-	if (res_desconexion < 0) {
-		log_debug(log_planificador,"Falló la desconexión con el esi: %d",socket);
-		exit_proceso(-1);
-	}
+	//envio_desconexion(socket);
 
 	finalizar_esi(socket);
 
@@ -595,6 +586,10 @@ bool clave_set_disponible(struct_blocked* elemento) {
 	return (strcmp(operacionEnMemoria->clave,elemento->clave) == 0 && (elemento->pid == esiRunning));
 }
 
+bool buscar_esi_ready(struct_ready* elemento) {
+	return (elemento->pid == esiRunning);
+}
+
 void desbloquear_esi() {
 	struct_blocked* esi_a_desbloquear;
 	esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)clave_ya_bloqueada);
@@ -604,7 +599,6 @@ void desbloquear_esi() {
 		agregar_ready(esi_a_desbloquear->pid);
 	}
 }
-
 
 int manejar_resultado(int socket,Message* msg) {
 	int resultado = desempaquetar_resultado(msg);
@@ -619,6 +613,7 @@ int manejar_resultado(int socket,Message* msg) {
 			break;
 		//En este caso como ya estaría bloqueado en mi lista queda esperando
 		case CLAVE_DUPLICADA:
+		case FIN_ARCHIVO:
 			return 0;
 		//En estos casos envío mensaje al esi para que se desconecte saliendo del bucle
 		case CLAVE_INEXISTENTE:

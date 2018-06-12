@@ -85,6 +85,7 @@ void loguear_envio_OK(t_log* log, Message * m, char* id_socket) {
 
 char* desempaquetar_varios(Message * m) {
 	char* contenido;
+	int r;
 	switch (m->header->tipo_mensaje) {
 	case TEXTO:
 		contenido = desempaquetar_texto(m);
@@ -96,12 +97,14 @@ char* desempaquetar_varios(Message * m) {
 		contenido = "ACK";
 		break;
 	case RESULTADO:
-		;
-		int r = desempaquetar_resultado(m);
+		r = desempaquetar_resultado(m);
 		contenido = nombres_resultados[r];
 		break;
 	case CONEXION:
 		contenido = "conexion";
+		break;
+	case DESCONEXION:
+		contenido = "desconexion";
 		break;
 	case CONFSTORAGE:
 		contenido = "storageConfig";
