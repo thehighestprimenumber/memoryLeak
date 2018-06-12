@@ -1,7 +1,7 @@
 #include "instancia.h"
 
-int main(){
-	int socket_coordinador = inicializar();
+int main(int argc, char *argv[]){
+	int socket_coordinador = inicializar(argv);
 	if (socket_coordinador<0)
 		return socket_coordinador;
 	while (1) {
@@ -32,28 +32,36 @@ int main(){
 	return OK;
 }
 
-int inicializar(){
+int inicializar(char* argv[]){
 	t_config* config;
 	log_inst = log_create("./log_de_instancia.log", "log_instancia", true, LOG_LEVEL_DEBUG);
-	config = config_create("./configInstancia.txt");
-
-	if (config == NULL) {
-		config = config_create("../configInstancia.txt");
+	if (argv == NULL || argv[1] == NULL) {
+			argv[1] = "configInstancia.txt";
 	}
+	config = config_create(argv[1]);
 	instancia.nombre_inst = leer_propiedad_string(config, "nombre_instancia");
-
+	log_debug(log_inst, "nombre_instancia: %s", instancia.nombre_inst);
 	instancia.ip_coordinador = leer_propiedad_string(config, "IP_coordinador");
+	log_debug(log_inst, "IP_coordinador: %s", instancia.ip_coordinador);
 	instancia.puerto_coord = leer_propiedad_string(config, "puerto_coordinador");
-
+	log_debug(log_inst, "puerto_coordinador: %s", instancia.puerto_coord);
 	char *alg = calloc(1, 5);
 	alg = leer_propiedad_string(config, "algoritmo");
-	if(strcmp(alg, "LRU")==0) instancia.algorimoActual = LRU;
-	else if(strcmp(alg, "BSU")==0) instancia.algorimoActual = BSU;
+	if(strcmp(alg, "LRU")==0){
+		instancia.algorimoActual = LRU;
+		log_debug(log_inst, "Algoritmo: LRU");
+	}
+	else if(strcmp(alg, "BSU")==0){
+		instancia.algorimoActual = BSU;
+		log_debug(log_inst, "Algoritmo: BSU");
+	}
 	else {
 		instancia.algorimoActual = CIRC;
+		log_debug(log_inst, "Algoritmo: CIRC");
 		inicializar_circular();
 	}
 	instancia.path = leer_propiedad_string(config, "punto_montaje");//"/home/utnso/instancia1/\0";
+	log_debug(log_inst, "punto_montaje: %s", instancia.path);
 	char *dir = calloc(1, strlen(instancia.path));
 	memcpy(dir, instancia.path, strlen(instancia.path)-1);
 	int resultado;
@@ -62,6 +70,7 @@ int inicializar(){
 	}
 	free(dir);
 	instancia.int_dump = leer_propiedad_int(config, "dump");
+	log_debug(log_inst, "intervalo_dump: %d", instancia.int_dump);
 	instancia.tabla_entradas = list_create();
 	instancia.socket_coordinador = conectar_a_coordinador(instancia.ip_coordinador, instancia.puerto_coord);
 	if(instancia.socket_coordinador == -1){
@@ -69,11 +78,11 @@ int inicializar(){
 	 return -10;
 	}
 	log_debug(log_inst, "Se pudo conectar con el coordinador");
-	Message* msg= empaquetar_conexion(INSTANCIA, instancia.nombre_inst);
+	Message* msg = empaquetar_conexion(INSTANCIA, instancia.nombre_inst);
 
 	if (send_msg(instancia.socket_coordinador, (*msg))<0)
 		return ERROR_DE_ENVIO;
-	log_debug(log_inst, "Se envio el mensaje");
+	log_debug(log_inst, "Se notifico al coordinador de nuestro nombre");
 	free_msg(&msg);
 
 	if(!recibir_config_storage()) return -10;

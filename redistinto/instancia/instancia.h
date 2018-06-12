@@ -5,7 +5,7 @@
 #include <commons/config.h>
 #include <commons/txt.h>
 #include <commons/log.h>
-#include "../../socket/operacion.h"
+#include "../socket/operacion.h"
 #include "configuracionInstancia.h"
 #include "handlerCoordinador.h"
 #include <sys/types.h>

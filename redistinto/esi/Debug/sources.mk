@@ -15,6 +15,5 @@ C_DEPS :=
 SUBDIRS := \
 . \
 parsi \
-socket/Debug \
 socket \
 

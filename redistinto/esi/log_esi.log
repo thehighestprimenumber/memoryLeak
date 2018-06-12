@@ -622,3 +622,10 @@ STORE futbol:messi
 [INFO] 21:48:39:608 ESI/(20701:20701): Recibido el contenido del script
 [INFO] 21:48:39:608 ESI/(20701:20701): Recibida instruccion de ejecutar
 [INFO] 21:48:49:563 ESI/(20701:20701): se envia el mensaje a coordinador para la operacion: GET futbol:messi
+[TRACE] 20:14:59:504 ESI/(5809:5809): Inicia el proceso ESI
+[TRACE] 20:14:59:512 ESI/(5809:5809): El puerto del coordinador es: 8087
+[TRACE] 20:14:59:513 ESI/(5809:5809): La ip del coordinador es: 127.0.0.1
+[TRACE] 20:14:59:513 ESI/(5809:5809): El puerto del planificador es: 8002
+[TRACE] 20:14:59:513 ESI/(5809:5809): La ip del planificador es: 127.0.0.1
+[TRACE] 20:14:59:513 ESI/(5809:5809): El nombre del script es: ESI_1
+[ERROR] 20:14:59:513 ESI/(5809:5809): Fallo conexion con el Coordinador
