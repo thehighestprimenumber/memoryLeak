@@ -4,6 +4,10 @@ int main(int argc,char *argv[]) {
 
 	int socket_coordinador = inicializar(argv);
 	if (socket_coordinador < 0) return EXIT_FAILURE;
+	semTabla = malloc(sizeof(sem_t));
+	sem_init(semTabla, 0 , 1);
+	pthread_t autoDumps;
+	pthread_create(&autoDumps, NULL, dump_automatico, NULL);
 
 	while (1) {
 		Message *msg = malloc(sizeof(Message));
@@ -95,6 +99,7 @@ int inicializar(char* argv[]){
 int manejar_operacion(Message * msg) {
 	t_operacion * operacion = desempaquetar_operacion(msg);
 	int resultado;
+	sem_wait(semTabla);
 	switch (operacion->tipo) {
 		case op_GET:
 			resultado = agregar_clave_a_lista(operacion->clave, operacion->largo_clave);
@@ -106,6 +111,7 @@ int manejar_operacion(Message * msg) {
 			resultado = guardar_entrada(operacion->clave, operacion->largo_clave);
 			break;
 	}
+	sem_post(semTabla);
 	Message* m_resultado= empaquetar_resultado(INSTANCIA, resultado);
 	if (send_msg(instancia.socket_coordinador, *m_resultado)<0)
 		return ERROR_DE_ENVIO;
@@ -116,7 +122,6 @@ int manejar_operacion(Message * msg) {
 }
 
 int agregar_clave_a_lista(char* clave, int largo_clave){
-	log_debug(log_inst, "Hola amiguitos, estoy ejecutando un GET");
 	t_clave_valor* clave_valor_existente = buscar_clave_valor (clave);
 	if (clave_valor_existente != NULL) return OK;
 
@@ -127,11 +132,11 @@ int agregar_clave_a_lista(char* clave, int largo_clave){
 	clave_valor->nroEntrada = -1;
 	memcpy(clave_valor->clave, clave, largo_clave);
 	list_add(instancia.tabla_entradas, clave_valor);
+	log_debug(log_inst, "GET %s", clave_valor->clave);
 	return OK;
 }
 
 int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_valor){
-	log_debug(log_inst, "Hola amiguitos, estoy ejecutando un SET");
 	t_clave_valor* entrada = buscar_clave_valor (clave);
 	if (entrada == NULL)
 			return CLAVE_INEXISTENTE;
@@ -140,6 +145,7 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 
 	switch(instancia.algorimoActual){
 		case CIRC:
+			log_debug(log_inst, "SET %s", entrada->clave);
 			if(guardar_circular(entrada, valor) < 0) return ERROR_VALOR_NULO;
 			break;
 		default:
@@ -149,10 +155,13 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 }
 
 int guardar_entrada(char* clave, int largo_clave){
-	log_debug(log_inst, "Hola amiguitos, estoy ejecutando un STORE");
 	t_clave_valor* clave_valor_existente = buscar_clave_valor(clave);
 	if (clave_valor_existente == NULL)
 		return CLAVE_INEXISTENTE;
+	if (clave_valor_existente->largo_valor < 1)
+		return VALOR_INEXISTENTE;
+
+	log_debug(log_inst, "STORE %s", clave_valor_existente->clave);
 	guardar(clave_valor_existente);
 	return OK;
 }
@@ -176,6 +185,7 @@ void guardar(void * contenido){
 	char* ruta = calloc(1, strlen(instancia.path)+entrada->largo_clave+1);
 	memcpy(ruta, instancia.path, strlen(instancia.path));
 	memcpy(ruta+strlen(instancia.path), entrada->clave, entrada->largo_clave);
+	log_debug(log_inst, "Guardando en %s", ruta);
 	FILE* file = fopen(ruta, "w");
 	char *ptrLectura = storage+entrada->nroEntrada*instancia.tamEntrada;
 	fwrite(ptrLectura, sizeof(char), entrada->largo_valor, file);
@@ -187,5 +197,18 @@ void eliminar_entrada(void *contenido){
 	t_clave_valor *entrada = contenido;
 	free(entrada->clave);
 	free(entrada);
+}
+
+
+void* dump_automatico(void *pepe){
+	while(true){
+		sleep(instancia.int_dump);
+		log_debug(log_inst, "Autodump iniciado");
+		sem_wait(semTabla);
+		list_iterate(instancia.tabla_entradas, guardar);
+		sem_post(semTabla);
+		log_debug(log_inst, "Autodump finalizado");
+	}
+	return NULL;
 }
 

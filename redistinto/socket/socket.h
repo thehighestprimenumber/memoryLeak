@@ -24,6 +24,7 @@
 #define ERROR_ARCHIVO_NO_ENCONTRADO -16
 #define ERROR_VALOR_NULO -17
 #define FIN_ARCHIVO -18
+#define VALOR_INEXISTENTE -19
 
 #define OK 0
 

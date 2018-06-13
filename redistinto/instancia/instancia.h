@@ -11,8 +11,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
+#include <semaphore.h>
 #include <commons/txt.h>
+#include <pthread.h>
 
 #define OK 0
 
@@ -46,6 +47,7 @@ t_instancia instancia;
 char *storage;
 char *claveEnBusqueda;
 struct stat pepito;
+sem_t *semTabla;
 
 
 int inicializar();
@@ -57,6 +59,7 @@ void guardar(void * entrada);
 void dump();
 void eliminar_entrada(void *contenido);
 int guardar_entrada(char* clave, int largo_clave);
+void* dump_automatico(void*);
 
 
 #endif /* INSTANCIA_INSTANCIA_H_ */

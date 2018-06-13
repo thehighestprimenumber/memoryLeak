@@ -244,6 +244,8 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 				//Deberia verificar primero si el evento ocurrido fue una desconexion
 				//Recibo el mensaje
 				Message *msg = malloc(sizeof(Message));
+				msg->header = NULL;
+				msg->contenido = NULL;
 				if(await_msg( ((Conexion*) list_get(conexiones, i))->socket, msg) == -1){
 					msg->header = malloc(sizeof(ContentHeader));
 					msg->header->remitente = ((Conexion*) list_get(conexiones, i))->conectado;
@@ -254,7 +256,6 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 					//list_destroy_and_destroy_elements(conexiones, close_conection);
 					socket_a_destruir = ((Conexion*) list_get(conexiones, i))->socket;
 					list_remove_and_destroy_by_condition(conexiones, close_conection_condition, close_conection);
-					continue;
 				}else{
 					((Conexion*) list_get(conexiones, i))->conectado = msg->header->remitente;
 					if( manejadorDeEvento(((Conexion*) list_get(conexiones, i))->socket, msg) == -1){//Llamo a la funcion que se encarga de manejar este nuevo mensaje
