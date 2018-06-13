@@ -11,6 +11,8 @@ int main(int argc,char *argv[]) {
 
 	while (1) {
 		Message *msg = malloc(sizeof(Message));
+		msg->contenido = NULL;
+		msg->header = NULL;
 		log_debug(log_inst, "esperando mensaje");
 		int resultado = await_msg(socket_coordinador, msg);
 		log_debug(log_inst, "llego un mensaje. parseando...");
@@ -31,10 +33,9 @@ int main(int argc,char *argv[]) {
 				break;
 
 		}
-
-
+		free_msg(msg);
 	}
-
+	free(semTabla);
 	return EXIT_SUCCESS;
 }
 
@@ -115,7 +116,7 @@ int manejar_operacion(Message * msg) {
 	Message* m_resultado= empaquetar_resultado(INSTANCIA, resultado);
 	if (send_msg(instancia.socket_coordinador, *m_resultado)<0)
 		return ERROR_DE_ENVIO;
-	log_debug(log_inst, "Se envio el mensaje");
+	log_debug(log_inst, "Se envio el resultado de la operacion");
 	free_msg(&m_resultado);
 	free_operacion(&operacion);
 	return OK;
