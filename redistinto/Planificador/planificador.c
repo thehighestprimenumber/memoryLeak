@@ -153,7 +153,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				switch(algorimoEnUso){
 					case FIFO:
 						manejar_desconexion_esi_fifo(socket);
-						return 0;
+						return -18;
 					default:
 						//fuck
 						return -2;
@@ -363,7 +363,7 @@ void agregar_esi_blocked(int idEsi, char* clave) {
 void agregar_finished(int idEsi) {
 	struct_finished* elemento = malloc(sizeof(struct_finished));
 	elemento->pid = idEsi;
-	list_add(cola_blocked,elemento);
+	list_add(cola_finished,elemento);
 	log_debug(log_planificador,"\nSe agrego el esi %d, a la lista de finalizados",idEsi);
 }
 

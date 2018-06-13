@@ -163,6 +163,7 @@ int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
 int ejecutar_proxima_operacion(){
 	if (operaciones->head == NULL) {
 		envio_desconexion(socket_planificador);
+		esi_correr = false;
 		return FIN_ARCHIVO;
 	}
 
@@ -204,8 +205,7 @@ void manejar_mensajes(Message mensaje) {
 		case EJECUTAR:
 			log_info(log_esi, "Recibida instruccion de ejecutar");
 			res = ejecutar_proxima_operacion();
-			if (res == OK)
-			{
+			if (res != FIN_ARCHIVO) {
 				Message * m = empaquetar_resultado(ESI, res);
 				enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
 			}
