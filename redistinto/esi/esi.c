@@ -162,7 +162,7 @@ int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
 
 int ejecutar_proxima_operacion(){
 	if (operaciones->head == NULL) {
-		envio_desconexion(socket_planificador);
+		//envio_desconexion(socket_planificador);
 		esi_correr = false;
 		return FIN_ARCHIVO;
 	}
@@ -272,15 +272,4 @@ esi_configuracion* iniciarlizar_configuracion(char* argv[]) {
 	log_trace(log_esi, "El nombre del script es: %s", argv[1]);
 	operaciones = list_create();
 	return pConfig;
-}
-
-int envio_desconexion(int socket) {
-	Message* mensajeDesc = empaquetar_texto("ESI confirma desconexión", strlen("ESI confirma desconexión") + 1, ESI);
-	mensajeDesc->header->tipo_mensaje = DESCONEXION;
-
-	int res_desconectar = enviar_y_loguear_mensaje(socket, *mensajeDesc, "PLANIFICADOR\0");
-	free(mensajeDesc);
-	if (res_desconectar < 0) {return -1;}
-
-	return 0;
 }

@@ -60,6 +60,5 @@ int cantidad_lineas_script(char* script);
 int ejecutar_proxima_operacion();
 void manejar_mensajes(Message mensaje);
 int armar_estructura_script(char* contenidoScript);
-int envio_desconexion(int socket);
 
 #endif

@@ -454,8 +454,9 @@ int manejar_mensaje_esi_fifo(int socket, Message *msg){return 0;}
 void manejar_desconexion_esi_fifo(int socket){
 	//Le confirmo al esi que se puede desconectar
 	//envio_desconexion(socket);
-
 	finalizar_esi(socket);
+
+	log_info(log_planificador, "RIP socket %d", socket);
 
 	ejecutar_nueva_esi();
 }
@@ -613,7 +614,6 @@ int manejar_resultado(int socket,Message* msg) {
 			break;
 		//En este caso como ya estaría bloqueado en mi lista queda esperando
 		case CLAVE_DUPLICADA:
-		case FIN_ARCHIVO:
 			return 0;
 		//En estos casos envío mensaje al esi para que se desconecte saliendo del bucle
 		case CLAVE_INEXISTENTE:
