@@ -629,3 +629,45 @@ STORE futbol:messi
 [TRACE] 20:14:59:513 ESI/(5809:5809): La ip del planificador es: 127.0.0.1
 [TRACE] 20:14:59:513 ESI/(5809:5809): El nombre del script es: ESI_1
 [ERROR] 20:14:59:513 ESI/(5809:5809): Fallo conexion con el Coordinador
+[TRACE] 21:10:22:7 ESI/(3331:3331): Inicia el proceso ESI
+[TRACE] 21:10:22:17 ESI/(3331:3331): El puerto del coordinador es: 8087
+[TRACE] 21:10:22:17 ESI/(3331:3331): La ip del coordinador es: 10.0.2.15
+[TRACE] 21:10:22:17 ESI/(3331:3331): El puerto del planificador es: 8002
+[TRACE] 21:10:22:17 ESI/(3331:3331): La ip del planificador es: 10.0.2.15
+[TRACE] 21:10:22:17 ESI/(3331:3331): El nombre del script es: ESI_1
+[INFO] 21:10:22:17 ESI/(3331:3331): ESI se conecto con el Coordinador
+[INFO] 21:10:24:20 ESI/(3331:3331): ESI se conecto con el Planificador
+[INFO] 21:10:24:20 ESI/(3331:3331): envio mensaje a planificador: conexion
+[INFO] 21:10:24:31 ESI/(3331:3331): Recibido el contenido del script
+[INFO] 21:10:24:31 ESI/(3331:3331): Recibida instruccion de ejecutar
+[INFO] 21:10:24:31 ESI/(3331:3331): se envia el mensaje a coordinador para la operacion: GET futbol:messi
+[INFO] 21:10:25:35 ESI/(3331:3331): resultado: OK
+[INFO] 21:10:25:35 ESI/(3331:3331): envio mensaje a planificador: OK
+[INFO] 21:10:25:37 ESI/(3331:3331): Recibida instruccion de ejecutar
+[INFO] 21:10:25:37 ESI/(3331:3331): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 21:10:26:39 ESI/(3331:3331): resultado: (null)
+[INFO] 21:10:26:39 ESI/(3331:3331): envio mensaje a planificador: (null)
+[ERROR] 21:10:57:725 ESI/(3331:3331): error de recepcion
+[TRACE] 21:12:17:541 ESI/(3494:3494): Inicia el proceso ESI
+[TRACE] 21:12:17:549 ESI/(3494:3494): El puerto del coordinador es: 8087
+[TRACE] 21:12:17:549 ESI/(3494:3494): La ip del coordinador es: 10.0.2.15
+[TRACE] 21:12:17:549 ESI/(3494:3494): El puerto del planificador es: 8002
+[TRACE] 21:12:17:550 ESI/(3494:3494): La ip del planificador es: 10.0.2.15
+[TRACE] 21:12:17:550 ESI/(3494:3494): El nombre del script es: ESI_1
+[INFO] 21:12:17:550 ESI/(3494:3494): ESI se conecto con el Coordinador
+[INFO] 21:12:19:551 ESI/(3494:3494): ESI se conecto con el Planificador
+[INFO] 21:12:19:551 ESI/(3494:3494): envio mensaje a planificador: conexion
+[INFO] 21:12:19:552 ESI/(3494:3494): Recibido el contenido del script
+[INFO] 21:12:19:552 ESI/(3494:3494): Recibida instruccion de ejecutar
+[INFO] 21:12:19:553 ESI/(3494:3494): se envia el mensaje a coordinador para la operacion: GET futbol:messi
+[INFO] 21:12:20:556 ESI/(3494:3494): resultado: OK
+[INFO] 21:12:20:556 ESI/(3494:3494): envio mensaje a planificador: OK
+[INFO] 21:12:20:563 ESI/(3494:3494): Recibida instruccion de ejecutar
+[INFO] 21:12:20:563 ESI/(3494:3494): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 21:12:21:569 ESI/(3494:3494): resultado: OK
+[INFO] 21:12:21:569 ESI/(3494:3494): envio mensaje a planificador: OK
+[INFO] 21:12:21:570 ESI/(3494:3494): Recibida instruccion de ejecutar
+[INFO] 21:12:21:570 ESI/(3494:3494): se envia el mensaje a coordinador para la operacion: STORE futbol:messi
+[INFO] 21:12:22:583 ESI/(3494:3494): resultado: OK
+[INFO] 21:12:22:583 ESI/(3494:3494): envio mensaje a planificador: OK
+[INFO] 21:12:22:584 ESI/(3494:3494): Recibida instruccion de ejecutar

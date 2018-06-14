@@ -33,7 +33,7 @@ int main(int argc,char *argv[]) {
 				break;
 
 		}
-		free_msg(msg);
+		free_msg(&msg);
 	}
 	free(semTabla);
 	return EXIT_SUCCESS;

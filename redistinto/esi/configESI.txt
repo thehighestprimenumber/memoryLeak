@@ -1,4 +1,4 @@
-IP_coordinador=127.0.0.1
+IP_coordinador=10.0.2.15
 puerto_coordinador=8087
-IP_planificador=127.0.0.1
+IP_planificador=10.0.2.15
 puerto_planificador=8002
