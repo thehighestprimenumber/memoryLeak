@@ -14,6 +14,7 @@
 #include <semaphore.h>
 #include <commons/txt.h>
 #include <pthread.h>
+#include <dirent.h>
 
 #define OK 0
 
@@ -60,6 +61,6 @@ void dump();
 void eliminar_entrada(void *contenido);
 int guardar_entrada(char* clave, int largo_clave);
 void* dump_automatico(void*);
-
+void recuperar_claves();
 
 #endif /* INSTANCIA_INSTANCIA_H_ */

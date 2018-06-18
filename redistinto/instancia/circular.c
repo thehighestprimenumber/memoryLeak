@@ -17,7 +17,7 @@ int guardar_circular(t_clave_valor *entrada, char *valor){
 	int nroEntrada = entradaActual;
 	entradaAEliminar = entradaActual;
 	//Esto hace lo que haria basicamente ceil(1)
-	double d = entrada->largo_valor/instancia.tamEntrada;
+	double d = (double)entrada->largo_valor/(double)instancia.tamEntrada;
 	int i = d;
 	entradaActual += i==d ? i:i+1;
 
@@ -27,8 +27,7 @@ int guardar_circular(t_clave_valor *entrada, char *valor){
 	}
 	entrada->nroEntrada = nroEntrada;
 	memcpy(storage+nroEntrada*instancia.tamEntrada, valor, entrada->largo_valor);
-
-	if(entradaActual == instancia.cantEntradas) entradaActual=0;
+	if(entradaActual >= instancia.cantEntradas) entradaActual=0;
 	return 0;
 }
 

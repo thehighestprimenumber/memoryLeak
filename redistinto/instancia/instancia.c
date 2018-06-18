@@ -69,16 +69,11 @@ int inicializar(char* argv[]){
 	}
 	instancia.path = leer_propiedad_string(config, "punto_montaje");//"/home/utnso/instancia1/\0";
 	log_debug(log_inst, "punto_montaje: %s", instancia.path);
-	char *dir = calloc(1, strlen(instancia.path));
-	memcpy(dir, instancia.path, strlen(instancia.path)-1);
-	if (stat(dir, &pepito) == -1) {
-	    mkdir(dir, 0777);
-	}
-	free(dir);
 	instancia.int_dump = leer_propiedad_int(config, "dump");
 	log_debug(log_inst, "intervalo_dump: %d", instancia.int_dump);
 	instancia.tabla_entradas = list_create();
 	instancia.socket_coordinador = conectar_a_coordinador(instancia.ip_coordinador, instancia.puerto_coord);
+
 	if(instancia.socket_coordinador == -1){
 	 log_debug(log_inst, "No se pudo conectar con el coordinador");
 	 return -10;
@@ -93,7 +88,15 @@ int inicializar(char* argv[]){
 
 	if(!recibir_config_storage()) return -10;
 	configurar_storage();
-
+	char *dir = calloc(1, strlen(instancia.path));
+	memcpy(dir, instancia.path, strlen(instancia.path)-1);
+	int resStat = stat(dir, &pepito);
+	if (resStat == -1) {
+	    mkdir(dir, 0777);
+	}else{
+		recuperar_claves();
+	}
+	free(dir);
 	return instancia.socket_coordinador;
 }
 
@@ -129,7 +132,7 @@ int agregar_clave_a_lista(char* clave, int largo_clave){
 	t_clave_valor *clave_valor = malloc(sizeof(t_clave_valor));
 	clave_valor->largo_clave=largo_clave;
 	clave_valor->largo_valor=0;
-	clave_valor->clave = malloc(largo_clave);
+	clave_valor->clave = calloc(largo_clave+1, 1);
 	clave_valor->nroEntrada = -1;
 	memcpy(clave_valor->clave, clave, largo_clave);
 	list_add(instancia.tabla_entradas, clave_valor);
@@ -146,12 +149,12 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 
 	switch(instancia.algorimoActual){
 		case CIRC:
-			log_debug(log_inst, "SET %s", entrada->clave);
 			if(guardar_circular(entrada, valor) < 0) return ERROR_VALOR_NULO;
 			break;
 		default:
 			break;
 	}
+	log_debug(log_inst, "SET %s", entrada->clave);
 	return OK;
 }
 
@@ -213,3 +216,59 @@ void* dump_automatico(void *pepe){
 	return NULL;
 }
 
+void recuperar_claves(){
+	DIR* FD;
+	struct dirent* in_file;
+	FILE *entry_file;
+	char *buffer;
+	char *dir;
+
+
+	/* Scanning the in directory */
+	if (NULL == (FD = opendir (instancia.path)))
+	{
+		log_debug(log_inst, "Fallo la apertura del directorio");
+		return;
+	}
+	while ((in_file = readdir(FD)))
+	{
+		/* On linux/Unix we don't want current and parent directories
+		 * 	         * If you're on Windows machine remove this two lines
+		 * 	         	         */
+		if (!strcmp (in_file->d_name, "."))
+			continue;
+		if (!strcmp (in_file->d_name, ".."))
+			continue;
+		/* Open directory entry file for common operation */
+		/* TODO : change permissions to meet your need! */
+
+		dir = calloc(strlen(instancia.path)+41, 1);
+		memcpy(dir, instancia.path, strlen(instancia.path));
+		char *file_name;
+		int len = strlen(in_file->d_name);
+		file_name = calloc(len+1,1);
+		memcpy(file_name, in_file->d_name, len);
+		memcpy(dir+strlen(instancia.path), file_name, len);
+
+		entry_file = fopen(dir, "r");
+		if (entry_file == NULL)
+		{
+			log_debug(log_inst, "Error abriendo el archivo %s", in_file->d_name);
+			free(dir);
+			continue;
+		}
+		buffer = calloc(BUFSIZ, 1);
+
+		fread(buffer, instancia.tamEntrada*instancia.cantEntradas, 1, entry_file);
+
+		agregar_clave_a_lista(in_file->d_name, len);
+		asignar_valor_a_clave(in_file->d_name, strlen(in_file->d_name), buffer, strlen(buffer));
+		log_debug(log_inst, "Recuperada clave %s con dato %s", dir, buffer);
+
+		free(buffer);
+		free(dir);
+		free(file_name);
+	    fclose(entry_file);
+	}
+
+}
