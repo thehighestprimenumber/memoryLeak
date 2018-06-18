@@ -3,15 +3,15 @@
 int main(void) {
 	inicializar_logger();
 
-	log_info(log_planificador, "\nCargando configuración");
+	log_info(log_consola, "\nCargando configuración");
 	estructura_planificador();
 
-	log_info(log_planificador,"\nPuerto planificador: %s", planificador.puerto_planif);
-	log_info(log_planificador,"\nAlgoritmo planificador: %s", planificador.algoritmo_planif);
-	log_info(log_planificador,"\nEstimación: %d", planificador.estimacion_inicial);
-	log_info(log_planificador,"\nIP Coordinador: %s", planificador.IP_coordinador);
-	log_info(log_planificador,"\nPuerto Coordinador: %s",planificador.puerto_coordinador);
-	log_info(log_planificador,"\nAlfa Planificación: %d", planificador.alfaPlanificacion);
+	log_info(log_consola,"\nPuerto planificador: %s", planificador.puerto_planif);
+	log_info(log_consola,"\nAlgoritmo planificador: %s", planificador.algoritmo_planif);
+	log_info(log_consola,"\nEstimación: %d", planificador.estimacion_inicial);
+	log_info(log_consola,"\nIP Coordinador: %s", planificador.IP_coordinador);
+	log_info(log_consola,"\nPuerto Coordinador: %s",planificador.puerto_coordinador);
+	log_info(log_consola,"\nAlfa Planificación: %d", planificador.alfaPlanificacion);
 
 	//Crear listas de procesos
 	cola_ready = list_create();
@@ -23,13 +23,13 @@ int main(void) {
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	int socketCoordinador = conectar_a_coordinador(pConfig);
 
-	log_info(log_planificador,"\nInicio de la consola\n");
+	log_info(log_consola,"\nInicio de la consola\n");
 
 	//Abrir Consola
 	pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
 
 	if (pidConsola < 0) {
-		log_error(log_planificador,"Error al intentar abrir la consola");
+		log_error(log_consola,"Error al intentar abrir la consola");
 		exit_proceso(-1);
 	}
 
@@ -46,7 +46,8 @@ int main(void) {
 }
 
 void inicializar_logger() {
-	log_planificador = log_create("./Planificador.log", "Planificador: ", true, LOG_LEVEL_INFO);
+	log_planificador = log_create("./Planificador.log", "Planificador: ", false, LOG_LEVEL_INFO);
+	log_consola = log_create("./Consola.log", "Consola Planificador: ", true, LOG_LEVEL_INFO);
 }
 
 char* armarPathScript(char* cadenaPath,char* nombreScript) {
@@ -94,10 +95,10 @@ void leer_script_completo(char* nombreArchivo) {
 }
 
 int iniciar(int socketCoordinador){
-	log_info(log_planificador, "Iniciando proceso planificador");
+	log_info(log_consola, "Iniciando proceso planificador");
 	char* ipLocal = get_local_ip();
 
-	log_info(log_planificador, "IP Local: %s", ipLocal);
+	log_info(log_consola, "IP Local: %s", ipLocal);
 
 	int socket_fd = create_listener(ipLocal,planificador.puerto_planif);
 	if (socket_fd <0) return ERROR_DE_CONEXION;

@@ -15,6 +15,7 @@
 void registrar_conexion(int socket);
 
 t_log * log_planificador;
+t_log * log_consola;
 
 void configurar_logger();
 
