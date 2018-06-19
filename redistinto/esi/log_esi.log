@@ -671,3 +671,62 @@ STORE futbol:messi
 [INFO] 21:12:22:583 ESI/(3494:3494): resultado: OK
 [INFO] 21:12:22:583 ESI/(3494:3494): envio mensaje a planificador: OK
 [INFO] 21:12:22:584 ESI/(3494:3494): Recibida instruccion de ejecutar
+[TRACE] 16:57:40:60 ESI/(17862:17862): Inicia el proceso ESI
+[TRACE] 16:57:40:61 ESI/(17862:17862): El puerto del coordinador es: 8087
+[TRACE] 16:57:40:71 ESI/(17862:17862): La ip del coordinador es: 10.0.2.15
+[TRACE] 16:57:40:71 ESI/(17862:17862): El puerto del planificador es: 8002
+[TRACE] 16:57:40:71 ESI/(17862:17862): La ip del planificador es: 10.0.2.15
+[TRACE] 16:57:40:71 ESI/(17862:17862): El nombre del script es: ESI_1
+[TRACE] 16:58:38:833 ESI/(17954:17954): Inicia el proceso ESI
+[TRACE] 16:58:38:835 ESI/(17954:17954): El puerto del coordinador es: 8087
+[TRACE] 16:58:38:835 ESI/(17954:17954): La ip del coordinador es: 10.0.2.15
+[TRACE] 16:58:38:835 ESI/(17954:17954): El puerto del planificador es: 8002
+[TRACE] 16:58:38:836 ESI/(17954:17954): La ip del planificador es: 10.0.2.15
+[TRACE] 16:58:38:836 ESI/(17954:17954): El nombre del script es: ESI_1
+[TRACE] 16:59:06:238 ESI/(17981:17981): Inicia el proceso ESI
+[TRACE] 16:59:06:821 ESI/(17981:17981): El puerto del coordinador es: 8087
+[TRACE] 16:59:07:407 ESI/(17981:17981): La ip del coordinador es: 10.0.2.15
+[TRACE] 16:59:07:813 ESI/(17981:17981): El puerto del planificador es: 8002
+[TRACE] 16:59:08:167 ESI/(17981:17981): La ip del planificador es: 10.0.2.15
+[TRACE] 16:59:08:953 ESI/(17981:17981): El nombre del script es: ESI_1
+[TRACE] 16:59:39:86 ESI/(18044:18044): Inicia el proceso ESI
+[TRACE] 16:59:39:86 ESI/(18044:18044): El puerto del coordinador es: 8087
+[TRACE] 16:59:39:86 ESI/(18044:18044): La ip del coordinador es: 10.0.2.15
+[TRACE] 16:59:39:86 ESI/(18044:18044): El puerto del planificador es: 8002
+[TRACE] 16:59:39:86 ESI/(18044:18044): La ip del planificador es: 10.0.2.15
+[TRACE] 16:59:39:86 ESI/(18044:18044): El nombre del script es: ESI_1
+[TRACE] 17:02:07:413 ESI/(18107:18107): Inicia el proceso ESI
+[TRACE] 17:02:07:898 ESI/(18107:18107): El puerto del coordinador es: 8087
+[TRACE] 17:02:08:391 ESI/(18107:18107): La ip del coordinador es: 10.0.2.15
+[TRACE] 17:02:08:895 ESI/(18107:18107): El puerto del planificador es: 8002
+[TRACE] 17:02:09:368 ESI/(18107:18107): La ip del planificador es: 10.0.2.15
+[TRACE] 17:02:11:352 ESI/(18107:18107): El nombre del script es: ESI_1
+[TRACE] 17:07:20:680 ESI/(18421:18421): Inicia el proceso ESI
+[TRACE] 17:07:20:680 ESI/(18421:18421): El puerto del coordinador es: 8087
+[TRACE] 17:07:20:680 ESI/(18421:18421): La ip del coordinador es: 10.0.2.15
+[TRACE] 17:07:20:680 ESI/(18421:18421): El puerto del planificador es: 8002
+[TRACE] 17:07:20:680 ESI/(18421:18421): La ip del planificador es: 10.0.2.15
+[TRACE] 17:07:20:680 ESI/(18421:18421): El nombre del script es: ESI_1
+[TRACE] 17:09:54:349 ESI/(18550:18550): Inicia el proceso ESI
+[TRACE] 17:09:54:349 ESI/(18550:18550): El puerto del coordinador es: 8087
+[TRACE] 17:09:54:349 ESI/(18550:18550): La ip del coordinador es: 10.0.2.15
+[TRACE] 17:09:54:349 ESI/(18550:18550): El puerto del planificador es: 8002
+[TRACE] 17:09:54:349 ESI/(18550:18550): La ip del planificador es: 10.0.2.15
+[TRACE] 17:09:54:349 ESI/(18550:18550): El nombre del script es: ESI_1
+[INFO] 17:10:10:505 ESI/(18550:18550): ESI se conecto con el Coordinador
+[INFO] 17:10:12:510 ESI/(18550:18550): ESI se conecto con el Planificador
+[INFO] 17:10:12:510 ESI/(18550:18550): envio mensaje a planificador: conexion
+[INFO] 17:10:12:510 ESI/(18550:18550): Recibido el contenido del script
+[INFO] 17:10:12:510 ESI/(18550:18550): Recibida instruccion de ejecutar
+[INFO] 17:10:12:510 ESI/(18550:18550): se envia el mensaje a coordinador para la operacion: GET futbol:messi
+[INFO] 17:10:13:511 ESI/(18550:18550): resultado: OK
+[INFO] 17:10:13:511 ESI/(18550:18550): envio mensaje a planificador: OK
+[INFO] 17:10:13:511 ESI/(18550:18550): Recibida instruccion de ejecutar
+[INFO] 17:10:13:511 ESI/(18550:18550): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 17:10:14:514 ESI/(18550:18550): resultado: OK
+[INFO] 17:10:14:514 ESI/(18550:18550): envio mensaje a planificador: OK
+[INFO] 17:10:14:514 ESI/(18550:18550): Recibida instruccion de ejecutar
+[INFO] 17:10:14:514 ESI/(18550:18550): se envia el mensaje a coordinador para la operacion: STORE futbol:messi
+[INFO] 17:10:15:516 ESI/(18550:18550): resultado: OK
+[INFO] 17:10:15:516 ESI/(18550:18550): envio mensaje a planificador: OK
+[INFO] 17:10:15:517 ESI/(18550:18550): Recibida instruccion de ejecutar
