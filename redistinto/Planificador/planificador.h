@@ -36,7 +36,7 @@
 #define ERROR -20
 
 char* arch_config;
-pthread_t threadConsola;
+//pthread_t threadConsola;
 int pidConsola;
 int pidCoordinador;
 

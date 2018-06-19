@@ -1,6 +1,6 @@
 #include "consola.h"
 
-void* abrir_consola(void* ptr) {
+/*void* abrir_consola(void* ptr) {
 	char* retorno;
 	char* linea = NULL;
 	while(1) {
@@ -30,12 +30,39 @@ void* abrir_consola(void* ptr) {
 
 	retorno = (char*) ptr;
 	return (void*) retorno;
+}*/
+
+int leer_consola() {
+	memset(comando_consola, '\0', 1000);
+	fgets(comando_consola, 1000, stdin);
+	return 0;
 }
 
-void procesar_funcion(char* comando) {
+void quitar_salto_linea(char *cadena) {
+	char *cadena2 = cadena;
+	while (*cadena != '\0') {
+		if (*cadena != '\n') {
+			*cadena2++ = *cadena++;
+		} else {
+			++cadena;
+		}
+	}
+	*cadena2 = '\0';
+}
+
+void procesar_funcion() {
+		int i = 0;
 		char** list_comandos;
 
-		list_comandos = string_split(comando," ");
+		printf("consola: %s", comando_consola);
+
+		string_to_upper(comando_consola);
+		list_comandos = string_split(comando_consola," ");
+
+		while (list_comandos[i] != NULL) {
+			quitar_salto_linea(list_comandos[i]); //saco el \n si es que lo tiene
+			i++;
+		}
 
 		if (strcmp(list_comandos[0],"CONTINUAR") == 0)
 			comando_continuar(list_comandos);

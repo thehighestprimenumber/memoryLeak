@@ -26,7 +26,7 @@ int main(void) {
 	log_info(log_consola,"\nInicio de la consola\n");
 
 	//Abrir Consola
-	pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
+	//pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
 
 	if (pidConsola < 0) {
 		log_error(log_consola,"Error al intentar abrir la consola");
@@ -114,7 +114,7 @@ int manejador_de_eventos(int socket, Message* msg){
 	log_info(log_planificador, "Ocurrio un evento del tipo: %d", msg->header->tipo_mensaje);
 
 	//En el caso de las operaciones el socket ya escucha el mensaje por lo que esto no va
-	if (msg->header->tipo_mensaje != OPERACION && msg->header->tipo_mensaje != RESULTADO && msg->header->tipo_mensaje != DESCONEXION)
+	if (msg->header->remitente != CONSOLA && msg->header->tipo_mensaje != OPERACION && msg->header->tipo_mensaje != RESULTADO && msg->header->tipo_mensaje != DESCONEXION)
 	{
 		int res = await_msg(socket, msg);
 		if (res<0) {
@@ -124,10 +124,13 @@ int manejador_de_eventos(int socket, Message* msg){
 		}
 	}
 
-	//Por ahora agrego caso con test para que siga funcionando, después sacar
-	enum tipoRemitente recipiente = msg->header->remitente;
+	if(msg->header->remitente == CONSOLA){
+		log_info(log_planificador, "Me hablo LA consola");
 
-	if(msg->header->remitente == ESI){
+		leer_consola();
+		procesar_funcion();
+	}
+	else if(msg->header->remitente == ESI){
 		log_info(log_planificador, "Me hablo una ESI");
 		switch(msg->header->tipo_mensaje){
 			case TEXTO:

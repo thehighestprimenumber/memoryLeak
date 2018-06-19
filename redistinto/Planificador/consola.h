@@ -14,8 +14,11 @@
 #include <readline/history.h>
 #include <commons/string.h>
 
-void* abrir_consola();
-void procesar_funcion(char* linea);
+//void* abrir_consola();
+char comando_consola[1000];
+
+int leer_consola();
+void procesar_funcion();
 
 void comando_continuar(char** linea);
 void comando_pausar(char** linea);
