@@ -75,14 +75,14 @@ t_operacion * crear_operacion(char* clave, int len_clave, char* valor, int len_v
 	t_operacion * op = (t_operacion *) malloc(sizeof(t_operacion));
 	op->tipo = tipo;
 
-	op->largo_clave=len_clave+1;
+	op->largo_clave=len_clave;
 
 	if (len_clave >0 ){
-	op->clave = calloc(1, len_clave+1);
+	op->clave = calloc(1, len_clave);
 	memcpy(op->clave, clave, len_clave);
 	}
 
-	op->largo_valor=len_valor+1;
+	op->largo_valor=len_valor;
 	if (len_valor >0 ){
 	op->valor= calloc(1, len_valor+1);
 	memcpy(op->valor, valor, len_valor);
