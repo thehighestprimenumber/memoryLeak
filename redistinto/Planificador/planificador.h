@@ -37,7 +37,7 @@
 #define ERROR -20
 
 char* arch_config;
-pthread_t threadConsola;
+//pthread_t threadConsola;
 int pidConsola;
 int pidCoordinador;
 
@@ -146,6 +146,8 @@ int validar_operacion_store();
 void ejecutar_nueva_esi();
 void desbloquear_esi();
 void kill_esi();
+void ejecutar_comando(int nroComando);
+void reanudar_ejecucion();
 
 bool clave_ya_bloqueada_config(char*clave1);
 bool clave_ya_bloqueada(struct_blocked* elemento);

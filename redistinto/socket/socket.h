@@ -35,7 +35,7 @@
 //Enums
 
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
-typedef enum tipoRemitente {DESCONOCIDO, ESI, PLANIFICADOR, INSTANCIA, COORDINADOR} tipoRemitente;
+typedef enum tipoRemitente {DESCONOCIDO, ESI, PLANIFICADOR, INSTANCIA, COORDINADOR, CONSOLA} tipoRemitente;
 
 typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, OPERACION, VALIDAR_BLOQUEO, TEXTO, RESULTADO, EJECUTAR, CONFSTORAGE, STATUS_CLAVE} tipoMensaje;
 

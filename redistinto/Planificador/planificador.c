@@ -3,15 +3,15 @@
 int main(void) {
 	inicializar_logger();
 
-	log_info(log_planificador, "\nCargando configuración");
+	log_info(log_consola, "\nCargando configuración");
 	estructura_planificador();
 
-	log_info(log_planificador,"\nPuerto planificador: %s", planificador.puerto_planif);
-	log_info(log_planificador,"\nAlgoritmo planificador: %s", planificador.algoritmo_planif);
-	log_info(log_planificador,"\nEstimación: %d", planificador.estimacion_inicial);
-	log_info(log_planificador,"\nIP Coordinador: %s", planificador.IP_coordinador);
-	log_info(log_planificador,"\nPuerto Coordinador: %s",planificador.puerto_coordinador);
-	log_info(log_planificador,"\nAlfa Planificación: %d", planificador.alfaPlanificacion);
+	log_info(log_consola,"\nPuerto planificador: %s", planificador.puerto_planif);
+	log_info(log_consola,"\nAlgoritmo planificador: %s", planificador.algoritmo_planif);
+	log_info(log_consola,"\nEstimación: %d", planificador.estimacion_inicial);
+	log_info(log_consola,"\nIP Coordinador: %s", planificador.IP_coordinador);
+	log_info(log_consola,"\nPuerto Coordinador: %s",planificador.puerto_coordinador);
+	log_info(log_consola,"\nAlfa Planificación: %d", planificador.alfaPlanificacion);
 
 	//Crear listas de procesos
 	cola_ready = list_create();
@@ -23,17 +23,17 @@ int main(void) {
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	int socketCoordinador = conectar_a_coordinador(pConfig);
 
-	log_info(log_planificador,"\nInicio de la consola\n");
+	log_info(log_consola,"\nInicio de la consola\n");
 
 	//Abrir Consola
-	pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
+	//pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
 
 	if (pidConsola < 0) {
-		log_error(log_planificador,"Error al intentar abrir la consola");
+		log_error(log_consola,"Error al intentar abrir la consola");
 		exit_proceso(-1);
 	}
 
-	//pthread_join(threadConsola,NULL);
+	puede_ejecutar = true;
 
 	//Escuchar conexiones ESI
 	algorimoEnUso = FIFO;
@@ -46,7 +46,8 @@ int main(void) {
 }
 
 void inicializar_logger() {
-	log_planificador = log_create("./Planificador.log", "Planificador: ", true, LOG_LEVEL_INFO);
+	log_planificador = log_create("./Planificador.log", "Planificador: ", false, LOG_LEVEL_INFO);
+	log_consola = log_create("./Consola.log", "Consola Planificador: ", true, LOG_LEVEL_INFO);
 }
 
 char* armarPathScript(char* cadenaPath,char* nombreScript) {
@@ -94,10 +95,10 @@ void leer_script_completo(char* nombreArchivo) {
 }
 
 int iniciar(int socketCoordinador){
-	log_info(log_planificador, "Iniciando proceso planificador");
+	log_info(log_consola, "Iniciando proceso planificador");
 	char* ipLocal = get_local_ip();
 
-	log_info(log_planificador, "IP Local: %s", ipLocal);
+	log_info(log_consola, "IP Local: %s", ipLocal);
 
 	int socket_fd = create_listener(ipLocal,planificador.puerto_planif);
 	if (socket_fd <0) return ERROR_DE_CONEXION;
@@ -113,7 +114,7 @@ int manejador_de_eventos(int socket, Message* msg){
 	log_info(log_planificador, "Ocurrio un evento del tipo: %d", msg->header->tipo_mensaje);
 
 	//En el caso de las operaciones el socket ya escucha el mensaje por lo que esto no va
-	if (msg->header->tipo_mensaje != OPERACION && msg->header->tipo_mensaje != RESULTADO && msg->header->tipo_mensaje != DESCONEXION)
+	if (msg->header->remitente != CONSOLA && msg->header->tipo_mensaje != OPERACION && msg->header->tipo_mensaje != RESULTADO && msg->header->tipo_mensaje != DESCONEXION)
 	{
 		int res = await_msg(socket, msg);
 		if (res<0) {
@@ -123,10 +124,14 @@ int manejador_de_eventos(int socket, Message* msg){
 		}
 	}
 
-	//Por ahora agrego caso con test para que siga funcionando, después sacar
-	enum tipoRemitente recipiente = msg->header->remitente;
+	if(msg->header->remitente == CONSOLA){
+		log_info(log_planificador, "Me hablo LA consola");
 
-	if(msg->header->remitente == ESI){
+		leer_consola();
+		int res = decodificar_comando();
+		ejecutar_comando(res);
+	}
+	else if(msg->header->remitente == ESI){
 		log_info(log_planificador, "Me hablo una ESI");
 		switch(msg->header->tipo_mensaje){
 			case TEXTO:
@@ -422,6 +427,7 @@ void finalizar_esi(int socket_esi) {
 
 void exit_proceso(int retorno) {
   log_destroy(log_planificador);
+  log_destroy(log_consola);
   exit(retorno);
 }
 
@@ -442,8 +448,11 @@ int manejar_nueva_esi_fifo(int socket){
 
 	//Verifico si algún esi está corriendo, caso contrario
 	//envio un esi a ejecutarse según el algorimto seleccionado
-	if (esiRunning == 0) {
-		ejecutar_nueva_esi();
+	if (puede_ejecutar == true)
+	{
+		if (esiRunning == 0) {
+			ejecutar_nueva_esi();
+		}
 	}
 
 	return OK;
@@ -610,8 +619,12 @@ int manejar_resultado(int socket,Message* msg) {
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
 
+		if (puede_ejecutar == true)
 			return envio_ejecutar(socket);
-			break;
+		else
+			return 0;
+
+		break;
 		//En este caso como ya estaría bloqueado en mi lista queda esperando
 		case CLAVE_DUPLICADA:
 			return 0;
@@ -647,4 +660,40 @@ int envio_desconexion(int socket) {
 	if (res_desconectar < 0) {exit_proceso(-1);}
 
 	return 0;
+}
+
+void ejecutar_comando(int nroComando) {
+	switch(nroComando){
+		case CONTINUAR:
+			reanudar_ejecucion();
+			break;
+		case PAUSAR:
+			puede_ejecutar = false;
+			break;
+		case BLOQUEAR:
+			break;
+		case DESBLOQUEAR:
+			break;
+		case LISTAR:
+			break;
+		case KILL:
+			break;
+		case STATUS:
+			break;
+	}
+}
+
+void reanudar_ejecucion() {
+	if (puede_ejecutar == false)
+	{
+		puede_ejecutar = true;
+
+		if (esiRunning == 0) {
+			ejecutar_nueva_esi();
+		}
+		else
+		{
+			envio_ejecutar(esiRunning);
+		}
+	}
 }

@@ -166,15 +166,21 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 	//Por si me mandan un socket con problemas
 	if(socketListener == -1 || socketCoordinador == -1) return;
 
+	int socketConsola = 0;
+
 	t_list *conexiones = list_create();
 	int activity, fdMax = socketListener > socketCoordinador ? socketListener:socketCoordinador;
 	fd_set readfds;
 
 	while(1){
 		//Vacio el set e incluyo al socket de escucha y el coordinador
+		//FD_ZERO(&master);
 		FD_ZERO(&readfds);
+		FD_SET(socketConsola, &readfds);
 		FD_SET(socketListener, &readfds);
 		FD_SET(socketCoordinador, &readfds);
+
+		//readfds = master;
 
 		//Agrego a todas las ESIs
 		for(int i = 0; i < list_size(conexiones); i++){
@@ -223,6 +229,23 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 			//Seteo el nuevo fd maximo
 			fdMax = nuevoSocket > fdMax ? nuevoSocket:fdMax;
 
+		}
+
+		//Preguntamos si ocurrio un evento en la consola
+		if(FD_ISSET(socketConsola, &readfds)){
+			//Creamos un nuevo mensaje para avisar de la nueva conexion
+			Message *msg = malloc(sizeof(Message));
+			msg->header = malloc(sizeof(ContentHeader));
+			msg->header->remitente = CONSOLA;
+			msg->header->tipo_mensaje = TEXTO;
+			msg->header->size = 0;
+			msg->contenido = NULL;
+
+			//FD_SET(socketConsola, &readfds);
+
+			//Llamo a la funcion encargada de manejar las nuevas conexiones
+			manejadorDeEvento(socketConsola, msg);
+			free_msg(&msg);
 		}
 
 		//Preguntamos si ocurrio un evento en el coordinador
