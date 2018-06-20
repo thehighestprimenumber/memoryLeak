@@ -1,4 +1,7 @@
 #include "logger_coordinador.h"
+#include "logger_comun.h"
+
+char* nombres_algoritmos_coordinador[] = {"EQUITATIVE LOAD", "LEAST SPACE USED"};
 
 char* buscar_id_conexion (int socket){
 	t_link_element *element = coordinador.conexiones->head;
@@ -21,4 +24,11 @@ void registrar_conexion(Message * m, int socket) {
 		strcpy(dato_conexion->nombre, nombre);
 		list_add(coordinador.conexiones, dato_conexion);
 		loguear_conexion(log_coordinador, m, dato_conexion->nombre);
+}
+
+
+void loguear_inst_op(t_log* log, char* nombre, t_operacion* op) {
+	log_info(log,
+			"se selecciona la instancia '%s' para la operacion %s %s", nombre,
+			nombres_operacion[op->tipo], op->clave);
 }

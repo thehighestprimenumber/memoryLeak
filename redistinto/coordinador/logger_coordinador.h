@@ -6,6 +6,7 @@
 #include <commons/log.h>
 #include <commons/string.h>
 
+char* nombres_algoritmos_coordinador[3];
 
 typedef struct {
 	int socket;
@@ -14,6 +15,7 @@ typedef struct {
 
 char* buscar_id_conexion (int socket);
 void registrar_conexion(Message * m, int socket);
+void loguear_inst_op(t_log* log, char* nombre, t_operacion* op);
 
 t_log* log_coordinador;
 

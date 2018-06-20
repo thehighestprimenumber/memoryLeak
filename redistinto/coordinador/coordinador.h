@@ -17,12 +17,6 @@
 #include  <signal.h>
 #include <semaphore.h>
 
-#define OK 0
-#define ERROR_COORDINADOR -20
-#define NO_HAY_INSTANCIAS -21
-#define CLAVE_BLOQUEADA -22
-
-
 void salir(int return_nr);
 
 enum algoritmo_coordinador {
@@ -38,8 +32,6 @@ typedef struct {
 	char* puerto_escucha;
 	char* ip_coordinador;
 	enum algoritmo_coordinador algoritmo;
-	int cantidad_entradas;
-	int tamanio_entrada;
 	int retardo;
 	t_operacion * operacion_global_threads;
 	int socket_planificador;

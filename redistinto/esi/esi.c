@@ -1,15 +1,15 @@
 #include "esi.h"
-esi_configuracion* iniciarlizar_configuracion(char* argv[]);
+esi_configuracion* inicializar_configuracion(char* argv[]);
 int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario);
 
 int main(int argc,char *argv[]) {
 	// Levantamos configuracion -  si argv esta vacio levanta ESI_1
-	esi_configuracion* pConfig = iniciarlizar_configuracion(argv);
+	esi_configuracion* pConfig = inicializar_configuracion(argv);
 	conectar_a_coordinador(pConfig);
 	conectar_a_planificador(pConfig);
 
 	esi_correr = true;
-
+	//TODO sacar esi_correr para poder soportar bloqueos temporales.
 	while (esi_correr) {
 			Message *msg = malloc(sizeof(Message));
 			msg->header = NULL;
@@ -119,22 +119,12 @@ t_operacion * convertir_operacion(t_esi_operacion operacionOriginal){
 
 }
 
-void* enviar_operacion_a_coordinador(t_operacion* operacion){
-	//FIXME acá devovles un int, pero la función declara return tipo void*
-	// y aparte la función que llama a esta no mira el resultado.
+void enviar_operacion_a_coordinador(t_operacion* operacion){
 	Message * msg = empaquetar_op_en_mensaje(operacion, ESI);
 
 	int res = enviar_y_loguear_mensaje(cliente_coordinador, *msg, "coordinador\0");
+	free_msg(&msg);
 	if (res < 0) exit(-1);
-	return NULL;
-
-	//Message *rta;
-	//int resultado = await_msg(cliente_coordinador, rta);
-	//free_msg(&rta);
-	//if (resultado < 0){
-	//	return ERROR_DE_RECEPCION;
-	//}
-
 }
 
 void enviar_ruta_script_al_planificador(char* path){
@@ -142,7 +132,9 @@ void enviar_ruta_script_al_planificador(char* path){
 	Message* msg = empaquetar_texto(path, strlen(path), ESI);
 	msg->header->tipo_mensaje = CONEXION;
 
-	if (enviar_y_loguear_mensaje(socket_planificador, (*msg), "planificador\0")<0)
+	int res = enviar_y_loguear_mensaje(socket_planificador, (*msg), "planificador\0");
+		free_msg(&msg);
+	if (res<0)
 		exit(ERROR_DE_ENVIO);
 
 }
@@ -172,7 +164,7 @@ int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
 int ejecutar_proxima_operacion(){
 	if (operaciones->head == NULL) {
 		//envio_desconexion(socket_planificador);
-		esi_correr = false;
+		esi_correr = false; //TODO reemplazar esto por un exit
 		return FIN_ARCHIVO;
 	}
 
@@ -180,9 +172,7 @@ int ejecutar_proxima_operacion(){
 	t_operacion * op = element->data;
 		enviar_operacion_a_coordinador(op);
 
-	Message *rta = malloc(sizeof(Message));
-	rta->header = NULL;
-	rta->contenido = NULL;
+	Message *rta = calloc (1, sizeof(Message));
 	if(await_msg(cliente_coordinador, rta) < 0){
 		log_error(log_esi, "error al recibir resultado");
 		exit(ERROR_DE_RECEPCION);
@@ -201,36 +191,29 @@ int ejecutar_proxima_operacion(){
 
 void manejar_mensajes(Message mensaje) {
 	//loguear_recepcion(log_esi, &mensaje, nombres_modulos[mensaje.header->remitente]);
-	int res;
+	int resultado;
 	switch (mensaje.header->tipo_mensaje) {
 		case CONEXION:
 			log_info(log_esi, "Recibido el contenido del script");
-			res = armar_estructura_script(mensaje.contenido);
-			if (res<0){
-				Message * m = empaquetar_resultado(ESI, res);
-				enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
-				free_msg(&m);
-			} break;
+			resultado = armar_estructura_script(mensaje.contenido);
+			break;
 		case DESCONEXION:
 			esi_correr = false;
 			break;
 		case EJECUTAR:
 			log_info(log_esi, "Recibida instruccion de ejecutar");
-			res = ejecutar_proxima_operacion();
-			if (res != FIN_ARCHIVO) {
-				Message * m = empaquetar_resultado(ESI, res);
-				enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
-				free_msg(&m);
-			}
+			resultado = ejecutar_proxima_operacion();
 			break;
-
 		case RESULTADO:
 			mensaje.header->remitente = ESI;
-			enviar_y_loguear_mensaje(socket_planificador, mensaje, "planificador/0");
+			resultado = enviar_y_loguear_mensaje(socket_planificador, mensaje, "planificador/0");
 			break;
 		default:
 			log_error(log_esi, "se recibio un mensaje de tipo inesperado");
 		}
+		Message * m = empaquetar_resultado(ESI, resultado);
+		resultado = enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
+		free_msg(&m);
 }
 
 int armar_estructura_script(char* contenidoScript) {
@@ -251,7 +234,7 @@ int armar_estructura_script(char* contenidoScript) {
 	} return OK;
 }
 
-esi_configuracion* iniciarlizar_configuracion(char* argv[]) {
+esi_configuracion* inicializar_configuracion(char* argv[]) {
 	// Levantamos configuracion
 	esi_configuracion* pConfig = (esi_configuracion*) malloc(
 			sizeof(esi_configuracion));

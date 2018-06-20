@@ -301,44 +301,9 @@ void free_msg(Message **msg){
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////
-//FUNCIONES SOCKET INSTANCIA
-//////////////////////////////////////////////////////////////////////////////////
-/*int start_listening(int socket, t_list *conexiones){
-	while(1){
-		Conexion *conexion = malloc(sizeof(Conexion));
-		socklen_t addrSize = sizeof(conexion->addr);
-		int nuevoSocket;
-		if(accept(nuevoSocket, &(conexion->addr), &addrSize) == -1) return -1;
-		conexion->socket = nuevoSocket;
-		//Deberia pedir permiso al semaforo para acceder a la lista
-		list_add(conexiones, conexion);
-		//
-	}
-	return 0;
-
-}*/
-
-
-/////////////////////////////////////////////////////////////////////////////////////
-//Funciones carpeta Sockets de ESI
-/////////////////////////////////////////////////////////////////////////////////////
-void close_listener(Conexion *conexion){
+void close_listener(Conexion *conexion){ //lo usa la ESI
 	close(conexion->socket);
 	//freeaddrinfo(conexion->addr);
 	free(conexion);
 	return;
-}
-
-void delete_conection(t_list *conexiones,int index){
-	//Deberia pedir permiso al semaforo para acceder a la lista
-	list_remove_and_destroy_element(conexiones, index, (void*)close_listener);
-	//
-}
-
-Conexion* get_conection(t_list *conexiones,int index){
-	//Deberia pedir permiso al semaforo para acceder a la lista
-	return (Conexion*) list_get(conexiones, index);
-	//
 }

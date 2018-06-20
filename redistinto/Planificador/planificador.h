@@ -30,6 +30,7 @@
 #include "../socket/operacion.h"
 #include "../socket/operacion.h"
 #include "logger_planificador.h"
+#include "logger_comun.h"
 
 #define OK 0
 
