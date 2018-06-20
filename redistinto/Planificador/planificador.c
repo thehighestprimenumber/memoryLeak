@@ -426,6 +426,7 @@ void finalizar_esi(int socket_esi) {
 
 void exit_proceso(int retorno) {
   log_destroy(log_planificador);
+  log_destroy(log_consola);
   exit(retorno);
 }
 
