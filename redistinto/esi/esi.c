@@ -11,21 +11,30 @@ int main(int argc,char *argv[]) {
 	esi_correr = true;
 
 	while (esi_correr) {
-			Message msg;
-			int resultado = await_msg(socket_planificador, &msg);
+			Message *msg = malloc(sizeof(Message));
+			msg->header = NULL;
+			msg->contenido = NULL;
+			int resultado = await_msg(socket_planificador, msg);
 			//log_info(log_esi, "se recibe un mensaje del planificador");
 			if (resultado<0){
 				log_error(log_esi, "error de recepcion");
 				break;
 			}
 
-			manejar_mensajes(msg);
+			manejar_mensajes(*msg);
+			free_msg(&msg);
 
 	}
 	//Recibo la ruta del script a ejecutar y se la envio al planificador
 	//char* path_script = argv[1];
 	//enviar_ruta_script_al_planificador(path_script);
 
+	//Deberia liberar toda la lista con un list_destroy_and_destroy_elements(2)
+	free(pConfig->coordinador_ip);
+	free(pConfig->coordinador_puerto);
+	free(pConfig->planificador_ip);
+	free(pConfig->planificador_puerto);
+	free(pConfig);
 	return EXIT_SUCCESS;
 }
 
@@ -172,17 +181,20 @@ int ejecutar_proxima_operacion(){
 		enviar_operacion_a_coordinador(op);
 
 	Message *rta = malloc(sizeof(Message));
+	rta->header = NULL;
+	rta->contenido = NULL;
 	if(await_msg(cliente_coordinador, rta) < 0){
 		log_error(log_esi, "error al recibir resultado");
 		exit(ERROR_DE_RECEPCION);
 	}
 
-	int resultado =desempaquetar_resultado(rta);
+	int resultado = desempaquetar_resultado(rta);
 	if(resultado != OK){
 		loguear_resultado(log_esi, resultado);
 		return resultado;
 	}
 	loguear_resultado(log_esi, desempaquetar_resultado(rta));
+	free_msg(&rta);
 	list_remove(operaciones, 0);
 	return OK;
 }
@@ -208,6 +220,7 @@ void manejar_mensajes(Message mensaje) {
 			if (res != FIN_ARCHIVO) {
 				Message * m = empaquetar_resultado(ESI, res);
 				enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
+				free_msg(&m);
 			}
 			break;
 
@@ -253,12 +266,27 @@ esi_configuracion* iniciarlizar_configuracion(char* argv[]) {
 	path_script = malloc(strlen(argv[1]) + 1);
 	memcpy(path_script, argv[1], strlen(argv[1]));
 	((char*) path_script)[strlen(argv[1])] = '\0';
-	pConfig->coordinador_ip = leer_propiedad_string(config, "IP_coordinador");
-	pConfig->coordinador_puerto = leer_propiedad_string(config,
-			"puerto_coordinador");
-	pConfig->planificador_ip = leer_propiedad_string(config, "IP_planificador");
-	pConfig->planificador_puerto = leer_propiedad_string(config,
-			"puerto_planificador");
+
+	pConfig->coordinador_ip = calloc(strlen(leer_propiedad_string(config, "IP_coordinador"))+1, 1);
+	memcpy(pConfig->coordinador_ip,
+			leer_propiedad_string(config, "IP_coordinador"),
+			strlen(leer_propiedad_string(config, "IP_coordinador")));
+
+	pConfig->coordinador_puerto = calloc(strlen(leer_propiedad_string(config,"puerto_coordinador"))+1, 1);
+	memcpy(pConfig->coordinador_puerto,
+			leer_propiedad_string(config,"puerto_coordinador"),
+			strlen(leer_propiedad_string(config,"puerto_coordinador")));
+
+	pConfig->planificador_ip = calloc(strlen(leer_propiedad_string(config, "IP_planificador"))+1, 1);
+	memcpy(pConfig->planificador_ip,
+			leer_propiedad_string(config, "IP_planificador"),
+			strlen(leer_propiedad_string(config, "IP_planificador")));
+
+	pConfig->planificador_puerto = calloc(strlen(leer_propiedad_string(config,"puerto_planificador"))+1, 1);
+	memcpy(pConfig->planificador_puerto,
+			leer_propiedad_string(config,"puerto_planificador"),
+			strlen(leer_propiedad_string(config,"puerto_planificador")));
+
 	// Levantamos el archivo de log y guardamos IP y Puerto
 	log_esi = log_create("log_esi.log", "ESI", true, LOG_LEVEL_TRACE);
 	log_trace(log_esi, "Inicia el proceso ESI");
@@ -271,5 +299,6 @@ esi_configuracion* iniciarlizar_configuracion(char* argv[]) {
 			pConfig->planificador_ip);
 	log_trace(log_esi, "El nombre del script es: %s", argv[1]);
 	operaciones = list_create();
+	config_destroy(config);
 	return pConfig;
 }
