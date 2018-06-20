@@ -33,7 +33,7 @@ int main(void) {
 		exit_proceso(-1);
 	}
 
-	//pthread_join(threadConsola,NULL);
+	puede_ejecutar = true;
 
 	//Escuchar conexiones ESI
 	algorimoEnUso = FIFO;
@@ -128,7 +128,8 @@ int manejador_de_eventos(int socket, Message* msg){
 		log_info(log_planificador, "Me hablo LA consola");
 
 		leer_consola();
-		procesar_funcion();
+		int res = decodificar_comando();
+		ejecutar_comando(res);
 	}
 	else if(msg->header->remitente == ESI){
 		log_info(log_planificador, "Me hablo una ESI");
@@ -447,8 +448,11 @@ int manejar_nueva_esi_fifo(int socket){
 
 	//Verifico si algún esi está corriendo, caso contrario
 	//envio un esi a ejecutarse según el algorimto seleccionado
-	if (esiRunning == 0) {
-		ejecutar_nueva_esi();
+	if (puede_ejecutar == true)
+	{
+		if (esiRunning == 0) {
+			ejecutar_nueva_esi();
+		}
 	}
 
 	return OK;
@@ -615,8 +619,12 @@ int manejar_resultado(int socket,Message* msg) {
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
 
+		if (puede_ejecutar == true)
 			return envio_ejecutar(socket);
-			break;
+		else
+			return 0;
+
+		break;
 		//En este caso como ya estaría bloqueado en mi lista queda esperando
 		case CLAVE_DUPLICADA:
 			return 0;
@@ -652,4 +660,40 @@ int envio_desconexion(int socket) {
 	if (res_desconectar < 0) {exit_proceso(-1);}
 
 	return 0;
+}
+
+void ejecutar_comando(int nroComando) {
+	switch(nroComando){
+		case CONTINUAR:
+			reanudar_ejecucion();
+			break;
+		case PAUSAR:
+			puede_ejecutar = false;
+			break;
+		case BLOQUEAR:
+			break;
+		case DESBLOQUEAR:
+			break;
+		case LISTAR:
+			break;
+		case KILL:
+			break;
+		case STATUS:
+			break;
+	}
+}
+
+void reanudar_ejecucion() {
+	if (puede_ejecutar == false)
+	{
+		puede_ejecutar = true;
+
+		if (esiRunning == 0) {
+			ejecutar_nueva_esi();
+		}
+		else
+		{
+			envio_ejecutar(esiRunning);
+		}
+	}
 }

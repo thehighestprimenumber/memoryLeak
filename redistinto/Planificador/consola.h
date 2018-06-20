@@ -13,21 +13,24 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <commons/string.h>
+#include "logger_planificador.h"
 
-//void* abrir_consola();
+typedef enum tipoConsola{CONTINUAR,PAUSAR,BLOQUEAR,DESBLOQUEAR,LISTAR,KILL,STATUS,ERROR} tipoConsola;
+
 char comando_consola[1000];
 
-int leer_consola();
-void procesar_funcion();
+bool puede_ejecutar;
 
-void comando_continuar(char** linea);
-void comando_pausar(char** linea);
-void comando_bloquear(char** linea);
-void comando_desbloquear(char** linea);
-void comando_listar(char** linea); //ACA NO ENTIENDO BIEN SI PIDE EL LISTADO DE ESIS QUE QUIEREN EJECUTAR X EJEMPLO
-void comando_kill(char** linea);
-void comando_status(char** linea);
-void comando_deadlock(char** linea);
+int leer_consola();
+int decodificar_comando();
+
+int comando_continuar(char** linea);
+int comando_pausar(char** linea);
+int comando_bloquear(char** linea);
+int comando_desbloquear(char** linea);
+int comando_listar(char** linea); //ACA NO ENTIENDO BIEN SI PIDE EL LISTADO DE ESIS QUE QUIEREN EJECUTAR X EJEMPLO
+int comando_kill(char** linea);
+int comando_status(char** linea);
 
 char* limpiar_comando(char* comando);
 int tamanio_array(char** cadena);
