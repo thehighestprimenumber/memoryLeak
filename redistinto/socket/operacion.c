@@ -127,7 +127,7 @@ char* desempaquetar_texto(Message* msg) {
 	if (msg == NULL || msg->header == NULL
 			|| msg->header->size < 1|| msg->contenido == NULL)
 		return NULL;
-	char* texto = malloc(msg->header->size);
+	char* texto = calloc(1, msg->header->size+1);
 	memcpy(texto, msg->contenido, msg->header->size);
 	return texto;
 }
@@ -136,7 +136,7 @@ char* desempaquetar_conexion(Message* msg) {
 	if (msg == NULL || msg->header == NULL
 			|| msg->header->size < 1|| msg->contenido == NULL)
 		return NULL;
-	char* texto = malloc(msg->header->size);
+	char* texto = calloc(1, msg->header->size+1);
 	memcpy(texto, msg->contenido, msg->header->size);
 	return texto;
 }
@@ -150,9 +150,9 @@ t_operacion* desempaquetar_operacion(Message* msg) {
 
 	//Lo copiamos a la operacion y lo liberamos
 	operacion->largo_clave = opHeader->largo_clave;
-	operacion->clave = malloc(operacion->largo_clave);
+	operacion->clave = calloc(1, operacion->largo_clave);
 	operacion->largo_valor = opHeader->largo_valor;
-	operacion->valor = malloc(operacion->largo_valor);
+	operacion->valor = calloc(1, operacion->largo_valor);
 	operacion->tipo = opHeader->tipo;
 	free(opHeader);
 

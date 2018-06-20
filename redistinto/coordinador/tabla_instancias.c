@@ -21,6 +21,10 @@ int criterio_nombre(fila_tabla_instancias* fila, void* nombre_instancia){
 	return !strcmp ((fila->nombre_instancia), (char*) nombre_instancia);
 }
 
+int criterio_esta_activa(fila_tabla_instancias* fila, void* nombre_instancia){
+	return fila->esta_activa;
+}
+
 int criterio_socket(fila_tabla_instancias* fila, void * socket){
 	int numero_socket = (int) socket;
 	return (fila->socket_instancia == numero_socket);
@@ -58,24 +62,6 @@ fila_tabla_instancias * buscar_instancia_por_valor_criterio (void* valor, int cr
 	return 0;
 }
 
-//int buscar_instancia_por_valor_criterio (void* valor, fila_tabla_instancias *output, int criterio (fila_tabla_instancias*, void*)){
-//	t_link_element *element = coordinador.tabla_instancias->head;
-//	int i=0;
-//	fila_tabla_instancias *fila;
-//		while (element != NULL) {
-//			fila = (fila_tabla_instancias*) (element->data);
-//			i++;
-//			if (criterio(fila, valor)) {
-//				output = fila;
-//				return i;
-//			}
-//			element = element->next;
-//		}
-//		log_debug(logger_coordinador, "ubicacion de la instancia instancia en lista: %d", i);
-//	free(element);
-//	return 0;
-//}
-
 int cambiar_estado_instancia(fila_tabla_instancias* fila, int esta_activa){
 	fila->esta_activa=esta_activa;
 	return OK;
@@ -91,11 +77,29 @@ fila_tabla_instancias* seleccionar_instancia_EL(){
 	return NULL;
 }
 
+fila_tabla_instancias * seleccionar_instancia_LSU (){
+	t_link_element *element = coordinador.tabla_instancias->head;
+	int activa = 1;
+	fila_tabla_instancias *mejor_opcion = buscar_instancia_por_valor_criterio(&activa, criterio_esta_activa);
+	if (mejor_opcion==NULL)
+		return NULL;
+	fila_tabla_instancias *fila_test = (fila_tabla_instancias*) element->data;
+		while (element != NULL && element->data != NULL) {
+			fila_test = (fila_tabla_instancias*) (element->data);
+			if (mejor_opcion->esta_activa && fila_test->entradas_libres > mejor_opcion->entradas_libres) {
+				mejor_opcion = fila_test;
+			}
+			element = element->next;
+		}
+	return mejor_opcion;
+}
 
 fila_tabla_instancias* seleccionar_instancia(char* clave) {
 	switch (coordinador.algoritmo) {
 		case EQUITATIVE_LOAD:
 			return seleccionar_instancia_EL();
+		case LEAST_SPACE_USED:
+			return seleccionar_instancia_LSU();
 		default: return 0;
 	}
 }
@@ -133,6 +137,7 @@ fila_tabla_instancias* registrar_instancia(char* nombre_instancia, int socket_in
 		fila = (fila_tabla_instancias*) calloc(sizeof(fila_tabla_instancias), 1);
 			fila->socket_instancia = socket_instancia;
 			fila->esta_activa = 1;
+			fila->entradas_libres = tabla_instancias.cantidad_entradas;
 			strcpy(fila->nombre_instancia, (char*) nombre_instancia);
 			fila->claves = list_create();
 			sem_init(&(fila->lock), 0, 0);

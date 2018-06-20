@@ -1,5 +1,6 @@
 # include "configuracion.h"
 # include "coordinador.h"
+# include "logger_coordinador.h"
 
 char* ruta_arch_config = "./config_coordinador.txt";
 char* ruta_arch_config_debug = "../config_coordinador.txt";
@@ -41,7 +42,7 @@ void inicializar_configuracion(){
 	leer_configuracion();
 
 	log_debug(log_coordinador, "\nretardo: %d\ncantidad_entradas: %d\ntamanio_entrada: %d\npuerto_escucha: %s\nalgoritmo: %s\n",
-			coordinador.retardo, coordinador.cantidad_entradas, coordinador.tamanio_entrada, coordinador.puerto_escucha, coordinador.algoritmo);
+			coordinador.retardo, tabla_instancias.cantidad_entradas, tabla_instancias.tamanio_entrada, coordinador.puerto_escucha, nombres_algoritmos_coordinador[coordinador.algoritmo]);
 
 	coordinador.tabla_instancias = list_create();
 	coordinador.conexiones = list_create();
@@ -56,8 +57,8 @@ int leer_configuracion(char* ip, char* puerto){
 		configuracion = config_create(ruta_arch_config_debug);
 
 	coordinador.retardo = leer_propiedad_int(configuracion, m_retardo);
-	coordinador.cantidad_entradas = leer_propiedad_int(configuracion, m_cantidad_entradas);
-	coordinador.tamanio_entrada = leer_propiedad_int(configuracion, m_tamanio_entrada);
+	tabla_instancias.cantidad_entradas = leer_propiedad_int(configuracion, m_cantidad_entradas);
+	tabla_instancias.tamanio_entrada = leer_propiedad_int(configuracion, m_tamanio_entrada);
 
 	leer_propiedad_ip(configuracion);
 	leer_propiedad_puerto_escucha(configuracion);

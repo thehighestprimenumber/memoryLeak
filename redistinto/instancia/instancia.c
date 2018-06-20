@@ -189,7 +189,7 @@ void guardar(void * contenido){
 	char* ruta = calloc(1, strlen(instancia.path)+entrada->largo_clave+1);
 	memcpy(ruta, instancia.path, strlen(instancia.path));
 	memcpy(ruta+strlen(instancia.path), entrada->clave, entrada->largo_clave);
-	log_debug(log_inst, "Guardando en %s", ruta);
+	if (LOGUEAR_DUMPS) log_debug(log_inst, "Guardando en %s", ruta);
 	FILE* file = fopen(ruta, "w");
 	char *ptrLectura = storage+entrada->nroEntrada*instancia.tamEntrada;
 	fwrite(ptrLectura, sizeof(char), entrada->largo_valor, file);
@@ -207,11 +207,11 @@ void eliminar_entrada(void *contenido){
 void* dump_automatico(void *pepe){
 	while(true){
 		sleep(instancia.int_dump);
-		log_debug(log_inst, "Autodump iniciado");
+		if (LOGUEAR_DUMPS) log_debug(log_inst, "Autodump iniciado");
 		sem_wait(semTabla);
 		list_iterate(instancia.tabla_entradas, guardar);
 		sem_post(semTabla);
-		log_debug(log_inst, "Autodump finalizado");
+		if (LOGUEAR_DUMPS) log_debug(log_inst, "Autodump finalizado");
 	}
 	return NULL;
 }

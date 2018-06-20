@@ -37,7 +37,7 @@ int mandar_operaciones_test(t_operacion * op, int socket_coordinador){
 	Message * m = empaquetar_op_en_mensaje(op, ESI);
 	int res = enviar_mensaje_test(socket_coordinador, *m);
 			if (res<0) return ERROR_DE_ENVIO;
-			free_msg(m);
+			free_msg(&m);
 
 	Message *msg;
 		int resultado = await_msg(socket_coordinador, msg);
@@ -45,7 +45,7 @@ int mandar_operaciones_test(t_operacion * op, int socket_coordinador){
 		if (resultado<0){
 			return ERROR_DE_RECEPCION;
 
-	}return desempaquetar_resultado(resultado);
+	}return resultado;
 
 }
 int test_ESI_get(int socket){
