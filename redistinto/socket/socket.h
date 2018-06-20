@@ -15,7 +15,6 @@
 #include <stdbool.h>
 
 //Defines
-#define OK 0
 #define ERROR_DE_CONEXION -10
 #define ERROR_DE_ENVIO -11
 #define ERROR_DE_RECEPCION -12
@@ -26,9 +25,6 @@
 #define ERROR_VALOR_NULO -17
 #define FIN_ARCHIVO -18
 #define VALOR_INEXISTENTE -19
-#define ERROR_COORDINADOR -20
-#define NO_HAY_INSTANCIAS -21
-#define CLAVE_BLOQUEADA -22
 
 #define OK 0
 
@@ -37,7 +33,7 @@
 //Aca se iran agregando los id que identificaran a los mensajes con distinto objetivo
 typedef enum tipoRemitente {DESCONOCIDO, ESI, PLANIFICADOR, INSTANCIA, COORDINADOR, CONSOLA} tipoRemitente;
 
-typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, OPERACION, VALIDAR_BLOQUEO, TEXTO, RESULTADO, EJECUTAR, CONFSTORAGE, STATUS_CLAVE} tipoMensaje;
+typedef enum tipoMensaje {ACK, CONEXION, DESCONEXION, OPERACION, VALIDAR_BLOQUEO, TEXTO, RESULTADO, EJECUTAR, CONFSTORAGE} tipoMensaje;
 
 //Estructura del header
 typedef struct {

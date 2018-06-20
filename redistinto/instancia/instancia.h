@@ -17,7 +17,6 @@
 #include <dirent.h>
 
 #define OK 0
-#define LOGUEAR_DUMPS 0
 
 typedef enum algorimoReemplazo{CIRC, LRU, BSU} algorimoReemplazo;
 

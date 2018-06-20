@@ -45,11 +45,9 @@ void* recibir_conexion(void* con) {
 				manejar_operacion(msg, conexion->socket);
 				break;
 			case CONFSTORAGE:
-			case EJECUTAR:
-				loguear_operacion_no_soportada(log_coordinador, msg, conexion->socket);
-				break;
-			case STATUS_CLAVE:
 				//TODO
+			case EJECUTAR:
+				//TODO ERROR
 				break;
 		}
 		free_msg(&msg);
