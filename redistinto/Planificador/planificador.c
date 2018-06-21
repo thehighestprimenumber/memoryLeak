@@ -19,10 +19,6 @@ int main(void) {
 	cola_esi_blocked = list_create();
 	cola_finished = list_create();
 
-	agregar_esi_blocked(15, "fruta");
-	agregar_esi_blocked(15, "futbol:messi");
-	agregar_esi_blocked(18, "fruta");
-
 	//conectar a coordinador
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	int socketCoordinador = conectar_a_coordinador(pConfig);
