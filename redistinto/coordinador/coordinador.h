@@ -52,5 +52,5 @@ char* arch_config;
 int manejar_operacion(Message * msg, int socket);
 void manejar_desconexion(int socket);
 int manejar_conexion(Message * m, int socket);
-
+int manejar_status(Message * msg, int socket);
 #endif

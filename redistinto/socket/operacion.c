@@ -193,3 +193,54 @@ ConfigStorage* desempaquetar_config_storage(Message *msg){
 	memcpy(cs,msg->contenido, sizeof(ConfigStorage));
 	return cs;
 }
+
+Message* empaquetar_STATUS(char* clave, char* nombre_instancia, int largo_clave, int largo_nombre_instancia, tipoRemitente remitente, unsigned int real) {
+
+	Message *msg = malloc(sizeof(Message));
+
+		//Preparo el ContentHeader
+		msg->header = malloc(sizeof(ContentHeader));
+		msg->header->remitente = remitente;
+		msg->header->tipo_mensaje = STATUS_CLAVE;
+		msg->header->size = sizeof(StatusHeader) + largo_clave + largo_nombre_instancia;
+
+		//Preparo el OperacionHeader
+		StatusHeader *opHeader = malloc(sizeof(StatusHeader));
+		opHeader->largo_clave = largo_clave;
+		opHeader->largo_valor = largo_nombre_instancia;
+		opHeader->real = real;
+
+		//Preparo el contenido del mensaje
+		msg->contenido = malloc(msg->header->size);
+		memcpy(msg->contenido, opHeader, sizeof(StatusHeader));
+		if (largo_clave>1)
+		memcpy(msg->contenido + sizeof(StatusHeader), clave, largo_clave);
+
+		if (largo_nombre_instancia>1)
+		memcpy(msg->contenido + sizeof(StatusHeader) + largo_clave, nombre_instancia, largo_nombre_instancia);
+
+		//Liberamos lo que ya no nos sirve
+		free(opHeader);
+
+		return msg;
+
+}
+
+
+int desempaquetar_status (Message* msg, char* clave, char* idInstancia) {
+	//Copiamos el header de la operacion
+	StatusHeader *statusHeader = malloc(sizeof(StatusHeader));
+	memcpy(statusHeader, msg->contenido, sizeof(StatusHeader));
+
+	clave = calloc(1, statusHeader->largo_clave+1);
+	idInstancia = calloc(1, statusHeader->largo_valor+1);
+	int real = statusHeader->real;
+	//Copiamos la clave y el valor
+	if (statusHeader->largo_clave>1)
+	memcpy(clave, msg->contenido + sizeof(StatusHeader), statusHeader->largo_clave);
+	if (statusHeader->largo_valor>1)
+	memcpy(idInstancia, msg->contenido + sizeof(StatusHeader)+ statusHeader->largo_clave, statusHeader->largo_valor);
+	free(statusHeader);
+
+	return real;
+}
