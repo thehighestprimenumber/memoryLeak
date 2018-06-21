@@ -126,6 +126,7 @@ int envio_desconexion(int socket);
 
 //Firmas de las funciones para agregar a las listas
 void agregar_ready(int idEsi);
+void agregar_esi_blocked(int idEsi,char* clave);
 
 struct_ready* seleccionar_esi_ready_fifo();
 
@@ -148,7 +149,9 @@ void desbloquear_esi();
 void kill_esi();
 void ejecutar_comando(int nroComando);
 void reanudar_ejecucion();
+void listar_esis_porClave();
 
+int obtener_id_esi(struct_blocked* elemento);
 bool clave_ya_bloqueada_config(char*clave1);
 bool clave_ya_bloqueada(struct_blocked* elemento);
 bool clave_set_disponible(struct_blocked* elemento);

@@ -19,6 +19,10 @@ int main(void) {
 	cola_esi_blocked = list_create();
 	cola_finished = list_create();
 
+	agregar_esi_blocked(15, "fruta");
+	agregar_esi_blocked(15, "futbol:messi");
+	agregar_esi_blocked(18, "fruta");
+
 	//conectar a coordinador
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	int socketCoordinador = conectar_a_coordinador(pConfig);
@@ -600,6 +604,12 @@ bool buscar_esi_ready(struct_ready* elemento) {
 	return (elemento->pid == esiRunning);
 }
 
+bool esi_espera_clave(struct_blocked* elemento) {
+	string_to_upper(elemento->clave);
+	bool resultado = strcmp(list_comandos[1],elemento->clave) == 0;
+	return resultado;
+}
+
 void desbloquear_esi() {
 	struct_blocked* esi_a_desbloquear;
 	esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)clave_ya_bloqueada);
@@ -675,12 +685,15 @@ void ejecutar_comando(int nroComando) {
 		case DESBLOQUEAR:
 			break;
 		case LISTAR:
+			listar_esis_porClave();
 			break;
 		case KILL:
 			break;
 		case STATUS:
 			break;
 	}
+
+	liberar_split(list_comandos);
 }
 
 void reanudar_ejecucion() {
@@ -697,3 +710,43 @@ void reanudar_ejecucion() {
 		}
 	}
 }
+
+void listar_esis_porClave(char* clave) {
+	int cantidad_esis_clave = list_count_satisfying(cola_esi_blocked, (void*)esi_espera_clave);
+
+	if (cantidad_esis_clave > 0) {
+		//int esis_identificadores[cantidad_esis_clave];
+		t_list* esis_bloqueados = list_filter(cola_esi_blocked, (void*)esi_espera_clave);
+		log_info(log_consola,"\nListado de ESIS esperando por la clave: %s", list_comandos[1]);
+
+		for (int i = 0; i < cantidad_esis_clave; i++) {
+			log_info(log_consola,"\nESI N°%d", ((struct_blocked*)list_get(esis_bloqueados, i))->pid);
+		}
+
+		list_destroy(esis_bloqueados);
+	}
+	else
+	{
+		log_info(log_consola,"\nNo hay ESIS esperando por la clave: %s", list_comandos[1]);
+	}
+}
+
+int obtener_id_esi(struct_blocked* elemento) {
+	return elemento->pid;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

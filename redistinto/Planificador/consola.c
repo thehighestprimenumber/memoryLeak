@@ -22,8 +22,6 @@ int decodificar_comando() {
 	int i = 0;
 	int resultado = 0;
 
-	char** list_comandos;
-
 	log_info(log_consola,"consola: %s", comando_consola);
 
 	string_to_upper(comando_consola);
@@ -54,7 +52,6 @@ int decodificar_comando() {
 		resultado = ERROR;
 	}
 
-	liberar_split(list_comandos);
 	return resultado;
 }
 
