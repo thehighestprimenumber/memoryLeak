@@ -84,7 +84,6 @@ typedef struct {
 
 extern int iniciar();
 
-int socket_coordinador;
 int identificador;
 
 char* configTxt = "./configPlanificador.txt";
@@ -150,6 +149,7 @@ void kill_esi();
 void ejecutar_comando(int nroComando);
 void reanudar_ejecucion();
 void listar_esis_porClave();
+int obtener_status();
 
 int obtener_id_esi(struct_blocked* elemento);
 bool clave_ya_bloqueada_config(char*clave1);

@@ -21,7 +21,7 @@ int main(void) {
 
 	//conectar a coordinador
 	t_planificador* pConfig = (t_planificador*)&planificador;
-	int socketCoordinador = conectar_a_coordinador(pConfig);
+	pidCoordinador = conectar_a_coordinador(pConfig);
 
 	log_info(log_consola,"\nInicio de la consola\n");
 
@@ -37,7 +37,7 @@ int main(void) {
 
 	//Escuchar conexiones ESI
 	algorimoEnUso = FIFO;
-	iniciar(socketCoordinador);
+	iniciar();
 
 	log_info(log_planificador,"\nProceso finalizado");
 	list_destroy(planificador.clavesBloqueadas);
@@ -94,7 +94,7 @@ void leer_script_completo(char* nombreArchivo) {
 		contenidoScript[fsize] = '\0';
 }
 
-int iniciar(int socketCoordinador){
+int iniciar(){
 	log_info(log_consola, "Iniciando proceso planificador");
 	char* ipLocal = get_local_ip();
 
@@ -105,7 +105,7 @@ int iniciar(int socketCoordinador){
 
 	free(ipLocal);
 
-	start_listening_select(socket_fd, socketCoordinador, *manejador_de_eventos);
+	start_listening_select(socket_fd, pidCoordinador, *manejador_de_eventos);
 
 	return 0;
 }
@@ -686,6 +686,7 @@ void ejecutar_comando(int nroComando) {
 		case KILL:
 			break;
 		case STATUS:
+			obtener_status();
 			break;
 	}
 
@@ -725,6 +726,51 @@ void listar_esis_porClave(char* clave) {
 	{
 		log_info(log_consola,"\nNo hay ESIS esperando por la clave: %s", list_comandos[1]);
 	}
+}
+
+int obtener_status() {
+	//Envío mensaje al esi preguntando en que instancia se encuentra (o se debería)
+	//encontrar la clave
+	Message * mensaje = empaquetar_STATUS(list_comandos[1], "",strlen(list_comandos[1]) + 1,0,PLANIFICADOR,0);
+
+	if (enviar_y_loguear_mensaje(pidCoordinador, *mensaje, "COORDINADOR\0")<0)
+		return ERROR_DE_ENVIO;
+
+	free_msg(&mensaje);
+	Message * respuesta = malloc(sizeof(Message));
+
+	if (await_msg(pidCoordinador, respuesta)<0)
+		return ERROR_DE_RECEPCION;
+
+	char* clave_resp = NULL;
+	char* inst_resp = NULL;
+
+	int es_instancia_real = desempaquetar_status(respuesta,clave_resp,inst_resp);
+
+	//Logueo y muestro resultados por la consola
+	//Reutilizando funcionalidad del listar para obtener ESIS que esperan por dicha clave
+	if (es_instancia_real == 1)
+	{
+		log_info(log_planificador,"Instancia Real para la clave %s : %s", clave_resp,inst_resp);
+	}
+	else if (es_instancia_real == 0)
+	{
+		log_info(log_planificador,"Instancia Simulada según algoritmo para la clave %s : %s", clave_resp,inst_resp);
+
+	}
+	else
+	{
+		log_error(log_planificador,"\nError al recibir status para la clave: %s", list_comandos[1]);
+		return ERROR_DE_RECEPCION;
+	}
+
+	free(clave_resp);
+	free(inst_resp);
+	free_msg(&respuesta);
+
+	listar_esis_porClave(list_comandos[1]);
+
+	return OK;
 }
 
 int obtener_id_esi(struct_blocked* elemento) {
