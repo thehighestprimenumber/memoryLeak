@@ -146,13 +146,20 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 			return CLAVE_INEXISTENTE;
 
 	entrada->largo_valor = largo_valor;
-
-	switch(instancia.algorimoActual){
-		case CIRC:
-			if(guardar_circular(entrada, valor) < 0) return ERROR_VALOR_NULO;
-			break;
-		default:
-			break;
+	if(entrada->nroEntrada >=0){//Solo ocurre si todavia no se le  asigno una entrada
+		switch(instancia.algorimoActual){
+			case CIRC:
+				if(guardar_circular(entrada, valor) < 0) return ERROR_VALOR_NULO;
+				break;
+			default:
+				break;
+		}
+	}else{
+		if(tam_min_entrada(largo_valor) > tam_min_entrada(entrada->largo_valor)){
+			log_debug(log_inst, "Valor %s ocupa mas entradas que el valor anterior asignado a esta clave", valor);
+			return VALOR_MUY_GRANDE;
+		}
+		memcpy(storage+entrada->nroEntrada*instancia.tamEntrada, valor, largo_valor);
 	}
 	log_debug(log_inst, "SET %s", entrada->clave);
 	return OK;
@@ -224,7 +231,6 @@ void recuperar_claves(){
 	char *dir;
 
 
-	/* Scanning the in directory */
 	if (NULL == (FD = opendir (instancia.path)))
 	{
 		log_debug(log_inst, "Fallo la apertura del directorio");
@@ -232,15 +238,11 @@ void recuperar_claves(){
 	}
 	while ((in_file = readdir(FD)))
 	{
-		/* On linux/Unix we don't want current and parent directories
-		 * 	         * If you're on Windows machine remove this two lines
-		 * 	         	         */
+
 		if (!strcmp (in_file->d_name, "."))
 			continue;
 		if (!strcmp (in_file->d_name, ".."))
 			continue;
-		/* Open directory entry file for common operation */
-		/* TODO : change permissions to meet your need! */
 
 		dir = calloc(strlen(instancia.path)+41, 1);
 		memcpy(dir, instancia.path, strlen(instancia.path));
@@ -272,3 +274,10 @@ void recuperar_claves(){
 	}
 
 }
+
+int tam_min_entrada(int largo_valor){
+	double d = (double)largo_valor/(double)instancia.tamEntrada;
+	int i = d;
+	return i==d ? i:i+1;
+}
+

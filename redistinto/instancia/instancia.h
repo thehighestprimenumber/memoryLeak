@@ -17,7 +17,7 @@
 #include <dirent.h>
 
 #define OK 0
-#define LOGUEAR_DUMPS 0
+#define LOGUEAR_DUMPS 1
 
 typedef enum algorimoReemplazo{CIRC, LRU, BSU} algorimoReemplazo;
 
@@ -63,5 +63,6 @@ void eliminar_entrada(void *contenido);
 int guardar_entrada(char* clave, int largo_clave);
 void* dump_automatico(void*);
 void recuperar_claves();
+int tam_min_entrada(int largo_valor);
 
 #endif /* INSTANCIA_INSTANCIA_H_ */

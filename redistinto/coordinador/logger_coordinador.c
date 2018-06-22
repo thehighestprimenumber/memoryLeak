@@ -1,5 +1,4 @@
 #include "logger_coordinador.h"
-#include "logger_comun.h"
 
 char* nombres_algoritmos_coordinador[] = {"EQUITATIVE LOAD", "LEAST SPACE USED"};
 

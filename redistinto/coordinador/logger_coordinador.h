@@ -5,6 +5,7 @@
 #include "../socket/operacion.h"
 #include <commons/log.h>
 #include <commons/string.h>
+#include "../socket/logger_comun.h"
 
 char* nombres_algoritmos_coordinador[3];
 

@@ -29,6 +29,7 @@
 #define ERROR_COORDINADOR -20
 #define NO_HAY_INSTANCIAS -21
 #define CLAVE_BLOQUEADA -22
+#define VALOR_MUY_GRANDE -23
 
 #define OK 0
 

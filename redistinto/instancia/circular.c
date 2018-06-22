@@ -16,10 +16,8 @@ int guardar_circular(t_clave_valor *entrada, char *valor){
 	}
 	int nroEntrada = entradaActual;
 	entradaAEliminar = entradaActual;
-	//Esto hace lo que haria basicamente ceil(1)
-	double d = (double)entrada->largo_valor/(double)instancia.tamEntrada;
-	int i = d;
-	entradaActual += i==d ? i:i+1;
+
+	entradaActual =+ tam_min_entrada(entrada->largo_valor);
 
 	while(entradaAEliminar<entradaActual){
 		list_remove_and_destroy_by_condition(instancia.tabla_entradas,eliminable, eliminar_entrada);
