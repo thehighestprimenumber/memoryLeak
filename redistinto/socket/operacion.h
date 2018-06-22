@@ -23,6 +23,12 @@ typedef struct {
 } __attribute__((packed)) OperacionHeader;
 
 typedef struct {
+	int largo_clave;
+	int largo_valor;
+	int real;
+} __attribute__((packed)) StatusHeader;
+
+typedef struct {
 	int cantEntradas;
 	int tamEntrada;
 } __attribute__((packed)) ConfigStorage;
@@ -49,4 +55,6 @@ Message* empaquetar_resultado(tipoRemitente remitente, int resultado);
 Message* empaquetar_config_storage(tipoRemitente remitente, int cantEntradas, int tamEntrada);
 ConfigStorage* desempaquetar_config_storage(Message *msg);
 
+Message* empaquetar_STATUS(char* clave, char* nombre_instancia, int largo_clave, int largo_nombre_instancia, tipoRemitente remitente, unsigned int real);
+int desempaquetar_status (Message* msg, char* clave, char* idInstancia);
 #endif

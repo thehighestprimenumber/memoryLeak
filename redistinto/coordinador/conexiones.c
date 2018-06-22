@@ -49,7 +49,7 @@ void* recibir_conexion(void* con) {
 				loguear_operacion_no_soportada(log_coordinador, msg, conexion->socket);
 				break;
 			case STATUS_CLAVE:
-				//TODO
+				manejar_status(msg, conexion->socket);
 				break;
 		}
 		free_msg(&msg);

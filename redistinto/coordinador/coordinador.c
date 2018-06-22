@@ -43,7 +43,6 @@ void manejar_desconexion(int socket){
 	desconectar_instancia(socket);
 	close(socket);
 }
-
 int manejar_operacion(Message * msg, int socket){
 	int res;
 	enum tipoRemitente remitente = msg->header->remitente;
@@ -55,6 +54,33 @@ int manejar_operacion(Message * msg, int socket){
 			loguear_operacion_no_soportada(log_coordinador, msg, socket);
 		}
 		return res;
+}
+
+int manejar_status(Message * msg, int socket){
+	fila_tabla_instancias * instancia;
+	char* clave;
+	char* idInstancia;
+	int real;
+	desempaquetar_status(msg, clave, idInstancia);
+	instancia = buscar_instancia_por_valor_criterio(clave, &criterio_clave);
+	if (instancia != NULL) {
+		real = 1;
+		idInstancia = calloc(1, strlen(instancia->nombre_instancia)+1);
+		strcpy(idInstancia, instancia->nombre_instancia);
+	} else {
+		real = 0;
+		instancia = seleccionar_instancia(clave);
+		if (instancia != NULL) {
+			idInstancia = calloc(1, strlen(instancia->nombre_instancia)+1);
+			strcpy(idInstancia, instancia->nombre_instancia);
+		} else
+			idInstancia = calloc(1, strlen("No hay instancias conectadas")+1);
+			strcpy(idInstancia, "No hay instancias conectadas");
+	}
+	Message * rta = empaquetar_STATUS(clave, idInstancia, strlen(clave), strlen(idInstancia), COORDINADOR, real);
+	int resultado = enviar_y_loguear_mensaje(socket, *rta);
+	free_msg(&rta);
+	return resultado;
 }
 
 int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
