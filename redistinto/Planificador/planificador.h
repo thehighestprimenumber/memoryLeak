@@ -154,6 +154,7 @@ void reanudar_ejecucion();
 void listar_esis_porClave();
 int obtener_status();
 void consola_bloquear();
+void consola_desbloquear();
 void buscar_y_correr_comando();
 
 int obtener_id_esi(struct_blocked* elemento);
@@ -162,6 +163,7 @@ bool clave_ya_bloqueada(struct_blocked* elemento);
 bool clave_set_disponible(struct_blocked* elemento);
 bool buscar_esi_ready(struct_ready* elemento);
 bool buscar_esi_a_bloquear(struct_ready* elemento);
+bool buscar_esi_a_desbloquear(struct_blocked* elemento);
 
 
 #endif /* PRUEBA_H_ */

@@ -609,6 +609,10 @@ bool buscar_esi_a_bloquear(struct_ready* elemento) {
 	return (elemento->pid == atoi(list_comandos[2]));
 }
 
+bool buscar_esi_a_desbloquear(struct_blocked* elemento) {
+	return strcmp(elemento->clave,list_comandos[1]) == 0;
+}
+
 bool esi_espera_clave(struct_blocked* elemento) {
 	string_to_upper(elemento->clave);
 	bool resultado = strcmp(list_comandos[1],elemento->clave) == 0;
@@ -634,7 +638,7 @@ int manejar_resultado(int socket,Message* msg) {
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
 
-		if (flag_puede_ejecutar == true)
+		if (flag_puede_ejecutar == true && socket == esiRunning)
 			return envio_ejecutar(socket);
 		else
 			return 0;
@@ -692,6 +696,7 @@ void ejecutar_comando(int nroComando) {
 				consola_bloquear();
 				break;
 			case DESBLOQUEAR:
+				consola_desbloquear();
 				break;
 			case LISTAR:
 				listar_esis_porClave();
@@ -823,8 +828,44 @@ void consola_bloquear() {
 	}
 
 	//Si se bloqueo el que estaba corriendo, busco un nuevo ESI para que corra
+	//Si no hay ningún ESI corriendo, se asigna uno nuevo
 	if (esiRunning == 0)
+	{
 		esiRunning = planificar_esis();
+		if (esiRunning != 0)
+		{
+			envio_ejecutar(esiRunning);
+		}
+	}
+}
+
+void consola_desbloquear() {
+
+	if (list_any_satisfy(cola_esi_blocked, (void*)buscar_esi_a_desbloquear)) {
+		struct_blocked* esi_a_desbloquear;
+		esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)buscar_esi_a_desbloquear);
+		list_remove_by_condition(cola_esi_blocked, ((void*) buscar_esi_a_desbloquear));
+		agregar_ready(esi_a_desbloquear->pid);
+
+		log_info(log_consola,"Se desbloqueo el esi %d para la clave %s",esi_a_desbloquear->pid,esi_a_desbloquear->clave);
+
+		free(esi_a_desbloquear);
+
+		//Si no hay ningún ESI corriendo, se asigna uno nuevo
+		if (esiRunning == 0)
+		{
+			esiRunning = planificar_esis();
+			if (esiRunning != 0)
+			{
+				envio_ejecutar(esiRunning);
+			}
+		}
+	}
+	else
+	{
+		list_remove_by_condition(cola_blocked, ((void*) buscar_esi_a_desbloquear));
+		log_info(log_consola,"La clave %s se encuentra liberada",list_comandos[1]);
+	}
 }
 
 void buscar_y_correr_comando() {
