@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 #include <semaphore.h>
 #include <pthread.h>
 #include "consola.h"
@@ -148,13 +149,13 @@ int validar_operacion_set();
 int validar_operacion_store();
 void ejecutar_nueva_esi();
 void desbloquear_esi();
-void kill_esi();
 void ejecutar_comando(int nroComando);
 void reanudar_ejecucion();
 void listar_esis_porClave();
 int obtener_status();
 void consola_bloquear();
 void consola_desbloquear();
+void consola_kill();
 void buscar_y_correr_comando();
 
 int obtener_id_esi(struct_blocked* elemento);
@@ -164,6 +165,6 @@ bool clave_set_disponible(struct_blocked* elemento);
 bool buscar_esi_ready(struct_ready* elemento);
 bool buscar_esi_a_bloquear(struct_ready* elemento);
 bool buscar_esi_a_desbloquear(struct_blocked* elemento);
-
+bool buscar_esi_kill(struct_blocked* elemento);
 
 #endif /* PRUEBA_H_ */
