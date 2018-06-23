@@ -41,6 +41,9 @@ char* arch_config;
 int pidConsola;
 int pidCoordinador;
 
+bool flag_instruccion;
+int nroComando;
+
 typedef enum algorimoPrioridad {FIFO} algorimoPrioridad;
 typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
 
@@ -150,11 +153,15 @@ void ejecutar_comando(int nroComando);
 void reanudar_ejecucion();
 void listar_esis_porClave();
 int obtener_status();
+void consola_bloquear();
+void buscar_y_correr_comando();
 
 int obtener_id_esi(struct_blocked* elemento);
 bool clave_ya_bloqueada_config(char*clave1);
 bool clave_ya_bloqueada(struct_blocked* elemento);
 bool clave_set_disponible(struct_blocked* elemento);
 bool buscar_esi_ready(struct_ready* elemento);
+bool buscar_esi_a_bloquear(struct_ready* elemento);
+
 
 #endif /* PRUEBA_H_ */

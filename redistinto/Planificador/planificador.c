@@ -33,7 +33,9 @@ int main(void) {
 		exit_proceso(-1);
 	}
 
-	puede_ejecutar = true;
+	flag_puede_ejecutar = true;
+	flag_comando_pendiente = false;
+	flag_instruccion = false;
 
 	//Escuchar conexiones ESI
 	algorimoEnUso = FIFO;
@@ -128,8 +130,8 @@ int manejador_de_eventos(int socket, Message* msg){
 		log_info(log_planificador, "Me hablo LA consola");
 
 		leer_consola();
-		int res = decodificar_comando();
-		ejecutar_comando(res);
+		nroComando = decodificar_comando();
+		ejecutar_comando(nroComando);
 	}
 	else if(msg->header->remitente == ESI){
 		log_info(log_planificador, "Me hablo una ESI");
@@ -166,6 +168,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				break;
 
 				case RESULTADO:
+					buscar_y_correr_comando();
 					return manejar_resultado(socket, msg);
 					break;
 
@@ -448,7 +451,7 @@ int manejar_nueva_esi_fifo(int socket){
 
 	//Verifico si algún esi está corriendo, caso contrario
 	//envio un esi a ejecutarse según el algorimto seleccionado
-	if (puede_ejecutar == true)
+	if (flag_puede_ejecutar == true)
 	{
 		if (esiRunning == 0) {
 			ejecutar_nueva_esi();
@@ -573,8 +576,10 @@ void ejecutar_nueva_esi() {
 	int esi_seleccionado = planificar_esis();
 
 	if (esi_seleccionado > 0) {
+	flag_instruccion = true;
 	//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 	//y comenzar a procesar instrucciones
+
 	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
@@ -598,6 +603,10 @@ bool clave_set_disponible(struct_blocked* elemento) {
 
 bool buscar_esi_ready(struct_ready* elemento) {
 	return (elemento->pid == esiRunning);
+}
+
+bool buscar_esi_a_bloquear(struct_ready* elemento) {
+	return (elemento->pid == atoi(list_comandos[2]));
 }
 
 bool esi_espera_clave(struct_blocked* elemento) {
@@ -625,7 +634,7 @@ int manejar_resultado(int socket,Message* msg) {
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
 
-		if (puede_ejecutar == true)
+		if (flag_puede_ejecutar == true)
 			return envio_ejecutar(socket);
 		else
 			return 0;
@@ -647,6 +656,7 @@ int manejar_resultado(int socket,Message* msg) {
 }
 
 int envio_ejecutar(int socket) {
+	flag_instruccion = true;
 	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
@@ -669,34 +679,43 @@ int envio_desconexion(int socket) {
 }
 
 void ejecutar_comando(int nroComando) {
-	switch(nroComando){
-		case CONTINUAR:
-			reanudar_ejecucion();
-			break;
-		case PAUSAR:
-			puede_ejecutar = false;
-			break;
-		case BLOQUEAR:
-			break;
-		case DESBLOQUEAR:
-			break;
-		case LISTAR:
-			listar_esis_porClave();
-			break;
-		case KILL:
-			break;
-		case STATUS:
-			obtener_status();
-			break;
-	}
+	if (flag_instruccion == false)
+		{
+		switch(nroComando){
+			case CONTINUAR:
+				reanudar_ejecucion();
+				break;
+			case PAUSAR:
+				flag_puede_ejecutar = false;
+				break;
+			case BLOQUEAR:
+				consola_bloquear();
+				break;
+			case DESBLOQUEAR:
+				break;
+			case LISTAR:
+				listar_esis_porClave();
+				break;
+			case KILL:
+				break;
+			case STATUS:
+				obtener_status();
+				break;
+		}
 
-	liberar_split(list_comandos);
+		liberar_split(list_comandos);
+		flag_comando_pendiente = false;
+	}
+	else
+	{
+		flag_comando_pendiente = true;
+	}
 }
 
 void reanudar_ejecucion() {
-	if (puede_ejecutar == false)
+	if (flag_puede_ejecutar == false)
 	{
-		puede_ejecutar = true;
+		flag_puede_ejecutar = true;
 
 		if (esiRunning == 0) {
 			ejecutar_nueva_esi();
@@ -777,9 +796,43 @@ int obtener_id_esi(struct_blocked* elemento) {
 	return elemento->pid;
 }
 
+void consola_bloquear() {
+	bool bloqueo_ok = false;
 
+	//Verifico si el esi a bloquear está en la cola de ready y si es así lo bloqueo
+	if (list_any_satisfy(cola_ready, (void*)buscar_esi_a_bloquear)) {
+		list_remove_by_condition(cola_ready, (void*)buscar_esi_a_bloquear);
+		agregar_esi_blocked(atoi(list_comandos[2]), list_comandos[1]);
+		bloqueo_ok = true;
+	}
 
+	//Verifico si el esi a bloquear es el esiRunning. Si es así lo bloqueo y mando nuevo ESI a correr
+	if (esiRunning == atoi(list_comandos[2])) {
+		esiRunning = 0;
+		agregar_esi_blocked(atoi(list_comandos[2]), list_comandos[1]);
+		free_operacion(&operacionEnMemoria);
+		bloqueo_ok = true;
+	}
 
+	//Informo si pudo bloquear el ESI o no. Caso negativo explicar motivo
+	if (bloqueo_ok)
+		log_info(log_consola, "Se bloqueó correctamente el esi %s para la clave %s",list_comandos[2],list_comandos[1]);
+	else
+	{
+		log_info(log_consola,"El ESI ingresado es inválido");
+	}
+
+	//Si se bloqueo el que estaba corriendo, busco un nuevo ESI para que corra
+	if (esiRunning == 0)
+		esiRunning = planificar_esis();
+}
+
+void buscar_y_correr_comando() {
+	flag_instruccion = false;
+
+	if (flag_comando_pendiente == true)
+		ejecutar_comando(nroComando);
+}
 
 
 

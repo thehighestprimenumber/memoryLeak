@@ -20,7 +20,8 @@ typedef enum tipoConsola{CONTINUAR,PAUSAR,BLOQUEAR,DESBLOQUEAR,LISTAR,KILL,STATU
 char comando_consola[1000];
 char** list_comandos;
 
-bool puede_ejecutar;
+bool flag_puede_ejecutar;
+bool flag_comando_pendiente;
 
 int leer_consola();
 int decodificar_comando();
