@@ -244,7 +244,7 @@ esi_configuracion* inicializar_configuracion(char* argv[]) {
 		config = config_create("../configESI.txt");
 	}
 	if (argv == NULL || argv[1] == NULL) {
-		argv[1] = "ESI_1";
+		argv[1] = "ESI_MultiClave";
 	}
 	path_script = malloc(strlen(argv[1]) + 1);
 	memcpy(path_script, argv[1], strlen(argv[1]));
