@@ -64,6 +64,7 @@ typedef struct {
 } struct_ready;
 
 int esiRunning = 0;
+int esi_a_eliminar = 0;
 
 typedef struct {
 	int pid;

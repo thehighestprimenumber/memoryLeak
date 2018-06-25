@@ -423,8 +423,13 @@ int planificar_esis() {
 }
 
 void finalizar_esi(int socket_esi) {
+	esi_a_eliminar = socket_esi;
 	agregar_finished(socket_esi);
-	esiRunning = 0;
+	list_remove_by_condition(cola_ready, (void*)buscar_esi_kill);
+	list_remove_by_condition(cola_blocked, (void*)buscar_esi_kill);
+	list_remove_by_condition(cola_esi_blocked, (void*)buscar_esi_kill);
+	if (socket_esi == esiRunning)
+		esiRunning = 0;
 }
 
 
@@ -470,7 +475,8 @@ void manejar_desconexion_esi_fifo(int socket){
 
 	log_info(log_planificador, "RIP socket %d", socket);
 
-	ejecutar_nueva_esi();
+	if (esiRunning == 0)
+		ejecutar_nueva_esi();
 }
 
 int manejar_operacion(int socket,Message* msg) {
@@ -614,7 +620,7 @@ bool buscar_esi_a_desbloquear(struct_blocked* elemento) {
 }
 
 bool buscar_esi_kill(struct_blocked* elemento) {
-	return (elemento->pid == atoi(list_comandos[1]));
+	return (elemento->pid == esi_a_eliminar);
 }
 
 bool esi_espera_clave(struct_blocked* elemento) {
@@ -875,28 +881,23 @@ void consola_desbloquear() {
 
 void consola_kill() {
 	bool kill_ok = false;
+	esi_a_eliminar = atoi(list_comandos[1]);
 
 	//Verifico si el esi a finalizar está en la cola de ready
 	if (list_any_satisfy(cola_ready, (void*)buscar_esi_kill)) {
-		list_remove_by_condition(cola_ready, (void*)buscar_esi_kill);
-		agregar_finished(atoi(list_comandos[1]));
-		kill(atoi(list_comandos[1]),SIGTERM);
+		envio_desconexion(esi_a_eliminar);
 		kill_ok = true;
 	}
 
 	//Verifico si el esi a finalizar está en la cola de esis bloqueados
-	if (list_any_satisfy(cola_esi_blocked, (void*)buscar_esi_kill)) {
-		list_remove_by_condition(cola_esi_blocked, (void*)buscar_esi_kill);
-		agregar_finished(atoi(list_comandos[1]));
-		kill(atoi(list_comandos[1]),SIGTERM);
+	else if (list_any_satisfy(cola_esi_blocked, (void*)buscar_esi_kill)) {
+		envio_desconexion(esi_a_eliminar);
 		kill_ok = true;
 	}
 
 	//Verifico si el esi a finalizar es el esiRunning.
-	if (esiRunning == atoi(list_comandos[1])) {
-		esiRunning = 0;
-		agregar_finished(atoi(list_comandos[1]));
-		kill(atoi(list_comandos[1]),SIGTERM);
+	else if (esiRunning == esi_a_eliminar) {
+		envio_desconexion(esi_a_eliminar);
 		free_operacion(&operacionEnMemoria);
 		kill_ok = true;
 	}
@@ -904,23 +905,11 @@ void consola_kill() {
 	//Informo si pudo finalizar el ESI o no se encontró
 	if (kill_ok)
 	{
-		list_remove_by_condition(cola_blocked, (void*)buscar_esi_kill);
 		log_info(log_consola, "Se eliminó correctamente el esi %s ",list_comandos[1]);
 	}
 	else
 	{
 		log_info(log_consola,"No se encontró el ESI ingresado");
-	}
-
-	//Si se eliminó el que estaba corriendo, busco un nuevo ESI para que corra
-	//Si no hay ningún ESI corriendo, se asigna uno nuevo
-	if (esiRunning == 0)
-	{
-		esiRunning = planificar_esis();
-		if (esiRunning != 0)
-		{
-			envio_ejecutar(esiRunning);
-		}
 	}
 }
 
