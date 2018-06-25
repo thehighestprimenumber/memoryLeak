@@ -101,19 +101,21 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 			if (instancia != NULL)
 				list_add(instancia->claves, clave);
 		} else {
-			instancia = buscar_instancia_por_valor_criterio(op->clave, &criterio_clave);
+			instancia = buscar_instancia_por_valor_criterio(clave, &criterio_clave);
 		}
 		if (instancia == NULL) {
 			resultado = NO_HAY_INSTANCIAS;
+			loguear_no_hay_instancia(log_coordinador, op);
 		} else {
 			loguear_inst_op(log_coordinador, instancia->nombre_instancia, op);
 			despertar_hilo_instancia(op, instancia);
+			resultado = coordinador.resultado_global;
+			if (resultado >= 0)
+				instancia->entradas_libres = resultado;
 		}
 	}
-	free(clave);
-	resultado = coordinador.resultado_global;
-	if (resultado >= 0)
-		instancia->entradas_libres = resultado;
+	//free(clave);
+
 	Message* rta_a_esi = empaquetar_resultado(COORDINADOR, resultado);
 	enviar_y_loguear_mensaje(socket_solicitante, *rta_a_esi);
 	loguear_resultado(log_coordinador, resultado);

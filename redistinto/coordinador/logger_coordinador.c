@@ -31,3 +31,9 @@ void loguear_inst_op(t_log* log, char* nombre, t_operacion* op) {
 			"se selecciona la instancia '%s' para la operacion %s %s", nombre,
 			nombres_operacion[op->tipo], op->clave);
 }
+
+void loguear_no_hay_instancia(t_log* log, t_operacion* op) {
+	log_info(log,
+			"no hay instancia para la operacion %s %s",
+			nombres_operacion[op->tipo], op->clave);
+}

@@ -730,3 +730,166 @@ STORE futbol:messi
 [INFO] 17:10:15:516 ESI/(18550:18550): resultado: OK
 [INFO] 17:10:15:516 ESI/(18550:18550): envio mensaje a planificador: OK
 [INFO] 17:10:15:517 ESI/(18550:18550): Recibida instruccion de ejecutar
+[TRACE] 19:03:59:261 ESI/(10043:10043): Inicia el proceso ESI
+[TRACE] 19:03:59:266 ESI/(10043:10043): El puerto del coordinador es: 8087
+[TRACE] 19:03:59:266 ESI/(10043:10043): La ip del coordinador es: 10.0.2.15
+[TRACE] 19:03:59:266 ESI/(10043:10043): El puerto del planificador es: 8002
+[TRACE] 19:03:59:266 ESI/(10043:10043): La ip del planificador es: 10.0.2.15
+[TRACE] 19:03:59:266 ESI/(10043:10043): El nombre del script es: ESI_MultiClave
+[INFO] 19:03:59:267 ESI/(10043:10043): ESI se conecto con el Coordinador
+[INFO] 19:04:01:268 ESI/(10043:10043): ESI se conecto con el Planificador
+[INFO] 19:04:01:268 ESI/(10043:10043): envio mensaje a planificador: conexion
+[INFO] 19:04:01:269 ESI/(10043:10043): Recibido el contenido del script
+[INFO] 19:04:01:269 ESI/(10043:10043): envio mensaje a planificador: OK
+[INFO] 19:04:01:270 ESI/(10043:10043): Recibida instruccion de ejecutar
+[INFO] 19:04:01:272 ESI/(10043:10043): se envia el mensaje a coordinador para la operacion: GET futbol:ansaldi
+[INFO] 19:04:02:290 ESI/(10043:10043): resultado: OK
+[INFO] 19:04:02:290 ESI/(10043:10043): envio mensaje a planificador: OK
+[INFO] 19:04:02:291 ESI/(10043:10043): Recibida instruccion de ejecutar
+[INFO] 19:04:02:291 ESI/(10043:10043): se envia el mensaje a coordinador para la operacion: SET futbol:ansaldi
+[ERROR] 19:05:16:52 ESI/(10043:10043): error al recibir resultado
+[TRACE] 19:06:37:695 ESI/(10228:10228): Inicia el proceso ESI
+[TRACE] 19:06:37:697 ESI/(10228:10228): El puerto del coordinador es: 8087
+[TRACE] 19:06:37:697 ESI/(10228:10228): La ip del coordinador es: 10.0.2.15
+[TRACE] 19:06:37:697 ESI/(10228:10228): El puerto del planificador es: 8002
+[TRACE] 19:06:37:697 ESI/(10228:10228): La ip del planificador es: 10.0.2.15
+[TRACE] 19:06:37:697 ESI/(10228:10228): El nombre del script es: ESI_MultiClave
+[INFO] 19:06:37:697 ESI/(10228:10228): ESI se conecto con el Coordinador
+[INFO] 19:06:39:697 ESI/(10228:10228): ESI se conecto con el Planificador
+[INFO] 19:06:39:698 ESI/(10228:10228): envio mensaje a planificador: conexion
+[INFO] 19:06:39:698 ESI/(10228:10228): Recibido el contenido del script
+[INFO] 19:06:39:698 ESI/(10228:10228): envio mensaje a planificador: OK
+[INFO] 19:06:39:698 ESI/(10228:10228): Recibida instruccion de ejecutar
+[INFO] 19:06:39:698 ESI/(10228:10228): se envia el mensaje a coordinador para la operacion: GET futbol:ansaldi
+[INFO] 19:13:22:223 ESI/(10228:10228): resultado: OK
+[INFO] 19:13:22:223 ESI/(10228:10228): envio mensaje a planificador: OK
+[INFO] 19:13:22:224 ESI/(10228:10228): Recibida instruccion de ejecutar
+[INFO] 19:13:22:224 ESI/(10228:10228): se envia el mensaje a coordinador para la operacion: SET futbol:ansaldi
+[ERROR] 19:16:44:442 ESI/(10228:10228): error al recibir resultado
+[TRACE] 19:18:35:270 ESI/(10560:10560): Inicia el proceso ESI
+[TRACE] 19:18:35:274 ESI/(10560:10560): El puerto del coordinador es: 8087
+[TRACE] 19:18:35:274 ESI/(10560:10560): La ip del coordinador es: 10.0.2.15
+[TRACE] 19:18:35:274 ESI/(10560:10560): El puerto del planificador es: 8002
+[TRACE] 19:18:35:275 ESI/(10560:10560): La ip del planificador es: 10.0.2.15
+[TRACE] 19:18:35:275 ESI/(10560:10560): El nombre del script es: ESI_MultiClave
+[INFO] 19:18:35:275 ESI/(10560:10560): ESI se conecto con el Coordinador
+[INFO] 19:18:37:277 ESI/(10560:10560): ESI se conecto con el Planificador
+[INFO] 19:18:37:277 ESI/(10560:10560): envio mensaje a planificador: conexion
+[INFO] 19:18:37:278 ESI/(10560:10560): Recibido el contenido del script
+[INFO] 19:18:37:278 ESI/(10560:10560): envio mensaje a planificador: OK
+[INFO] 19:18:37:279 ESI/(10560:10560): Recibida instruccion de ejecutar
+[INFO] 19:18:37:279 ESI/(10560:10560): se envia el mensaje a coordinador para la operacion: GET futbol:ansaldi
+[INFO] 19:19:23:927 ESI/(10560:10560): resultado: OK
+[INFO] 19:19:23:928 ESI/(10560:10560): envio mensaje a planificador: OK
+[INFO] 19:19:23:929 ESI/(10560:10560): Recibida instruccion de ejecutar
+[INFO] 19:19:23:932 ESI/(10560:10560): se envia el mensaje a coordinador para la operacion: SET futbol:ansaldi
+[ERROR] 19:22:15:56 ESI/(10560:10560): error al recibir resultado
+[TRACE] 19:23:28:978 ESI/(10755:10755): Inicia el proceso ESI
+[TRACE] 19:23:28:979 ESI/(10755:10755): El puerto del coordinador es: 8087
+[TRACE] 19:23:28:979 ESI/(10755:10755): La ip del coordinador es: 10.0.2.15
+[TRACE] 19:23:28:979 ESI/(10755:10755): El puerto del planificador es: 8002
+[TRACE] 19:23:28:979 ESI/(10755:10755): La ip del planificador es: 10.0.2.15
+[TRACE] 19:23:28:979 ESI/(10755:10755): El nombre del script es: ESI_MultiClave
+[INFO] 19:23:28:979 ESI/(10755:10755): ESI se conecto con el Coordinador
+[INFO] 19:23:30:980 ESI/(10755:10755): ESI se conecto con el Planificador
+[INFO] 19:23:30:980 ESI/(10755:10755): envio mensaje a planificador: conexion
+[INFO] 19:23:30:980 ESI/(10755:10755): Recibido el contenido del script
+[INFO] 19:23:30:980 ESI/(10755:10755): envio mensaje a planificador: OK
+[INFO] 19:23:30:980 ESI/(10755:10755): Recibida instruccion de ejecutar
+[INFO] 19:23:30:980 ESI/(10755:10755): se envia el mensaje a coordinador para la operacion: GET futbol:ansaldi
+[INFO] 19:24:28:293 ESI/(10755:10755): resultado: OK
+[INFO] 19:24:28:293 ESI/(10755:10755): envio mensaje a planificador: OK
+[INFO] 19:24:28:294 ESI/(10755:10755): Recibida instruccion de ejecutar
+[INFO] 19:24:28:294 ESI/(10755:10755): se envia el mensaje a coordinador para la operacion: SET futbol:ansaldi
+[INFO] 19:26:20:644 ESI/(10755:10755): resultado: NO_HAY_INSTANCIAS
+[INFO] 19:26:20:644 ESI/(10755:10755): envio mensaje a planificador: NO_HAY_INSTANCIAS
+[INFO] 19:26:20:644 ESI/(10755:10755): Recibida instruccion de ejecutar
+[INFO] 19:26:20:644 ESI/(10755:10755): se envia el mensaje a coordinador para la operacion: SET futbol:ansaldi
+[INFO] 19:30:51:660 ESI/(10755:10755): resultado: NO_HAY_INSTANCIAS
+[INFO] 19:30:51:660 ESI/(10755:10755): envio mensaje a planificador: NO_HAY_INSTANCIAS
+[ERROR] 19:30:55:597 ESI/(10755:10755): error de recepcion
+[TRACE] 19:32:14:974 ESI/(11181:11181): Inicia el proceso ESI
+[TRACE] 19:32:14:979 ESI/(11181:11181): El puerto del coordinador es: 8087
+[TRACE] 19:32:14:979 ESI/(11181:11181): La ip del coordinador es: 10.0.2.15
+[TRACE] 19:32:14:979 ESI/(11181:11181): El puerto del planificador es: 8002
+[TRACE] 19:32:14:980 ESI/(11181:11181): La ip del planificador es: 10.0.2.15
+[TRACE] 19:32:14:980 ESI/(11181:11181): El nombre del script es: ESI_MultiClave
+[INFO] 19:32:14:981 ESI/(11181:11181): ESI se conecto con el Coordinador
+[ERROR] 19:32:16:983 ESI/(11181:11181): Fallo conexion esi con el Planificador
+[TRACE] 19:33:42:814 ESI/(11238:11238): Inicia el proceso ESI
+[TRACE] 19:33:42:819 ESI/(11238:11238): El puerto del coordinador es: 8087
+[TRACE] 19:33:42:821 ESI/(11238:11238): La ip del coordinador es: 10.0.2.15
+[TRACE] 19:33:42:821 ESI/(11238:11238): El puerto del planificador es: 8002
+[TRACE] 19:33:42:821 ESI/(11238:11238): La ip del planificador es: 10.0.2.15
+[TRACE] 19:33:42:821 ESI/(11238:11238): El nombre del script es: ESI_MultiClave
+[INFO] 19:33:42:824 ESI/(11238:11238): ESI se conecto con el Coordinador
+[INFO] 19:33:44:825 ESI/(11238:11238): ESI se conecto con el Planificador
+[INFO] 19:33:44:826 ESI/(11238:11238): envio mensaje a planificador: conexion
+[INFO] 19:33:44:827 ESI/(11238:11238): Recibido el contenido del script
+[INFO] 19:33:44:828 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:33:44:833 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:33:44:834 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: GET futbol:ansaldi
+[INFO] 19:34:12:392 ESI/(11238:11238): resultado: OK
+[INFO] 19:34:12:393 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:34:12:393 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:34:12:393 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:ansaldi
+[INFO] 19:34:57:780 ESI/(11238:11238): resultado: OK
+[INFO] 19:34:57:780 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:34:57:781 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:34:57:782 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: GET futbol:messi
+[INFO] 19:35:05:21 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:05:21 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:05:21 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:05:21 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:08:386 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:08:386 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:08:386 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:08:387 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:19:99 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:19:99 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:19:99 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:19:100 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:20:105 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:20:107 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:20:107 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:20:108 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:21:110 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:21:110 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:21:110 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:21:110 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:22:115 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:22:115 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:22:115 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:22:116 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:23:119 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:23:119 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:23:119 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:23:119 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:24:123 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:24:123 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:24:124 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:24:125 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:25:129 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:25:129 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:25:129 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:25:129 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:26:130 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:26:130 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:26:130 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:26:130 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:27:139 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:27:140 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:27:140 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:27:140 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: SET futbol:messi
+[INFO] 19:35:28:142 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:28:143 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:28:143 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:28:143 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: STORE futbol:messi
+[INFO] 19:35:29:150 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:29:152 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:29:153 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:29:154 ESI/(11238:11238): se envia el mensaje a coordinador para la operacion: STORE futbol:ansaldi
+[INFO] 19:35:30:161 ESI/(11238:11238): resultado: OK
+[INFO] 19:35:30:161 ESI/(11238:11238): envio mensaje a planificador: OK
+[INFO] 19:35:30:162 ESI/(11238:11238): Recibida instruccion de ejecutar
+[INFO] 19:35:30:162 ESI/(11238:11238): envio mensaje a planificador: FIN_ARCHIVO

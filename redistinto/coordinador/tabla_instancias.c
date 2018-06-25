@@ -59,7 +59,7 @@ fila_tabla_instancias * buscar_instancia_por_valor_criterio (void* valor, int cr
 			}
 			element = element->next;
 		}
-	return 0;
+	return NULL;
 }
 
 int cambiar_estado_instancia(fila_tabla_instancias* fila, int esta_activa){

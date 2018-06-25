@@ -50,6 +50,7 @@ char *storage;
 char *claveEnBusqueda;
 struct stat pepito;
 sem_t *semTabla;
+int espacioUsado;
 
 
 int inicializar();
@@ -64,5 +65,6 @@ int guardar_entrada(char* clave, int largo_clave);
 void* dump_automatico(void*);
 void recuperar_claves();
 int tam_min_entrada(int largo_valor);
+void sumardor_parcial_espacio_usado(void *contenido);
 
 #endif /* INSTANCIA_INSTANCIA_H_ */
