@@ -146,7 +146,7 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 			return CLAVE_INEXISTENTE;
 
 	entrada->largo_valor = largo_valor;
-	if(entrada->nroEntrada >=0){//Solo ocurre si todavia no se le  asigno una entrada
+	if(entrada->nroEntrada < 0){//Solo ocurre si todavia no se le  asigno una entrada
 		switch(instancia.algorimoActual){
 			case CIRC:
 				if(guardar_circular(entrada, valor) < 0) return ERROR_VALOR_NULO;
@@ -162,7 +162,9 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 		memcpy(storage+entrada->nroEntrada*instancia.tamEntrada, valor, largo_valor);
 	}
 	log_debug(log_inst, "SET %s", entrada->clave);
-	return OK;
+	espacioUsado = 0;
+	list_iterate(instancia.tabla_entradas, sumardor_parcial_espacio_usado);
+	return instancia.cantEntradas*instancia.tamEntrada-espacioUsado;
 }
 
 int guardar_entrada(char* clave, int largo_clave){
@@ -279,5 +281,10 @@ int tam_min_entrada(int largo_valor){
 	double d = (double)largo_valor/(double)instancia.tamEntrada;
 	int i = d;
 	return i==d ? i:i+1;
+}
+
+void sumardor_parcial_espacio_usado(void *contenido){
+	t_clave_valor *entrada = contenido;
+	espacioUsado += tam_min_entrada(entrada->largo_valor);
 }
 
