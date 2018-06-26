@@ -164,7 +164,7 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 	log_debug(log_inst, "SET %s", entrada->clave);
 	espacioUsado = 0;
 	list_iterate(instancia.tabla_entradas, sumardor_parcial_espacio_usado);
-	return instancia.cantEntradas*instancia.tamEntrada-espacioUsado;
+	return (instancia.cantEntradas*instancia.tamEntrada-espacioUsado)/instancia.tamEntrada;
 }
 
 int guardar_entrada(char* clave, int largo_clave){
