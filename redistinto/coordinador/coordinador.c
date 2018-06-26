@@ -84,8 +84,10 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 			loguear_inst_op(log_coordinador, instancia->nombre_instancia, op);
 			despertar_hilo_instancia(op, instancia);
 			resultado = coordinador.resultado_global;
-			if (resultado >= 0)
+			if (resultado > 0) {
 				instancia->entradas_libres = resultado;
+				resultado = OK;
+			}
 		}
 	}
 	//free(clave);
