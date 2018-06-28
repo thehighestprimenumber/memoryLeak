@@ -26,8 +26,6 @@ int main(void) {
 	log_info(log_consola,"\nInicio de la consola\n");
 
 	//Abrir Consola
-	//pidConsola = pthread_create(&threadConsola, NULL, (void*)&abrir_consola, (void*) "Inicio del hilo de la consola");
-
 	if (pidConsola < 0) {
 		log_error(log_consola,"Error al intentar abrir la consola");
 		exit_proceso(-1);
@@ -47,31 +45,80 @@ int main(void) {
 	exit_proceso(0);
 }
 
-void inicializar_logger() {
-	log_planificador = log_create("./Planificador.log", "Planificador: ", false, LOG_LEVEL_INFO);
-	log_consola = log_create("./Consola.log", "Consola Planificador: ", true, LOG_LEVEL_INFO);
+int conectar_a_coordinador(t_planificador* pConfig) {
+	int pidCoordinador = connect_to_server(pConfig->IP_coordinador,pConfig->puerto_coordinador);
+	//Verifico conexion con el coordinador
+	if (pidCoordinador < 0) {
+		log_error(log_planificador, "Fallo conexión Planificador con el Coordinador");
+		return -1;
+	} else {
+		log_info(log_planificador, "Planificador se conecto con el Coordinador");
+	}
+
+	Message * mensaje = empaquetar_conexion(PLANIFICADOR, "planificador\0");
+	int resultado = enviar_y_loguear_mensaje(pidCoordinador, *mensaje, "coordinador\0");
+
+	if (resultado < 0) {
+		log_error(log_planificador, "Fallo envio mensaje conexión al Coordinador");
+		return -1;
+	}
+
+	return pidCoordinador;
+}
+
+int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
+	int res = send_msg(socket, msg);
+		if (res<0) {
+			loguear_error_envio(log_planificador, &msg, destinatario);
+			return ERROR_DE_ENVIO;
+		}
+	loguear_envio_OK(log_planificador, &msg, destinatario);
+	return OK;
+}
+
+int iniciar(){
+	log_info(log_consola, "Iniciando proceso planificador");
+	char* ipLocal = get_local_ip();
+	log_info(log_consola, "IP Local: %s", ipLocal);
+
+	int socket_fd = create_listener(ipLocal,planificador.puerto_planif);
+	if (socket_fd <0) return ERROR_DE_CONEXION;
+
+	free(ipLocal);
+
+	start_listening_select(socket_fd, pidCoordinador, *manejador_de_eventos);
+
+	return 0;
+}
+
+void exit_proceso(int retorno) {
+  log_destroy(log_planificador);
+  log_destroy(log_consola);
+  exit(retorno);
+}
+
+void liberar_split(char** array){
+	int i = 0;
+	while (array[i] != NULL) {
+		free(array[i]);
+		i++;
+	}
+	free(array);
 }
 
 char* armarPathScript(char* cadenaPath,char* nombreScript) {
 	char* cadenaScript = malloc(strlen(cadenaPath) + strlen(nombreScript) + 1);
 	memcpy(cadenaScript,cadenaPath,strlen(cadenaPath) + 1);
 	strcat(cadenaScript,nombreScript);
-	//strcat(cadenaScript,".txt");
 	return cadenaScript;
 }
 
 void leer_script_completo(char* nombreArchivo) {
 	//Abrir archivo para los esis
-	//script_a_procesar = txt_open_for_append(scriptTxt);
-	//if (script_a_procesar == NULL)
-	//	script_a_procesar = txt_open_for_append(scriptTxtDebug);
-
 	FILE *f = fopen(armarPathScript(scriptTxtDebug,nombreArchivo), "rb");
 		if (f == NULL) {
 			f = fopen(armarPathScript(scriptTxt,nombreArchivo), "rb");
 			if (f == NULL) {
-				//perror("fopen");
-				//exit(EXIT_FAILURE);
 				contenidoScript = malloc(strlen(" "));
 				memcpy(contenidoScript," ",strlen(" "));
 
@@ -90,26 +137,8 @@ void leer_script_completo(char* nombreArchivo) {
 		}
 
 		fread(contenidoScript, fsize, 1, f);
-
 		fclose(f);
-
 		contenidoScript[fsize] = '\0';
-}
-
-int iniciar(){
-	log_info(log_consola, "Iniciando proceso planificador");
-	char* ipLocal = get_local_ip();
-
-	log_info(log_consola, "IP Local: %s", ipLocal);
-
-	int socket_fd = create_listener(ipLocal,planificador.puerto_planif);
-	if (socket_fd <0) return ERROR_DE_CONEXION;
-
-	free(ipLocal);
-
-	start_listening_select(socket_fd, pidCoordinador, *manejador_de_eventos);
-
-	return 0;
 }
 
 int manejador_de_eventos(int socket, Message* msg){
@@ -138,7 +167,6 @@ int manejador_de_eventos(int socket, Message* msg){
 		switch(msg->header->tipo_mensaje){
 			case TEXTO:
 				log_info(log_planificador, "Me envio un texto");
-				//Por ahora es texto, en un futuro alguna estructura mas compleja
 				return manejar_mensaje_esi_fifo(socket, msg);
 
 			case CONEXION:
@@ -156,7 +184,6 @@ int manejador_de_eventos(int socket, Message* msg){
 				break;
 
 			case DESCONEXION:
-				//loguear_desconexion_int(socket);
 				switch(algorimoEnUso){
 					case FIFO:
 						manejar_desconexion_esi_fifo(socket);
@@ -211,129 +238,7 @@ int manejador_de_eventos(int socket, Message* msg){
 	return ERROR;
 }
 
-int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
-	//log_info(log_planificador, "se va a enviar mensaje desde el planificador mensaje a %d: %s", socket, msg.contenido);
-	int res = send_msg(socket, msg);
-		if (res<0) {
-			//log_info(log_planificador, "error al enviar mensaje a %d", socket);
-			loguear_error_envio(log_planificador, &msg, destinatario);
-			return ERROR_DE_ENVIO;
-		}
-	//log_info(log_planificador, "se envio el mensaje desde el planificador mensaje a %d: %s", socket, msg.contenido);
-	loguear_envio_OK(log_planificador, &msg, destinatario);
-	return OK;
-}
-
-void estructura_planificador() {
-	t_config* configuracion;
-
-	planificador.clavesBloqueadas = list_create();
-
-	configuracion = config_create(configTxt);
-
-	if (configuracion == NULL)
-		configuracion = config_create(configTxtDebug);
-
-	puerto_planif_read(configuracion);
-	algoritmo_read(configuracion);
-	estimacion_read(configuracion);
-	ip_coordinador_read(configuracion);
-	puerto_coordinador_read(configuracion);
-	alfaPlanificacion_read(configuracion);
-	clavesBloqueadas_read(configuracion);
-
-	config_destroy(configuracion);
-}
-
-void puerto_planif_read(t_config* configuracion) {
-	if (config_has_property(configuracion, puerto_planificador)) {
-		char* puertoPlanif = config_get_string_value(configuracion,puerto_planificador);
-		planificador.puerto_planif = malloc(strlen(puertoPlanif) + 1);
-		memcpy(planificador.puerto_planif,puertoPlanif,strlen(puertoPlanif) + 1);
-	}
-}
-
-void ip_planif_read(t_config* configuracion) {
-	if (config_has_property(configuracion, ip_planificador)) {
-		char* ipPlanif = config_get_string_value(configuracion,ip_planificador);
-		planificador.IP_planificador = malloc(strlen(ip_planificador) + 1);
-		memcpy(planificador.IP_planificador,ipPlanif,strlen(ipPlanif) + 1);
-	}
-}
-
-void algoritmo_read(t_config* configuracion) {
-	if (config_has_property(configuracion, algoritmo_planificador)) {
-		char* algoritmo = config_get_string_value(configuracion,algoritmo_planificador);
-		planificador.algoritmo_planif = malloc(strlen(algoritmo) + 1);
-		memcpy(planificador.algoritmo_planif,algoritmo,strlen(algoritmo) + 1);
-	}
-}
-
-void estimacion_read(t_config* configuracion) {
-	if (config_has_property(configuracion, estimacion_planificador)) {
-		planificador.estimacion_inicial = config_get_int_value(configuracion,estimacion_planificador);
-	}
-}
-
-void ip_coordinador_read(t_config* configuracion) {
-	if (config_has_property(configuracion, IPCoord_planificador)) {
-		char* IPcoord = config_get_string_value(configuracion,IPCoord_planificador);
-
-		planificador.IP_coordinador = malloc(strlen(IPcoord) + 1);
-		memcpy(planificador.IP_coordinador,IPcoord,strlen(IPcoord) + 1);
-
-	}
-}
-
-void puerto_coordinador_read(t_config* configuracion) {
-	if (config_has_property(configuracion, puertoCoord_planificador)) {
-		char* puertoCoord = config_get_string_value(configuracion,puertoCoord_planificador);
-		planificador.puerto_coordinador = malloc(strlen(puertoCoord) + 1);
-		memcpy(planificador.puerto_coordinador,puertoCoord,strlen(puertoCoord) + 1);
-	}
-}
-
-void alfaPlanificacion_read(t_config* configuracion) {
-	if (config_has_property(configuracion, alfa_planificador)) {
-		planificador.alfaPlanificacion = config_get_int_value(configuracion,alfa_planificador);
-	}
-}
-
-void clavesBloqueadas_read(t_config* configuracion) {
-	char** claves = NULL;
-
-	if (config_has_property(configuracion, claves_bloqueadas)) {
-		claves = string_split(config_get_string_value(configuracion,claves_bloqueadas),",");
-	}
-
-	for (int i=0;i<sizeof(claves) - 1;i++) {
-		list_add(planificador.clavesBloqueadas,claves[i]);
-	}
-
-	//liberar_split(claves);
-}
-
-int conectar_a_coordinador(t_planificador* pConfig) {
-	int pidCoordinador = connect_to_server(pConfig->IP_coordinador,pConfig->puerto_coordinador);
-	//Verifico conexion con el coordinador
-	if (pidCoordinador < 0) {
-		log_error(log_planificador, "Fallo conexión Planificador con el Coordinador");
-		return -1;
-	} else {
-		log_info(log_planificador, "Planificador se conecto con el Coordinador");
-	}
-
-	Message * mensaje = empaquetar_conexion(PLANIFICADOR, "planificador\0");
-	int resultado = enviar_y_loguear_mensaje(pidCoordinador, *mensaje, "coordinador\0");
-
-	if (resultado < 0) {
-		log_error(log_planificador, "Fallo envio mensaje conexión al Coordinador");
-		return -1;
-	}
-
-	return pidCoordinador;
-}
-
+//Conexion
 void aceptar_conexion(int socket, char* nombreScript) {
 	//Por último envío mensaje de confirmación al esi que se conecto
 	leer_script_completo(nombreScript);
@@ -343,6 +248,7 @@ void aceptar_conexion(int socket, char* nombreScript) {
 	free_msg(&mensaje);
 }
 
+//Manejo listas
 void agregar_ready(int idEsi) {
 	struct_ready* elemento = malloc(sizeof(struct_ready));
 	elemento->pid = idEsi;
@@ -375,18 +281,14 @@ void agregar_finished(int idEsi) {
 	log_debug(log_planificador,"\nSe agrego el esi %d, a la lista de finalizados",idEsi);
 }
 
-struct_ready* seleccionar_esi_ready_fifo() {
-	struct_ready* esi_seleccionado;
-
-	//Si hay esis esperando, selecciona al primero de la lista
-	if (list_size(cola_ready) > 0) {
-		esi_seleccionado = list_get(cola_ready, 0);
-		list_remove(cola_ready, 0);
-		return esi_seleccionado;
-	}
-
-	//Si no encuentro nada retorno null
-	return NULL;
+void finalizar_esi(int socket_esi) {
+	esi_a_eliminar = socket_esi;
+	agregar_finished(socket_esi);
+	list_remove_by_condition(cola_ready, (void*)buscar_esi_kill);
+	list_remove_by_condition(cola_blocked, (void*)buscar_esi_kill);
+	list_remove_by_condition(cola_esi_blocked, (void*)buscar_esi_kill);
+	if (socket_esi == esiRunning)
+		esiRunning = 0;
 }
 
 int planificar_esis() {
@@ -422,31 +324,21 @@ int planificar_esis() {
 	return esiSeleccionado;
 }
 
-void finalizar_esi(int socket_esi) {
-	esi_a_eliminar = socket_esi;
-	agregar_finished(socket_esi);
-	list_remove_by_condition(cola_ready, (void*)buscar_esi_kill);
-	list_remove_by_condition(cola_blocked, (void*)buscar_esi_kill);
-	list_remove_by_condition(cola_esi_blocked, (void*)buscar_esi_kill);
-	if (socket_esi == esiRunning)
-		esiRunning = 0;
-}
+struct_ready* seleccionar_esi_ready_fifo() {
+	struct_ready* esi_seleccionado;
 
-
-void exit_proceso(int retorno) {
-  log_destroy(log_planificador);
-  log_destroy(log_consola);
-  exit(retorno);
-}
-
-void liberar_split(char** array){
-	int i = 0;
-	while (array[i] != NULL) {
-		free(array[i]);
-		i++;
+	//Si hay esis esperando, selecciona al primero de la lista
+	if (list_size(cola_ready) > 0) {
+		esi_seleccionado = list_get(cola_ready, 0);
+		list_remove(cola_ready, 0);
+		return esi_seleccionado;
 	}
-	free(array);
+
+	//Si no encuentro nada retorno null
+	return NULL;
 }
+
+
 
 //Funciones dummy para que corra provisionalmente
 int manejar_nueva_esi_fifo(int socket){
@@ -507,6 +399,35 @@ int manejar_operacion(int socket,Message* msg) {
 	return OK;
 }
 
+int manejar_resultado(int socket,Message* msg) {
+	int resultado = desempaquetar_resultado(msg);
+	loguear_resultado(log_planificador, resultado);
+
+	switch(resultado){
+		case OK:
+		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
+		//y comenzar a procesar instrucciones
+		if (flag_puede_ejecutar == true && socket == esiRunning)
+			return envio_ejecutar(socket);
+		else
+			return 0;
+
+		break;
+		//En este caso como ya estaría bloqueado en mi lista queda esperando
+		case CLAVE_DUPLICADA:
+			return 0;
+		//En estos casos envío mensaje al esi para que se desconecte saliendo del bucle
+		case CLAVE_INEXISTENTE:
+		case CLAVE_MUY_GRANDE:
+		case ERROR_VALOR_NULO:
+			return envio_desconexion(socket);
+		default:
+		//fuck
+		return -2;
+	}
+
+}
+
 int validar_operacion_get() {
 	if (list_any_satisfy(planificador.clavesBloqueadas, ((void*) clave_ya_bloqueada_config)))
 	{
@@ -533,7 +454,6 @@ int validar_operacion_get() {
 int validar_operacion_set() {
 	if (!list_any_satisfy(cola_blocked, ((void*) clave_set_disponible)))
 	{
-		//kill(esiRunning,SIGTERM);
 		free_operacion(&operacionEnMemoria);
 		return CLAVE_INEXISTENTE;
 	}
@@ -585,7 +505,6 @@ void ejecutar_nueva_esi() {
 	flag_instruccion = true;
 	//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 	//y comenzar a procesar instrucciones
-
 	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
@@ -639,35 +558,7 @@ void desbloquear_esi() {
 	}
 }
 
-int manejar_resultado(int socket,Message* msg) {
-	int resultado = desempaquetar_resultado(msg);
-	loguear_resultado(log_planificador, resultado);
 
-	switch(resultado){
-		case OK:
-		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
-		//y comenzar a procesar instrucciones
-
-		if (flag_puede_ejecutar == true && socket == esiRunning)
-			return envio_ejecutar(socket);
-		else
-			return 0;
-
-		break;
-		//En este caso como ya estaría bloqueado en mi lista queda esperando
-		case CLAVE_DUPLICADA:
-			return 0;
-		//En estos casos envío mensaje al esi para que se desconecte saliendo del bucle
-		case CLAVE_INEXISTENTE:
-		case CLAVE_MUY_GRANDE:
-		case ERROR_VALOR_NULO:
-			return envio_desconexion(socket);
-		default:
-		//fuck
-		return -2;
-	}
-
-}
 
 int envio_ejecutar(int socket) {
 	flag_instruccion = true;
@@ -728,6 +619,13 @@ void ejecutar_comando(int nroComando) {
 	}
 }
 
+void buscar_y_correr_comando() {
+	flag_instruccion = false;
+
+	if (flag_comando_pendiente == true)
+		ejecutar_comando(nroComando);
+}
+
 void reanudar_ejecucion() {
 	if (flag_puede_ejecutar == false)
 	{
@@ -747,7 +645,6 @@ void listar_esis_porClave(char* clave) {
 	int cantidad_esis_clave = list_count_satisfying(cola_esi_blocked, (void*)esi_espera_clave);
 
 	if (cantidad_esis_clave > 0) {
-		//int esis_identificadores[cantidad_esis_clave];
 		t_list* esis_bloqueados = list_filter(cola_esi_blocked, (void*)esi_espera_clave);
 		log_info(log_consola,"\nListado de ESIS esperando por la clave: %s", list_comandos[1]);
 
@@ -912,22 +809,3 @@ void consola_kill() {
 		log_info(log_consola,"No se encontró el ESI ingresado");
 	}
 }
-
-void buscar_y_correr_comando() {
-	flag_instruccion = false;
-
-	if (flag_comando_pendiente == true)
-		ejecutar_comando(nroComando);
-}
-
-
-
-
-
-
-
-
-
-
-
-

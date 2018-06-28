@@ -4,29 +4,15 @@
 
 #define NO_USE_FSEEK 0
 
-#define puerto_planificador "puerto"
-#define ip_planificador "ip_planificador"
-#define algoritmo_planificador "algoritmo"
-#define estimacion_planificador "estimacion"
-#define IPCoord_planificador "IP_coordinador"
-#define puertoCoord_planificador "puerto_coordinador"
-#define alfa_planificador "alfa_planificador"
-#define claves_bloqueadas "claves_bloqueadas"
-
 #include <commons/log.h>
-#include <commons/collections/list.h>
-#include <stdlib.h>
-#include <commons/txt.h>
-#include <commons/config.h>
-#include <commons/string.h>
 #include "time.h"
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 #include <signal.h>
 #include <semaphore.h>
 #include <pthread.h>
 #include "consola.h"
+#include "configuracionPlanificador.h"
 #include "../socket/socket.h"
 #include "../socket/operacion.h"
 #include "../socket/operacion.h"
@@ -47,17 +33,6 @@ int nroComando;
 
 typedef enum algorimoPrioridad {FIFO} algorimoPrioridad;
 typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
-
-typedef struct {
-        char* puerto_planif;
-	    char* IP_planificador;
-	   	char* algoritmo_planif;
-	   	int estimacion_inicial;
-	   	char* IP_coordinador;
-	   	char* puerto_coordinador;
-	   	int alfaPlanificacion;
-	   	t_list* clavesBloqueadas;
-} t_planificador;
 
 typedef struct {
 	int pid;
@@ -81,8 +56,6 @@ t_list* cola_finished;
 
 t_list* cola_esi_blocked;
 
-t_planificador planificador;
-
 typedef struct {
 	int enumTipo;
 } tipo_mensaje;
@@ -90,9 +63,6 @@ typedef struct {
 extern int iniciar();
 
 int identificador;
-
-char* configTxt = "./configPlanificador.txt";
-char* configTxtDebug = "../configPlanificador.txt";
 
 char* scriptTxtDebug = "../../scripts/";
 char* scriptTxt = "../scripts/";
@@ -108,17 +78,8 @@ FILE* script_a_procesar;
 void inicializar_logger();
 void exit_proceso();
 
-void estructura_planificador();
-
 char* armarPathScript(char* cadenaPath,char* nombreScript);
 void leer_script_completo(char* nombreScript);
-void puerto_planif_read(t_config* configuracion);
-void algoritmo_read(t_config* configuracion);
-void estimacion_read(t_config* configuracion);
-void ip_coordinador_read(t_config* configuracion);
-void puerto_coordinador_read(t_config* configuracion);
-void alfaPlanificacion_read(t_config* configuracion);
-void clavesBloqueadas_read(t_config* configuracion);
 void liberar_split(char** array);
 int conectar_a_coordinador(t_planificador* pConfig);
 int manejador_de_eventos(int socket, Message* msj);
