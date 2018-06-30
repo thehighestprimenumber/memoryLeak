@@ -15,6 +15,6 @@
 //Funciones
 void free_memory(void **puntero);
 char* get_local_ip();
-
+int cantidad_lineas_script(char* script);
 
 #endif /* REDISTINTO_COMMON_H_ */

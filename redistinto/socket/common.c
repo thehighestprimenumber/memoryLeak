@@ -43,3 +43,15 @@ char* get_local_ip(){
     }
     return buffer;
 }
+
+int cantidad_lineas_script(char* script){
+
+	int n_lineas = 0;
+
+	for(int i = 0; script[i] != '\0'; i++){
+	if (script[i] == '\n') n_lineas++;
+	}
+
+	return n_lineas + 1;
+
+}

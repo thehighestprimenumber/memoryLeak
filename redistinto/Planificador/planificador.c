@@ -141,6 +141,14 @@ void leer_script_completo(char* nombreArchivo) {
 		contenidoScript[fsize] = '\0';
 }
 
+struct_pcb inicializar_pcb() {
+	struct_pcb pcb;
+	pcb.pid = 0;
+	pcb.lineas_restantes = 0;
+	pcb.tamanio_script = 0;
+	return pcb;
+}
+
 int manejador_de_eventos(int socket, Message* msg){
 	log_info(log_planificador, "Ocurrio un evento del tipo: %d", msg->header->tipo_mensaje);
 
@@ -165,13 +173,10 @@ int manejador_de_eventos(int socket, Message* msg){
 	else if(msg->header->remitente == ESI){
 		log_info(log_planificador, "Me hablo una ESI");
 		switch(msg->header->tipo_mensaje){
-			case TEXTO:
-				log_info(log_planificador, "Me envio un texto");
-				return manejar_mensaje_esi_fifo(socket, msg);
-
 			case CONEXION:
 				log_info(log_planificador, "Se conecto una ESI");
 				aceptar_conexion(socket, msg->contenido);
+
 				//Switcheamos por el algoritmo
 				switch(algorimoEnUso){
 					case FIFO:
@@ -249,29 +254,29 @@ void aceptar_conexion(int socket, char* nombreScript) {
 }
 
 //Manejo listas
-void agregar_ready(int idEsi) {
+void agregar_ready(struct_pcb pcb) {
 	struct_ready* elemento = malloc(sizeof(struct_ready));
-	elemento->pid = idEsi;
+	elemento->pcb = pcb;
 	list_add(cola_ready,elemento);
-	log_debug(log_planificador,"\nSe agrego el esi %d, a la lista de listos",idEsi);
+	log_debug(log_planificador,"\nSe agrego el esi %d, a la lista de listos",pcb.pid);
 }
 
-void agregar_blocked(int idEsi, char* clave) {
+void agregar_blocked(struct_pcb pcb, char* clave) {
 	struct_blocked* elemento = malloc(sizeof(struct_blocked));
-	elemento->pid = idEsi;
+	elemento->pcb = pcb;
 	elemento->clave = (char*)malloc(strlen(clave)+1);
 	strcpy(elemento->clave,clave);
 	list_add(cola_blocked,elemento);
-	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de bloqueados",idEsi,clave);
+	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de bloqueados",pcb.pid,clave);
 }
 
-void agregar_esi_blocked(int idEsi, char* clave) {
+void agregar_esi_blocked(struct_pcb pcb, char* clave) {
 	struct_blocked* elemento = malloc(sizeof(struct_blocked));
-	elemento->pid = idEsi;
+	elemento->pcb = pcb;
 	elemento->clave = (char*)malloc(strlen(clave)+1);
 	strcpy(elemento->clave,clave);
 	list_add(cola_esi_blocked,elemento);
-	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de esis bloqueados por clave tomada anteriormente",idEsi,clave);
+	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de esis bloqueados por clave tomada anteriormente",pcb.pid,clave);
 }
 
 void agregar_finished(int idEsi) {
@@ -287,20 +292,19 @@ void finalizar_esi(int socket_esi) {
 	list_remove_by_condition(cola_ready, (void*)buscar_esi_kill);
 	list_remove_by_condition(cola_blocked, (void*)buscar_esi_kill);
 	list_remove_by_condition(cola_esi_blocked, (void*)buscar_esi_kill);
-	if (socket_esi == esiRunning)
-		esiRunning = 0;
+	if (socket_esi == esiRunning.pid)
+		esiRunning = inicializar_pcb();
 }
 
-int planificar_esis() {
-	int esiSeleccionado = 0;
+struct_pcb planificar_esis() {
+	esiRunning = inicializar_pcb();
 
 	if (strcmp(planificador.algoritmo_planif,"FIFO") == 0) {
 		struct_ready* primer_esi = seleccionar_esi_ready_fifo();
 		if (primer_esi != NULL){
 			//Obtengo el seleccionado para enviar un mensaje, y me lo guardo en variable
 			//global como proceso que está ejecutando
-			esiSeleccionado = primer_esi->pid;
-			esiRunning = esiSeleccionado;
+			esiRunning = primer_esi->pcb;
 		}
 	}
 	else if (strcmp(planificador.algoritmo_planif,"SJF-SD") == 0) {
@@ -321,7 +325,7 @@ int planificar_esis() {
 		exit_proceso(-1);
 	}
 
-	return esiSeleccionado;
+	return esiRunning;
 }
 
 struct_ready* seleccionar_esi_ready_fifo() {
@@ -344,21 +348,20 @@ struct_ready* seleccionar_esi_ready_fifo() {
 int manejar_nueva_esi_fifo(int socket){
 
 	//Agrego la nueva conexión a lista de preparados
-	agregar_ready(socket);
+	struct_pcb pcb = inicializar_pcb();
+	agregar_ready(pcb);
 
 	//Verifico si algún esi está corriendo, caso contrario
 	//envio un esi a ejecutarse según el algorimto seleccionado
 	if (flag_puede_ejecutar == true)
 	{
-		if (esiRunning == 0) {
+		if (esiRunning.pid == 0) {
 			ejecutar_nueva_esi();
 		}
 	}
 
 	return OK;
 }
-
-int manejar_mensaje_esi_fifo(int socket, Message *msg){return 0;}
 
 void manejar_desconexion_esi_fifo(int socket){
 	//Le confirmo al esi que se puede desconectar
@@ -367,7 +370,7 @@ void manejar_desconexion_esi_fifo(int socket){
 
 	log_info(log_planificador, "RIP socket %d", socket);
 
-	if (esiRunning == 0)
+	if (esiRunning.pid == 0)
 		ejecutar_nueva_esi();
 }
 
@@ -407,7 +410,7 @@ int manejar_resultado(int socket,Message* msg) {
 		case OK:
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
-		if (flag_puede_ejecutar == true && socket == esiRunning)
+		if (flag_puede_ejecutar == true && socket == esiRunning.pid)
 			return envio_ejecutar(socket);
 		else
 			return 0;
@@ -499,16 +502,16 @@ int validar_operacion_store() {
 }
 
 void ejecutar_nueva_esi() {
-	int esi_seleccionado = planificar_esis();
+	struct_pcb esi_seleccionado = planificar_esis();
 
-	if (esi_seleccionado > 0) {
+	if (esi_seleccionado.pid > 0) {
 	flag_instruccion = true;
 	//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 	//y comenzar a procesar instrucciones
 	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
-	int res_ejecutar = enviar_y_loguear_mensaje(esi_seleccionado, *mensajeEjec, "ESI\0");
+	int res_ejecutar = enviar_y_loguear_mensaje(esi_seleccionado.pid, *mensajeEjec, "ESI\0");
 	free(mensajeEjec);
 	if (res_ejecutar < 0) {exit_proceso(-1);}
 	}
@@ -523,15 +526,15 @@ bool clave_ya_bloqueada(struct_blocked* elemento) {
 }
 
 bool clave_set_disponible(struct_blocked* elemento) {
-	return (strcmp(operacionEnMemoria->clave,elemento->clave) == 0 && (elemento->pid == esiRunning));
+	return (strcmp(operacionEnMemoria->clave,elemento->clave) == 0 && (elemento->pcb.pid == esiRunning.pid));
 }
 
 bool buscar_esi_ready(struct_ready* elemento) {
-	return (elemento->pid == esiRunning);
+	return (elemento->pcb.pid == esiRunning.pid);
 }
 
 bool buscar_esi_a_bloquear(struct_ready* elemento) {
-	return (elemento->pid == atoi(list_comandos[2]));
+	return (elemento->pcb.pid == atoi(list_comandos[2]));
 }
 
 bool buscar_esi_a_desbloquear(struct_blocked* elemento) {
@@ -539,7 +542,7 @@ bool buscar_esi_a_desbloquear(struct_blocked* elemento) {
 }
 
 bool buscar_esi_kill(struct_blocked* elemento) {
-	return (elemento->pid == esi_a_eliminar);
+	return (elemento->pcb.pid == esi_a_eliminar);
 }
 
 bool esi_espera_clave(struct_blocked* elemento) {
@@ -554,7 +557,7 @@ void desbloquear_esi() {
 	if (esi_a_desbloquear != NULL)
 	{
 		list_remove_by_condition(cola_esi_blocked, ((void*) clave_set_disponible));
-		agregar_ready(esi_a_desbloquear->pid);
+		agregar_ready(esi_a_desbloquear->pcb);
 	}
 }
 
@@ -631,12 +634,12 @@ void reanudar_ejecucion() {
 	{
 		flag_puede_ejecutar = true;
 
-		if (esiRunning == 0) {
+		if (esiRunning.pid == 0) {
 			ejecutar_nueva_esi();
 		}
 		else
 		{
-			envio_ejecutar(esiRunning);
+			envio_ejecutar(esiRunning.pid);
 		}
 	}
 }
@@ -649,7 +652,7 @@ void listar_esis_porClave(char* clave) {
 		log_info(log_consola,"\nListado de ESIS esperando por la clave: %s", list_comandos[1]);
 
 		for (int i = 0; i < cantidad_esis_clave; i++) {
-			log_info(log_consola,"\nESI N°%d", ((struct_blocked*)list_get(esis_bloqueados, i))->pid);
+			log_info(log_consola,"\nESI N°%d", ((struct_blocked*)list_get(esis_bloqueados, i))->pcb.pid);
 		}
 
 		list_destroy(esis_bloqueados);
@@ -706,7 +709,7 @@ int obtener_status() {
 }
 
 int obtener_id_esi(struct_blocked* elemento) {
-	return elemento->pid;
+	return elemento->pcb.pid;
 }
 
 void consola_bloquear() {
@@ -714,15 +717,17 @@ void consola_bloquear() {
 
 	//Verifico si el esi a bloquear está en la cola de ready y si es así lo bloqueo
 	if (list_any_satisfy(cola_ready, (void*)buscar_esi_a_bloquear)) {
+		struct_ready* esiBloqueado = list_get((void*)list_filter(cola_ready, (void*)buscar_esi_a_bloquear),1);
 		list_remove_by_condition(cola_ready, (void*)buscar_esi_a_bloquear);
-		agregar_esi_blocked(atoi(list_comandos[2]), list_comandos[1]);
+		agregar_esi_blocked(esiBloqueado->pcb, list_comandos[1]);
+		free(esiBloqueado);
 		bloqueo_ok = true;
 	}
 
 	//Verifico si el esi a bloquear es el esiRunning. Si es así lo bloqueo y mando nuevo ESI a correr
-	if (esiRunning == atoi(list_comandos[2])) {
-		esiRunning = 0;
-		agregar_esi_blocked(atoi(list_comandos[2]), list_comandos[1]);
+	if (esiRunning.pid == atoi(list_comandos[2])) {
+		agregar_esi_blocked(esiRunning, list_comandos[1]);
+		esiRunning = inicializar_pcb();
 		free_operacion(&operacionEnMemoria);
 		bloqueo_ok = true;
 	}
@@ -737,12 +742,12 @@ void consola_bloquear() {
 
 	//Si se bloqueo el que estaba corriendo, busco un nuevo ESI para que corra
 	//Si no hay ningún ESI corriendo, se asigna uno nuevo
-	if (esiRunning == 0)
+	if (esiRunning.pid == 0)
 	{
 		esiRunning = planificar_esis();
-		if (esiRunning != 0)
+		if (esiRunning.pid != 0)
 		{
-			envio_ejecutar(esiRunning);
+			envio_ejecutar(esiRunning.pid);
 		}
 	}
 }
@@ -753,19 +758,19 @@ void consola_desbloquear() {
 		struct_blocked* esi_a_desbloquear;
 		esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)buscar_esi_a_desbloquear);
 		list_remove_by_condition(cola_esi_blocked, ((void*) buscar_esi_a_desbloquear));
-		agregar_ready(esi_a_desbloquear->pid);
+		agregar_ready(esi_a_desbloquear->pcb);
 
-		log_info(log_consola,"Se desbloqueo el esi %d para la clave %s",esi_a_desbloquear->pid,esi_a_desbloquear->clave);
+		log_info(log_consola,"Se desbloqueo el esi %d para la clave %s",esi_a_desbloquear->pcb.pid,esi_a_desbloquear->clave);
 
 		free(esi_a_desbloquear);
 
 		//Si no hay ningún ESI corriendo, se asigna uno nuevo
-		if (esiRunning == 0)
+		if (esiRunning.pid == 0)
 		{
 			esiRunning = planificar_esis();
-			if (esiRunning != 0)
+			if (esiRunning.pid != 0)
 			{
-				envio_ejecutar(esiRunning);
+				envio_ejecutar(esiRunning.pid);
 			}
 		}
 	}
@@ -793,7 +798,7 @@ void consola_kill() {
 	}
 
 	//Verifico si el esi a finalizar es el esiRunning.
-	else if (esiRunning == esi_a_eliminar) {
+	else if (esiRunning.pid == esi_a_eliminar) {
 		envio_desconexion(esi_a_eliminar);
 		free_operacion(&operacionEnMemoria);
 		kill_ok = true;

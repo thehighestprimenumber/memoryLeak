@@ -36,13 +36,19 @@ typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
 
 typedef struct {
 	int pid;
-} struct_ready;
+	int tamanio_script;
+	int lineas_restantes;
+} struct_pcb;
 
-int esiRunning = 0;
+struct_pcb esiRunning = {0,0,0};
 int esi_a_eliminar = 0;
 
 typedef struct {
-	int pid;
+	struct_pcb pcb;
+} struct_ready;
+
+typedef struct {
+	struct_pcb pcb;
 	char* clave;
 } struct_blocked;
 
@@ -90,16 +96,16 @@ int envio_ejecutar(int socket);
 int envio_desconexion(int socket);
 
 //Firmas de las funciones para agregar a las listas
-void agregar_ready(int idEsi);
-void agregar_esi_blocked(int idEsi,char* clave);
+void agregar_ready(struct_pcb pcb);
+void agregar_esi_blocked(struct_pcb pcb,char* clave);
 
 struct_ready* seleccionar_esi_ready_fifo();
 
 //Firmas de las funciones que irian más adelante
-int planificar_esis(); //Replanifica los esis y devuelve el identificador del próximo a ejecutar
+struct_pcb inicializar_pcb();
+struct_pcb planificar_esis(); //Replanifica los esis y devuelve el identificador del próximo a ejecutar
 int abrirPlanificador(); //Abre la conexión del planificador y sus conexiones
 int manejar_nueva_esi_fifo(int socket); //Añade una esi a la lista de prioridades o cola o lo que diga el algoritmo(mirar var global)
-int manejar_mensaje_esi_fifo(int socket, Message *msg); //Se encarga de manejar el dato de la ESI y replanificar al respecto
 void manejar_desconexion_esi_fifo(int socket); //Elimina a la esi segun plantea fifo
 int estimar_rafaga(char* algoritmo); //Estima la duración de la próxima ráfaga usando formula de la media exponencial
 void aceptar_conexion(int socket, char* nombreScript);

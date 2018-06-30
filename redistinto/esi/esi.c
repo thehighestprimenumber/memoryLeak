@@ -139,18 +139,6 @@ void enviar_ruta_script_al_planificador(char* path){
 
 }
 
-int cantidad_lineas_script(char* script){
-
-	int n_lineas = 0;
-
-	for(int i = 0; script[i] != '\0'; i++){
-	if (script[i] == '\n') n_lineas++;
-	}
-
-	return n_lineas + 1;
-
-}
-
 int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
 	int res = send_msg(socket, msg);
 	if (res < 0) {
