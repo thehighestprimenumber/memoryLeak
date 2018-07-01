@@ -150,6 +150,7 @@ struct_pcb inicializar_pcb() {
 
 int manejador_de_eventos(int socket, Message* msg){
 	log_info(log_planificador, "Ocurrio un evento del tipo: %d", msg->header->tipo_mensaje);
+	int resp = 0;
 
 	//En el caso de las operaciones el socket ya escucha el mensaje por lo que esto no va
 	if (msg->header->remitente != CONSOLA && msg->header->tipo_mensaje != OPERACION && msg->header->tipo_mensaje != RESULTADO && msg->header->tipo_mensaje != DESCONEXION)
@@ -176,55 +177,14 @@ int manejador_de_eventos(int socket, Message* msg){
 				log_info(log_planificador, "Se conecto una ESI");
 				aceptar_conexion(socket, msg->contenido);
 
-				//Switcheamos por el algoritmo
-				if (strcmp(planificador.algoritmo_planif,"FIFO") == 0)
-				{
-					manejar_nueva_esi_fifo(socket);
-					return 0;
-				}
-				else if (strcmp(planificador.algoritmo_planif,"SJF-SD") == 0)
-				{
-					//manejar_nueva_esi_SJF_SD(socket);
-					return 0;
-				}
-				else if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0)
-				{
-
-				}
-				else if (strcmp(planificador.algoritmo_planif,"HRRN") == 0)
-				{
-
-				}
-				else
-				{
-						return -2;
-				}
+				resp = manejar_nueva_esi(socket);
+				return resp;
 				break;
 
 			case DESCONEXION:
-				if (strcmp(planificador.algoritmo_planif,"FIFO") == 0)
-				{
-					manejar_desconexion_esi_fifo(socket);
-					return -18;
-				}
-				else if (strcmp(planificador.algoritmo_planif,"SJF-SD") == 0)
-				{
-					//manejar_desconexion_esi_SJF_SD(socket);
-					return 0;
-				}
-				else if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0)
-				{
+				resp = manejar_desconexion_esi(socket);
+				return resp;
 
-				}
-				else if (strcmp(planificador.algoritmo_planif,"HRRN") == 0)
-				{
-
-				}
-				else
-				{
-					//fuck
-					return -2;
-				}
 				break;
 
 				case RESULTADO:
@@ -326,17 +286,13 @@ void finalizar_esi(int socket_esi) {
 
 struct_pcb planificar_esis() {
 	esiRunning = inicializar_pcb();
+	struct_ready* esi_elegido;
 
 	if (strcmp(planificador.algoritmo_planif,"FIFO") == 0) {
-		struct_ready* primer_esi = seleccionar_esi_ready_fifo();
-		if (primer_esi != NULL){
-			//Obtengo el seleccionado para enviar un mensaje, y me lo guardo en variable
-			//global como proceso que está ejecutando
-			esiRunning = primer_esi->pcb;
-		}
+		esi_elegido = seleccionar_esi_ready_fifo();
 	}
 	else if (strcmp(planificador.algoritmo_planif,"SJF-SD") == 0) {
-
+		esi_elegido = seleccionar_esi_ready_sjf_sd();
 	}
 
 	else if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0) {
@@ -351,6 +307,11 @@ struct_pcb planificar_esis() {
 	{
 		log_debug(log_planificador,"El algoritmo de planificación %s es inválido",planificador.algoritmo_planif);
 		exit_proceso(-1);
+	}
+
+	if (esi_elegido != NULL){
+		esiRunning = esi_elegido->pcb;
+		free(esi_elegido);
 	}
 
 	return esiRunning;
@@ -370,14 +331,31 @@ struct_ready* seleccionar_esi_ready_fifo() {
 	return NULL;
 }
 
+struct_ready* seleccionar_esi_ready_sjf_sd() {
+	struct_ready* esi_seleccionado;
 
+	//Si hay esis esperando, selecciona al que tiene menos instrucciones pendientes
+	//Para esto reordeno la lista por este criterio
+	if (list_size(cola_ready) > 0) {
+		list_sort(cola_ready,(void*)ordenar_menos_instrucciones);
+		esi_seleccionado = list_get(cola_ready, 0);
+		list_remove(cola_ready, 0);
+		return esi_seleccionado;
+	}
+
+	//Si no encuentro nada retorno null
+	return NULL;
+}
 
 //Funciones dummy para que corra provisionalmente
-int manejar_nueva_esi_fifo(int socket){
+int manejar_nueva_esi(int socket){
+	int resultado = 0;
 
 	//Agrego la nueva conexión a lista de preparados
 	struct_pcb pcb = inicializar_pcb();
 	pcb.pid = socket;
+	pcb.tamanio_script = cantidad_lineas_script(contenidoScript);
+	pcb.lineas_restantes = pcb.tamanio_script;
 	agregar_ready(pcb);
 
 	//Verifico si algún esi está corriendo, caso contrario
@@ -385,14 +363,14 @@ int manejar_nueva_esi_fifo(int socket){
 	if (flag_puede_ejecutar == true)
 	{
 		if (esiRunning.pid == 0) {
-			ejecutar_nueva_esi();
+			resultado = ejecutar_nueva_esi();
 		}
 	}
 
-	return OK;
+	return resultado;
 }
 
-void manejar_desconexion_esi_fifo(int socket){
+int manejar_desconexion_esi(int socket){
 	//Le confirmo al esi que se puede desconectar
 	//envio_desconexion(socket);
 	finalizar_esi(socket);
@@ -401,6 +379,8 @@ void manejar_desconexion_esi_fifo(int socket){
 
 	if (esiRunning.pid == 0)
 		ejecutar_nueva_esi();
+
+	return -18;
 }
 
 int manejar_operacion(int socket,Message* msg) {
@@ -437,6 +417,7 @@ int manejar_resultado(int socket,Message* msg) {
 
 	switch(resultado){
 		case OK:
+		esiRunning.lineas_restantes--;
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
 		if (flag_puede_ejecutar == true && socket == esiRunning.pid)
@@ -447,6 +428,7 @@ int manejar_resultado(int socket,Message* msg) {
 		break;
 		//En este caso como ya estaría bloqueado en mi lista queda esperando
 		case CLAVE_DUPLICADA:
+			esiRunning = inicializar_pcb();
 			return 0;
 		//En estos casos envío mensaje al esi para que se desconecte saliendo del bucle
 		case CLAVE_INEXISTENTE:
@@ -530,7 +512,7 @@ int validar_operacion_store() {
 	return OK;
 }
 
-void ejecutar_nueva_esi() {
+int ejecutar_nueva_esi() {
 	struct_pcb esi_seleccionado = planificar_esis();
 
 	if (esi_seleccionado.pid > 0) {
@@ -544,10 +526,19 @@ void ejecutar_nueva_esi() {
 	free(mensajeEjec);
 	if (res_ejecutar < 0) {exit_proceso(-1);}
 	}
+
+	return OK;
 }
 
 bool clave_ya_bloqueada_config(char* clave) {
 	return (strcmp(operacionEnMemoria->clave,clave) == 0);
+}
+
+bool clave_verificar_config(char* clave) {
+	char cadena[strlen(clave)];
+	strcpy(cadena,clave);
+	string_to_upper(cadena);
+	return (strcmp(list_comandos[1],cadena) == 0);
 }
 
 bool clave_ya_bloqueada(struct_blocked* elemento) {
@@ -567,7 +558,10 @@ bool buscar_esi_a_bloquear(struct_ready* elemento) {
 }
 
 bool buscar_esi_a_desbloquear(struct_blocked* elemento) {
-	return strcmp(elemento->clave,list_comandos[1]) == 0;
+	char cadena[strlen(elemento->clave)];
+	strcpy(cadena,elemento->clave);
+	string_to_upper(cadena);
+	return strcmp(cadena,list_comandos[1]) == 0;
 }
 
 bool buscar_esi_kill(struct_blocked* elemento) {
@@ -578,6 +572,10 @@ bool esi_espera_clave(struct_blocked* elemento) {
 	string_to_upper(elemento->clave);
 	bool resultado = strcmp(list_comandos[1],elemento->clave) == 0;
 	return resultado;
+}
+
+bool ordenar_menos_instrucciones(struct_ready* readyA, struct_ready* readyB) {
+	return readyA->pcb.lineas_restantes <= readyB->pcb.lineas_restantes;
 }
 
 void desbloquear_esi() {
@@ -782,6 +780,11 @@ void consola_bloquear() {
 }
 
 void consola_desbloquear() {
+	//Desbloqueo la clave si esta se encuentra en la lista de claves bloqueadas
+	if (list_any_satisfy(planificador.clavesBloqueadas, ((void*) clave_verificar_config)))
+	{
+		list_remove_by_condition(planificador.clavesBloqueadas, ((void*) clave_verificar_config));
+	}
 
 	if (list_any_satisfy(cola_esi_blocked, (void*)buscar_esi_a_desbloquear)) {
 		struct_blocked* esi_a_desbloquear;

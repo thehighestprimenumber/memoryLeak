@@ -97,13 +97,16 @@ void agregar_ready(struct_pcb pcb);
 void agregar_esi_blocked(struct_pcb pcb,char* clave);
 
 struct_ready* seleccionar_esi_ready_fifo();
+struct_ready* seleccionar_esi_ready_sjf_sd();
+
+//Funciones inicio y fin de instrucciones esi
+int manejar_nueva_esi(int socket); //Añade una esi a la lista de prioridades o cola o lo que diga el algoritmo(mirar var global)
+int manejar_desconexion_esi(int socket); //Elimina a la esi segun plantea fifo
 
 //Firmas de las funciones que irian más adelante
 struct_pcb inicializar_pcb();
 struct_pcb planificar_esis(); //Replanifica los esis y devuelve el identificador del próximo a ejecutar
 int abrirPlanificador(); //Abre la conexión del planificador y sus conexiones
-int manejar_nueva_esi_fifo(int socket); //Añade una esi a la lista de prioridades o cola o lo que diga el algoritmo(mirar var global)
-void manejar_desconexion_esi_fifo(int socket); //Elimina a la esi segun plantea fifo
 int estimar_rafaga(char* algoritmo); //Estima la duración de la próxima ráfaga usando formula de la media exponencial
 void aceptar_conexion(int socket, char* nombreScript);
 int validar_clave(char* clave);
@@ -112,7 +115,7 @@ void finalizar_esi(int socket_esi);
 int validar_operacion_get();
 int validar_operacion_set();
 int validar_operacion_store();
-void ejecutar_nueva_esi();
+int ejecutar_nueva_esi();
 void desbloquear_esi();
 void ejecutar_comando(int nroComando);
 void reanudar_ejecucion();
@@ -124,12 +127,14 @@ void consola_kill();
 void buscar_y_correr_comando();
 
 int obtener_id_esi(struct_blocked* elemento);
-bool clave_ya_bloqueada_config(char*clave1);
+bool clave_ya_bloqueada_config(char*clave);
+bool clave_verificar_config(char*clave);
 bool clave_ya_bloqueada(struct_blocked* elemento);
 bool clave_set_disponible(struct_blocked* elemento);
 bool buscar_esi_ready(struct_ready* elemento);
 bool buscar_esi_a_bloquear(struct_ready* elemento);
 bool buscar_esi_a_desbloquear(struct_blocked* elemento);
 bool buscar_esi_kill(struct_blocked* elemento);
+bool ordenar_menos_instrucciones(struct_ready* readyA, struct_ready* readyB);
 
 #endif /* PRUEBA_H_ */

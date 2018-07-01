@@ -1,8 +1,8 @@
 puerto=8002
 algoritmo=SJF-SD
-estimacion=10
+estimacion=3
 ip_planificador=10.0.2.15
 IP_coordinador=10.0.2.15
 puerto_coordinador=8087
 alfa_planificador=50
-claves_bloqueadas=
+claves_bloqueadas=futbol:messi

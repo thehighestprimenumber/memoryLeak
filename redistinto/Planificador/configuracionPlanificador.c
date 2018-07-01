@@ -85,7 +85,7 @@ void clavesBloqueadas_read(t_config* configuracion) {
 		char* cadenaClaves = config_get_string_value(configuracion,claves_bloqueadas);
 		if (cadenaClaves != NULL)
 			claves = string_split(config_get_string_value(configuracion,claves_bloqueadas),",");
-		free(cadenaClaves);
+		//free(cadenaClaves);
 	}
 
 	//for (int i=0;i<sizeof(&claves) - 1;i++) {
