@@ -36,7 +36,6 @@ int main(void) {
 	flag_instruccion = false;
 
 	//Escuchar conexiones ESI
-	algorimoEnUso = FIFO;
 	iniciar();
 
 	log_info(log_planificador,"\nProceso finalizado");
@@ -178,24 +177,53 @@ int manejador_de_eventos(int socket, Message* msg){
 				aceptar_conexion(socket, msg->contenido);
 
 				//Switcheamos por el algoritmo
-				switch(algorimoEnUso){
-					case FIFO:
-						manejar_nueva_esi_fifo(socket);
-						return 0;
-					default:
-						//fuck
+				if (strcmp(planificador.algoritmo_planif,"FIFO") == 0)
+				{
+					manejar_nueva_esi_fifo(socket);
+					return 0;
+				}
+				else if (strcmp(planificador.algoritmo_planif,"SJF-SD") == 0)
+				{
+					//manejar_nueva_esi_SJF_SD(socket);
+					return 0;
+				}
+				else if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0)
+				{
+
+				}
+				else if (strcmp(planificador.algoritmo_planif,"HRRN") == 0)
+				{
+
+				}
+				else
+				{
 						return -2;
 				}
 				break;
 
 			case DESCONEXION:
-				switch(algorimoEnUso){
-					case FIFO:
-						manejar_desconexion_esi_fifo(socket);
-						return -18;
-					default:
-						//fuck
-						return -2;
+				if (strcmp(planificador.algoritmo_planif,"FIFO") == 0)
+				{
+					manejar_desconexion_esi_fifo(socket);
+					return -18;
+				}
+				else if (strcmp(planificador.algoritmo_planif,"SJF-SD") == 0)
+				{
+					//manejar_desconexion_esi_SJF_SD(socket);
+					return 0;
+				}
+				else if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0)
+				{
+
+				}
+				else if (strcmp(planificador.algoritmo_planif,"HRRN") == 0)
+				{
+
+				}
+				else
+				{
+					//fuck
+					return -2;
 				}
 				break;
 

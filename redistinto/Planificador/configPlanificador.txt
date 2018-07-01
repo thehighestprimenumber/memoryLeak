@@ -1,8 +1,8 @@
 puerto=8002
-algoritmo=FIFO
+algoritmo=SJF-SD
 estimacion=10
 ip_planificador=10.0.2.15
 IP_coordinador=10.0.2.15
 puerto_coordinador=8087
-alfa_planificador=40
-claves_bloqueadas=CLAVE1,CLAVE4,CLAVE6
+alfa_planificador=50
+claves_bloqueadas=

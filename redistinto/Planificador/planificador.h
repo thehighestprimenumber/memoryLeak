@@ -31,7 +31,6 @@ int pidCoordinador;
 bool flag_instruccion;
 int nroComando;
 
-typedef enum algorimoPrioridad {FIFO} algorimoPrioridad;
 typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
 
 typedef struct {
@@ -74,8 +73,6 @@ char* scriptTxtDebug = "../../scripts/";
 char* scriptTxt = "../scripts/";
 
 char* contenidoScript;
-
-algorimoPrioridad algorimoEnUso;
 
 t_operacion* operacionEnMemoria;
 

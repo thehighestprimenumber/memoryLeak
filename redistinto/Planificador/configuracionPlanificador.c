@@ -82,13 +82,21 @@ void clavesBloqueadas_read(t_config* configuracion) {
 	char** claves = NULL;
 
 	if (config_has_property(configuracion, claves_bloqueadas)) {
-		claves = string_split(config_get_string_value(configuracion,claves_bloqueadas),",");
+		char* cadenaClaves = config_get_string_value(configuracion,claves_bloqueadas);
+		if (cadenaClaves != NULL)
+			claves = string_split(config_get_string_value(configuracion,claves_bloqueadas),",");
+		free(cadenaClaves);
 	}
 
-	for (int i=0;i<sizeof(claves) - 1;i++) {
-		list_add(planificador.clavesBloqueadas,claves[i]);
+	//for (int i=0;i<sizeof(&claves) - 1;i++) {
+	int i = 0;
+	if (claves != NULL)
+	{
+		while (claves[i]) {
+			list_add(planificador.clavesBloqueadas,claves[i]);
+			i = i + 1;
+		}
 	}
-
 	//liberar_split(claves);
 }
 
