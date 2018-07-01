@@ -349,6 +349,7 @@ int manejar_nueva_esi_fifo(int socket){
 
 	//Agrego la nueva conexión a lista de preparados
 	struct_pcb pcb = inicializar_pcb();
+	pcb.pid = socket;
 	agregar_ready(pcb);
 
 	//Verifico si algún esi está corriendo, caso contrario
