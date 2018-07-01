@@ -36,7 +36,9 @@ typedef enum {READY,RUNNING,BLOCKED,FINISHED} t_esi_estados;
 typedef struct {
 	int pid;
 	int tamanio_script;
-	int lineas_restantes;
+	int rafaga_actual_real;
+	double estimado_rafaga_actual;
+	double estimado_proxima_rafaga;
 } struct_pcb;
 
 struct_pcb esiRunning = {0,0,0};

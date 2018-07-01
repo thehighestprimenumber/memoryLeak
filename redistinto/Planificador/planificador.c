@@ -143,7 +143,9 @@ void leer_script_completo(char* nombreArchivo) {
 struct_pcb inicializar_pcb() {
 	struct_pcb pcb;
 	pcb.pid = 0;
-	pcb.lineas_restantes = 0;
+	pcb.rafaga_actual_real = 0;
+	pcb.estimado_rafaga_actual = planificador.estimacion_inicial;
+	pcb.estimado_proxima_rafaga = 0;
 	pcb.tamanio_script = 0;
 	return pcb;
 }
@@ -259,12 +261,15 @@ void agregar_blocked(struct_pcb pcb, char* clave) {
 }
 
 void agregar_esi_blocked(struct_pcb pcb, char* clave) {
-	struct_blocked* elemento = malloc(sizeof(struct_blocked));
-	elemento->pcb = pcb;
-	elemento->clave = (char*)malloc(strlen(clave)+1);
-	strcpy(elemento->clave,clave);
-	list_add(cola_esi_blocked,elemento);
-	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de esis bloqueados por clave tomada anteriormente",pcb.pid,clave);
+	if (pcb.pid != 0)
+	{
+		struct_blocked* elemento = malloc(sizeof(struct_blocked));
+		elemento->pcb = pcb;
+		elemento->clave = (char*)malloc(strlen(clave)+1);
+		strcpy(elemento->clave,clave);
+		list_add(cola_esi_blocked,elemento);
+		log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de esis bloqueados por clave tomada anteriormente",pcb.pid,clave);
+	}
 }
 
 void agregar_finished(int idEsi) {
@@ -355,7 +360,6 @@ int manejar_nueva_esi(int socket){
 	struct_pcb pcb = inicializar_pcb();
 	pcb.pid = socket;
 	pcb.tamanio_script = cantidad_lineas_script(contenidoScript);
-	pcb.lineas_restantes = pcb.tamanio_script;
 	agregar_ready(pcb);
 
 	//Verifico si algún esi está corriendo, caso contrario
@@ -417,7 +421,6 @@ int manejar_resultado(int socket,Message* msg) {
 
 	switch(resultado){
 		case OK:
-		esiRunning.lineas_restantes--;
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
 		if (flag_puede_ejecutar == true && socket == esiRunning.pid)
@@ -446,6 +449,7 @@ int validar_operacion_get() {
 	if (list_any_satisfy(planificador.clavesBloqueadas, ((void*) clave_ya_bloqueada_config)))
 	{
 		agregar_esi_blocked(esiRunning, operacionEnMemoria->clave);
+		esiRunning = inicializar_pcb();
 		free_operacion(&operacionEnMemoria);
 		return CLAVE_DUPLICADA;
 	}
@@ -454,6 +458,7 @@ int validar_operacion_get() {
 		if (list_any_satisfy(cola_blocked, (void*) clave_ya_bloqueada))
 		{
 			agregar_esi_blocked(esiRunning, operacionEnMemoria->clave);
+			esiRunning = inicializar_pcb();
 			free_operacion(&operacionEnMemoria);
 			return CLAVE_DUPLICADA;
 		}
@@ -526,6 +531,11 @@ int ejecutar_nueva_esi() {
 	free(mensajeEjec);
 	if (res_ejecutar < 0) {exit_proceso(-1);}
 	}
+	else
+	{
+		esiRunning.rafaga_actual_real++;
+		esiRunning.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esiRunning.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esiRunning.estimado_rafaga_actual;
+	}
 
 	return OK;
 }
@@ -575,7 +585,7 @@ bool esi_espera_clave(struct_blocked* elemento) {
 }
 
 bool ordenar_menos_instrucciones(struct_ready* readyA, struct_ready* readyB) {
-	return readyA->pcb.lineas_restantes <= readyB->pcb.lineas_restantes;
+	return readyA->pcb.estimado_proxima_rafaga <= readyB->pcb.estimado_proxima_rafaga;
 }
 
 void desbloquear_esi() {
@@ -584,6 +594,12 @@ void desbloquear_esi() {
 	if (esi_a_desbloquear != NULL)
 	{
 		list_remove_by_condition(cola_esi_blocked, ((void*) clave_set_disponible));
+
+		//Recalculo estimaciones
+		esiRunning.estimado_rafaga_actual = esiRunning.estimado_proxima_rafaga;
+		esiRunning.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esiRunning.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esiRunning.estimado_rafaga_actual;
+		esi_a_desbloquear->pcb.rafaga_actual_real = 0;
+
 		agregar_ready(esi_a_desbloquear->pcb);
 	}
 }
@@ -591,6 +607,9 @@ void desbloquear_esi() {
 
 
 int envio_ejecutar(int socket) {
+	esiRunning.rafaga_actual_real++;
+	esiRunning.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esiRunning.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esiRunning.estimado_rafaga_actual;
+
 	flag_instruccion = true;
 	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
@@ -768,13 +787,15 @@ void consola_bloquear() {
 	}
 
 	//Si se bloqueo el que estaba corriendo, busco un nuevo ESI para que corra
-	//Si no hay ningún ESI corriendo, se asigna uno nuevo
 	if (esiRunning.pid == 0)
 	{
-		esiRunning = planificar_esis();
-		if (esiRunning.pid != 0)
+		if (flag_puede_ejecutar == true)
 		{
-			envio_ejecutar(esiRunning.pid);
+			esiRunning = planificar_esis();
+			if (esiRunning.pid != 0)
+			{
+				envio_ejecutar(esiRunning.pid);
+			}
 		}
 	}
 }
@@ -799,10 +820,13 @@ void consola_desbloquear() {
 		//Si no hay ningún ESI corriendo, se asigna uno nuevo
 		if (esiRunning.pid == 0)
 		{
-			esiRunning = planificar_esis();
-			if (esiRunning.pid != 0)
+			if (flag_puede_ejecutar == true)
 			{
-				envio_ejecutar(esiRunning.pid);
+				esiRunning = planificar_esis();
+				if (esiRunning.pid != 0)
+				{
+					envio_ejecutar(esiRunning.pid);
+				}
 			}
 		}
 	}
