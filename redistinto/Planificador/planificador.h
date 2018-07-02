@@ -100,6 +100,7 @@ void agregar_esi_blocked(struct_pcb pcb,char* clave);
 
 struct_ready* seleccionar_esi_ready_fifo();
 struct_ready* seleccionar_esi_ready_sjf_sd();
+struct_ready* seleccionar_esi_ready_sjf_cd();
 
 //Funciones inicio y fin de instrucciones esi
 int manejar_nueva_esi(int socket); //Añade una esi a la lista de prioridades o cola o lo que diga el algoritmo(mirar var global)

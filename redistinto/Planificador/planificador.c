@@ -290,18 +290,19 @@ void finalizar_esi(int socket_esi) {
 }
 
 struct_pcb planificar_esis() {
-	esiRunning = inicializar_pcb();
 	struct_ready* esi_elegido;
 
 	if (strcmp(planificador.algoritmo_planif,"FIFO") == 0) {
+		esiRunning = inicializar_pcb();
 		esi_elegido = seleccionar_esi_ready_fifo();
 	}
 	else if (strcmp(planificador.algoritmo_planif,"SJF-SD") == 0) {
+		esiRunning = inicializar_pcb();
 		esi_elegido = seleccionar_esi_ready_sjf_sd();
 	}
 
 	else if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0) {
-
+		esi_elegido = seleccionar_esi_ready_sjf_cd();
 	}
 
 	else if (strcmp(planificador.algoritmo_planif,"HRRN") == 0) {
@@ -352,6 +353,31 @@ struct_ready* seleccionar_esi_ready_sjf_sd() {
 	return NULL;
 }
 
+struct_ready* seleccionar_esi_ready_sjf_cd() {
+	struct_ready* esi_seleccionado;
+
+	//Si hay esis esperando, selecciona al que tiene menos instrucciones pendientes
+	//Para esto reordeno la lista por este criterio
+	if (list_size(cola_ready) > 0) {
+		list_sort(cola_ready,(void*)ordenar_menos_instrucciones);
+		esi_seleccionado = list_get(cola_ready, 0);
+
+		//Logueo para ver comparacion
+		log_info(log_planificador,"ESI actual: %d, Estimado próxima ráfaga: %d",esiRunning.estimado_proxima_rafaga);
+		log_info(log_planificador,"ESI seleccionado: %d, Estimado próxima ráfaga: %d",esi_seleccionado->pcb.estimado_proxima_rafaga);
+
+		//Si el esi_seleccionado tiene una estimación menor al esiRunning lo selecciono, sino retorno null
+		if ((esiRunning.pid == 0) || (esi_seleccionado->pcb.estimado_proxima_rafaga < esiRunning.estimado_proxima_rafaga))
+		{
+			list_remove(cola_ready, 0);
+			return esi_seleccionado;
+		}
+	}
+
+	//Si no encuentro nada retorno null
+	return NULL;
+}
+
 //Funciones dummy para que corra provisionalmente
 int manejar_nueva_esi(int socket){
 	int resultado = 0;
@@ -369,6 +395,12 @@ int manejar_nueva_esi(int socket){
 		if (esiRunning.pid == 0) {
 			resultado = ejecutar_nueva_esi();
 		}
+	}
+	else if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0)
+	{
+		//Si es un algoritmo con desalojo, replanifico si o si, o en el ejecutar_nueva_esi
+		//Y si hay una instrucción ejecutandose solo replanifico y listo...
+		planificar_esis();
 	}
 
 	return resultado;
@@ -423,8 +455,8 @@ int manejar_resultado(int socket,Message* msg) {
 		case OK:
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
-		if (flag_puede_ejecutar == true && socket == esiRunning.pid)
-			return envio_ejecutar(socket);
+		if (flag_puede_ejecutar == true && esiRunning.pid != 0)
+			return envio_ejecutar(esiRunning.pid);
 		else
 			return 0;
 
@@ -585,6 +617,9 @@ bool esi_espera_clave(struct_blocked* elemento) {
 }
 
 bool ordenar_menos_instrucciones(struct_ready* readyA, struct_ready* readyB) {
+	log_info(log_planificador,"ESI: %d, Estimado próxima ráfaga: %d",readyA->pcb.estimado_proxima_rafaga);
+	log_info(log_planificador,"ESI: %d, Estimado próxima ráfaga: %d",readyB->pcb.estimado_proxima_rafaga);
+
 	return readyA->pcb.estimado_proxima_rafaga <= readyB->pcb.estimado_proxima_rafaga;
 }
 
@@ -596,11 +631,14 @@ void desbloquear_esi() {
 		list_remove_by_condition(cola_esi_blocked, ((void*) clave_set_disponible));
 
 		//Recalculo estimaciones
-		esiRunning.estimado_rafaga_actual = esiRunning.estimado_proxima_rafaga;
-		esiRunning.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esiRunning.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esiRunning.estimado_rafaga_actual;
+		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
+		esi_a_desbloquear->pcb.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esi_a_desbloquear->pcb.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esi_a_desbloquear->pcb.estimado_rafaga_actual;
 		esi_a_desbloquear->pcb.rafaga_actual_real = 0;
 
 		agregar_ready(esi_a_desbloquear->pcb);
+
+		if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0)
+			planificar_esis();
 	}
 }
 
@@ -828,6 +866,16 @@ void consola_desbloquear() {
 					envio_ejecutar(esiRunning.pid);
 				}
 			}
+			else
+			{
+				if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0)
+					planificar_esis();
+			}
+		}
+		else
+		{
+			if (strcmp(planificador.algoritmo_planif,"SJF-CD") == 0)
+				planificar_esis();
 		}
 	}
 	else
