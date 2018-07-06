@@ -3,15 +3,15 @@
 int main(void) {
 	inicializar_logger();
 
-	log_info(log_consola, "\nCargando configuración");
+	log_info(log_consola, "\nCargando configuracion");
 	estructura_planificador();
 
 	log_info(log_consola,"\nPuerto planificador: %s", planificador.puerto_planif);
 	log_info(log_consola,"\nAlgoritmo planificador: %s", planificador.algoritmo_planif);
-	log_info(log_consola,"\nEstimación: %d", planificador.estimacion_inicial);
+	log_info(log_consola,"\nEstimacion: %d", planificador.estimacion_inicial);
 	log_info(log_consola,"\nIP Coordinador: %s", planificador.IP_coordinador);
 	log_info(log_consola,"\nPuerto Coordinador: %s",planificador.puerto_coordinador);
-	log_info(log_consola,"\nAlfa Planificación: %d", planificador.alfaPlanificacion);
+	log_info(log_consola,"\nAlfa Planificacion: %d", planificador.alfaPlanificacion);
 
 	//Crear listas de procesos
 	cola_ready = list_create();
@@ -48,7 +48,7 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 	int pidCoordinador = connect_to_server(pConfig->IP_coordinador,pConfig->puerto_coordinador);
 	//Verifico conexion con el coordinador
 	if (pidCoordinador < 0) {
-		log_error(log_planificador, "Fallo conexión Planificador con el Coordinador");
+		log_error(log_planificador, "Fallo conexion Planificador con el Coordinador");
 		return -1;
 	} else {
 		log_info(log_planificador, "Planificador se conecto con el Coordinador");
@@ -58,7 +58,7 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 	int resultado = enviar_y_loguear_mensaje(pidCoordinador, *mensaje, "coordinador\0");
 
 	if (resultado < 0) {
-		log_error(log_planificador, "Fallo envio mensaje conexión al Coordinador");
+		log_error(log_planificador, "Fallo envio mensaje conexion al Coordinador");
 		return -1;
 	}
 
@@ -202,7 +202,7 @@ int manejador_de_eventos(int socket, Message* msg){
 		log_info(log_planificador, "Me hablo el Coordinador");
 		switch(msg->header->tipo_mensaje){
 			case OPERACION:
-				log_info(log_planificador, "Me pidió validar un get o un set");
+				log_info(log_planificador, "Me pidio validar una operacion");
 
 				sleep(1);
 
@@ -311,7 +311,7 @@ struct_pcb planificar_esis() {
 
 	else
 	{
-		log_debug(log_planificador,"El algoritmo de planificación %s es inválido",planificador.algoritmo_planif);
+		log_debug(log_planificador,"El algoritmo de planificacion %s es invalido",planificador.algoritmo_planif);
 		exit_proceso(-1);
 	}
 
@@ -363,8 +363,8 @@ struct_ready* seleccionar_esi_ready_sjf_cd() {
 		esi_seleccionado = list_get(cola_ready, 0);
 
 		//Logueo para ver comparacion
-		log_info(log_planificador,"ESI actual: %d, Estimado próxima ráfaga: %d",esiRunning.estimado_proxima_rafaga);
-		log_info(log_planificador,"ESI seleccionado: %d, Estimado próxima ráfaga: %d",esi_seleccionado->pcb.estimado_proxima_rafaga);
+		log_info(log_planificador,"ESI actual: %d, Estimado proxima rafaga: %lf",esiRunning.pid,esiRunning.estimado_proxima_rafaga);
+		log_info(log_planificador,"ESI seleccionado: %d, Estimado proxima rafaga: %lf",esi_seleccionado->pcb.pid,esi_seleccionado->pcb.estimado_proxima_rafaga);
 
 		//Si el esi_seleccionado tiene una estimación menor al esiRunning lo selecciono, sino retorno null
 		if ((esiRunning.pid == 0) || (esi_seleccionado->pcb.estimado_proxima_rafaga < esiRunning.estimado_proxima_rafaga))
@@ -386,6 +386,10 @@ int manejar_nueva_esi(int socket){
 	struct_pcb pcb = inicializar_pcb();
 	pcb.pid = socket;
 	pcb.tamanio_script = cantidad_lineas_script(contenidoScript);
+
+	//Al conectarse queda parado en la primera instruccion
+	pcb.rafaga_actual_real++;
+	pcb.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)pcb.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * pcb.estimado_rafaga_actual;
 	agregar_ready(pcb);
 
 	//Verifico si algún esi está corriendo, caso contrario
@@ -455,6 +459,8 @@ int manejar_resultado(int socket,Message* msg) {
 		case OK:
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
+		esiRunning.rafaga_actual_real++;
+		esiRunning.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)esiRunning.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * esiRunning.estimado_rafaga_actual;
 		if (flag_puede_ejecutar == true && esiRunning.pid != 0)
 			return envio_ejecutar(esiRunning.pid);
 		else
@@ -553,20 +559,18 @@ int ejecutar_nueva_esi() {
 	struct_pcb esi_seleccionado = planificar_esis();
 
 	if (esi_seleccionado.pid > 0) {
-	flag_instruccion = true;
-	//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
-	//y comenzar a procesar instrucciones
-	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
-	mensajeEjec->header->tipo_mensaje = EJECUTAR;
+		flag_instruccion = true;
+		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
+		//y comenzar a procesar instrucciones
+		Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
+		mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
-	int res_ejecutar = enviar_y_loguear_mensaje(esi_seleccionado.pid, *mensajeEjec, "ESI\0");
-	free(mensajeEjec);
-	if (res_ejecutar < 0) {exit_proceso(-1);}
-	}
-	else
-	{
-		esiRunning.rafaga_actual_real++;
-		esiRunning.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esiRunning.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esiRunning.estimado_rafaga_actual;
+		int res_ejecutar = enviar_y_loguear_mensaje(esi_seleccionado.pid, *mensajeEjec, "ESI\0");
+		free(mensajeEjec);
+		if (res_ejecutar < 0) {
+			exit_proceso(-1);
+		}
+
 	}
 
 	return OK;
@@ -617,8 +621,8 @@ bool esi_espera_clave(struct_blocked* elemento) {
 }
 
 bool ordenar_menos_instrucciones(struct_ready* readyA, struct_ready* readyB) {
-	log_info(log_planificador,"ESI: %d, Estimado próxima ráfaga: %d",readyA->pcb.estimado_proxima_rafaga);
-	log_info(log_planificador,"ESI: %d, Estimado próxima ráfaga: %d",readyB->pcb.estimado_proxima_rafaga);
+	log_info(log_planificador,"ESI: %d, Estimado proxima rafaga: %lf",readyA->pcb.pid,readyA->pcb.estimado_proxima_rafaga);
+	log_info(log_planificador,"ESI: %d, Estimado proxima rafaga: %lf",readyB->pcb.pid,readyB->pcb.estimado_proxima_rafaga);
 
 	return readyA->pcb.estimado_proxima_rafaga <= readyB->pcb.estimado_proxima_rafaga;
 }
@@ -645,9 +649,6 @@ void desbloquear_esi() {
 
 
 int envio_ejecutar(int socket) {
-	esiRunning.rafaga_actual_real++;
-	esiRunning.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esiRunning.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esiRunning.estimado_rafaga_actual;
-
 	flag_instruccion = true;
 	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
@@ -774,7 +775,7 @@ int obtener_status() {
 	}
 	else if (es_instancia_real == 0)
 	{
-		log_info(log_planificador,"Instancia Simulada según algoritmo para la clave %s : %s", clave_resp,inst_resp);
+		log_info(log_planificador,"Instancia Simulada segun algoritmo para la clave %s : %s", clave_resp,inst_resp);
 
 	}
 	else
@@ -818,10 +819,10 @@ void consola_bloquear() {
 
 	//Informo si pudo bloquear el ESI o no. Caso negativo explicar motivo
 	if (bloqueo_ok)
-		log_info(log_consola, "Se bloqueó correctamente el esi %s para la clave %s",list_comandos[2],list_comandos[1]);
+		log_info(log_consola, "Se bloqueo correctamente el esi %s para la clave %s",list_comandos[2],list_comandos[1]);
 	else
 	{
-		log_info(log_consola,"El ESI ingresado es inválido");
+		log_info(log_consola,"El ESI ingresado es invalido");
 	}
 
 	//Si se bloqueo el que estaba corriendo, busco un nuevo ESI para que corra
@@ -911,10 +912,10 @@ void consola_kill() {
 	//Informo si pudo finalizar el ESI o no se encontró
 	if (kill_ok)
 	{
-		log_info(log_consola, "Se eliminó correctamente el esi %s ",list_comandos[1]);
+		log_info(log_consola, "Se elimino correctamente el esi %s ",list_comandos[1]);
 	}
 	else
 	{
-		log_info(log_consola,"No se encontró el ESI ingresado");
+		log_info(log_consola,"No se encontro el ESI ingresado");
 	}
 }
