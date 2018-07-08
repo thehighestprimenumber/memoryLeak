@@ -25,8 +25,10 @@ char* nombres_modulos[] = {"DESCONOCIDO", "ESI", "PLANIFICADOR", "INSTANCIA", "C
 char* desempaquetar_varios(Message * m);
 
 void loguear_conexion(t_log* log, Message * m, char* id_socket) {
+	char* nombre = desempaquetar_conexion(m);
 	log_info(log,
-			"recibe conexion de %s", desempaquetar_conexion(m));
+			"recibe conexion de %s", nombre);
+	free (nombre);
 }
 
 void loguear_recepcion(t_log* log, Message * m, char* id_socket) {
@@ -36,6 +38,7 @@ void loguear_recepcion(t_log* log, Message * m, char* id_socket) {
 		log_info(log,
 				"recibio un mensaje de %s para la operacion %s %s", id_socket,
 				nombres_operacion[op->tipo], op->clave);
+		free_operacion(&op);
 	} else {
 		char* contenido = desempaquetar_varios(m);
 		log_info(log,
@@ -63,6 +66,7 @@ void loguear_error_envio(t_log* log, Message * m, char* id_socket) {
 		log_info(log,
 				"error al enviar el mensaje a %s para la operacion: %s %s",
 				id_socket, nombres_operacion[op->tipo], op->clave);
+		free_operacion(&op);
 	} else {
 		char* contenido = desempaquetar_varios(m);
 		log_warning(log, "error al enviar mensaje a %s: %s", id_socket,

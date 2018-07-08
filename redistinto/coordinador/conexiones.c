@@ -34,29 +34,32 @@ void* recibir_conexion(void* con) {
 				break;
 			case DESCONEXION:
 				manejar_desconexion(conexion->socket);
+				pthread_exit(OK);
 				break;
 			case ACK:
-				break;
 			case VALIDAR_BLOQUEO:
 			case TEXTO:
 			case RESULTADO:
+				//pthread_exit(OK);
 				break;
 			case OPERACION:
 				manejar_operacion(msg, conexion->socket);
+				pthread_exit(OK);
 				break;
 			case CONFSTORAGE:
 			case EJECUTAR:
 				loguear_operacion_no_soportada(log_coordinador, msg, conexion->socket);
+				pthread_exit(OK);
 				break;
 			case STATUS_CLAVE:
 				manejar_status(msg, conexion->socket);
+				//pthread_exit(OK);
 				break;
 		}
 		free_msg(&msg);
 	}
-free(conexion);
-
-return 0;
+	free(conexion);
+	return 0;
 }
 
 int iniciar_servicio() {

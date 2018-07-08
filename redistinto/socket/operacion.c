@@ -61,7 +61,9 @@ int desempaquetar_resultado(Message* msg){
 		return 0;
 	int* resultado = calloc (1, sizeof(int));
 	memcpy (resultado, (int*) msg->contenido,  sizeof(int));
-	return *resultado;
+	int output = *resultado;
+	free (resultado);
+	return output;
 }
 
 

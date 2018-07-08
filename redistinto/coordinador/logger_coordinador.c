@@ -23,6 +23,7 @@ void registrar_conexion(Message * m, int socket) {
 		strcpy(dato_conexion->nombre, nombre);
 		list_add(coordinador.conexiones, dato_conexion);
 		loguear_conexion(log_coordinador, m, dato_conexion->nombre);
+		free(nombre);
 }
 
 

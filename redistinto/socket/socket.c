@@ -157,7 +157,7 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void 
 			//Si ocurre esto es porque tuvo un problema creando el hilo
 			close_conection(conexion);
 		}
-
+		//TODO free conexion
 	}
 }
 

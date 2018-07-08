@@ -111,7 +111,7 @@ void esperar_operacion(fila_tabla_instancias* instancia){
 		Message * mensaje = empaquetar_op_en_mensaje(coordinador.operacion_global_threads, COORDINADOR);
 		if (enviar_y_loguear_mensaje(instancia->socket_instancia, *mensaje)<0)
 			coordinador.resultado_global = ERROR_DE_ENVIO;
-		free(mensaje);
+		free_msg(&mensaje);
 			//log_debug(logger_coordinador, "se solicita %s %s %s", tipoMensajeNombre[operacion->header->tipo], operacion->clave, operacion->valor);
 
 		Message *respuesta = malloc(sizeof(Message));
@@ -121,11 +121,11 @@ void esperar_operacion(fila_tabla_instancias* instancia){
 			}
 
 			else coordinador.resultado_global = desempaquetar_resultado(respuesta);
-
-			free(respuesta);
+			free_msg(&respuesta);
 
 		sem_post(&coordinador.lock_operaciones);
 	}
+	pthread_exit(OK);
 }
 
 fila_tabla_instancias* registrar_instancia(char* nombre_instancia, int socket_instancia) {

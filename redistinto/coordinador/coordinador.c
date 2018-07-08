@@ -1,6 +1,7 @@
 # include "coordinador.h"
 # include "configuracion.h"
 # include "conexiones.h"
+#define activar_retardo 0
 
 
 int procesarSolicitudDeEsi(Message * msg, int socket_solicitante);
@@ -84,6 +85,8 @@ int manejar_status(Message * msg, int socket){
 }
 
 int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
+	if (activar_retardo) sleep(coordinador.retardo);
+
 	t_operacion * op = desempaquetar_operacion(msg);
 
 	//enviar_mensaje(socket_solicitante, *empaquetar_ack(COORDINADOR));
@@ -109,6 +112,7 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 		} else {
 			loguear_inst_op(log_coordinador, instancia->nombre_instancia, op);
 			despertar_hilo_instancia(op, instancia);
+			free_operacion(&op);
 			resultado = coordinador.resultado_global;
 			if (resultado > 0) {
 				instancia->entradas_libres = resultado;
@@ -163,17 +167,6 @@ int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* ins
 
 	return coordinador.resultado_global;
 }
-
-/*int informar_resultado_al_planificador(int resultado){
-	Message * rta_a_planif = empaquetar_resultado(COORDINADOR, coordinador.resultado_global);
-		if (enviar_y_loguear_mensaje(socket_planificador, *rta_a_planif)) {
-			log_warning(log_coordinador, "error al enviar resultado al coordinador");
-			return ERROR_DE_ENVIO;
-		}
-		free(rta_a_planif);
-		return 0;
-}*/
-
 
 void manejar_kill(int signal){
 	if (signal == SIGINT) {
