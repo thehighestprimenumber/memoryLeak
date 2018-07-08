@@ -1,4 +1,6 @@
 #include "instancia.h"
+#define configuracionDefault "configInstancia2.txt"
+int calcular_entradas_libres();
 
 int main(int argc,char *argv[]) {
 
@@ -43,7 +45,7 @@ int inicializar(char* argv[]){
 	t_config* config;
 	log_inst = log_create("./log_de_instancia.log", "log_instancia", true, LOG_LEVEL_DEBUG);
 	if (argv == NULL || argv[1] == NULL) {
-			argv[1] = "configInstancia.txt";
+			argv[1] = configuracionDefault;
 	}
 	config = config_create(argv[1]);
 	instancia.nombre_inst = leer_propiedad_string(config, "nombre_instancia");
@@ -97,6 +99,7 @@ int inicializar(char* argv[]){
 		recuperar_claves();
 	}
 	free(dir);
+
 	return instancia.socket_coordinador;
 }
 
@@ -177,6 +180,16 @@ int guardar_entrada(char* clave, int largo_clave){
 	log_debug(log_inst, "STORE %s", clave_valor_existente->clave);
 	guardar(clave_valor_existente);
 	return OK;
+}
+
+bool conClave(void* input){
+	t_clave_valor* entrada = (t_clave_valor* ) entrada;
+	bool res = (entrada->clave != NULL && strcmp(entrada->clave, "") && strcmp(entrada->clave, "\0"));
+	free(entrada);
+	return res;
+}
+int calcular_entradas_libres(){
+	return (instancia.cantEntradas - list_count_satisfying(instancia.tabla_entradas, ((void*) conClave)));
 }
 
 bool buscador(void *contenido){

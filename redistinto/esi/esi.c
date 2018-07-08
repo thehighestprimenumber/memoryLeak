@@ -48,9 +48,6 @@ char* leer_propiedad_string (t_config *configuracion, char* propiedad){
 }
 
 void conectar_a_planificador(esi_configuracion* pConfig) {
-
-	sleep(2);
-
 	socket_planificador = connect_to_server(pConfig->planificador_ip,pConfig->planificador_puerto);
 	//Verifico conexion con el planificador
 	if (socket_planificador < 0) {
