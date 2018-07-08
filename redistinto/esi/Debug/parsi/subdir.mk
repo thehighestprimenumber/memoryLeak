@@ -4,7 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-/home/utnso/tp-2018-1c-Memory-leak/redistinto/parsi/src/parsi/parser.c 
+/home/utnso/workspace/tp-2018-1c-Memory-leak/redistinto/parsi/src/parsi/parser.c 
 
 OBJS += \
 ./parsi/parser.o 
@@ -14,7 +14,7 @@ C_DEPS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
-parsi/parser.o: /home/utnso/tp-2018-1c-Memory-leak/redistinto/parsi/src/parsi/parser.c
+parsi/parser.o: /home/utnso/workspace/tp-2018-1c-Memory-leak/redistinto/parsi/src/parsi/parser.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
 	gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
