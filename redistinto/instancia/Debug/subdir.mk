@@ -5,18 +5,21 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../circular.c \
+../compactador.c \
 ../configuracionInstancia.c \
 ../handlerCoordinador.c \
 ../instancia.c 
 
 OBJS += \
 ./circular.o \
+./compactador.o \
 ./configuracionInstancia.o \
 ./handlerCoordinador.o \
 ./instancia.o 
 
 C_DEPS += \
 ./circular.d \
+./compactador.d \
 ./configuracionInstancia.d \
 ./handlerCoordinador.d \
 ./instancia.d 

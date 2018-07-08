@@ -109,7 +109,7 @@ int manejar_operacion(Message * msg) {
 	sem_wait(semTabla);
 	switch (operacion->tipo) {
 		case op_GET:
-			resultado = agregar_clave_a_lista(operacion->clave, operacion->largo_clave);
+			resultado = OK;//agregar_clave_a_lista(operacion->clave, operacion->largo_clave);
 			break;
 		case op_SET:
 			resultado = asignar_valor_a_clave(operacion->clave, operacion->largo_clave, operacion->valor, operacion->largo_valor);
@@ -145,8 +145,10 @@ int agregar_clave_a_lista(char* clave, int largo_clave){
 
 int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_valor){
 	t_clave_valor* entrada = buscar_clave_valor (clave);
-	if (entrada == NULL)
-			return CLAVE_INEXISTENTE;
+	if (entrada == NULL){
+		agregar_clave_a_lista(clave, largo_clave);
+		entrada = buscar_clave_valor (clave);
+	}
 
 	entrada->largo_valor = largo_valor;
 	if(entrada->nroEntrada < 0){//Solo ocurre si todavia no se le  asigno una entrada
@@ -165,9 +167,7 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 		memcpy(storage+entrada->nroEntrada*instancia.tamEntrada, valor, largo_valor);
 	}
 	log_debug(log_inst, "SET %s", entrada->clave);
-	espacioUsado = 0;
-	list_iterate(instancia.tabla_entradas, sumardor_parcial_espacio_usado);
-	return (instancia.cantEntradas*instancia.tamEntrada-espacioUsado)/instancia.tamEntrada;
+	return cantidad_entradas_libres();
 }
 
 int guardar_entrada(char* clave, int largo_clave){
@@ -289,15 +289,3 @@ void recuperar_claves(){
 	}
 
 }
-
-int tam_min_entrada(int largo_valor){
-	double d = (double)largo_valor/(double)instancia.tamEntrada;
-	int i = d;
-	return i==d ? i:i+1;
-}
-
-void sumardor_parcial_espacio_usado(void *contenido){
-	t_clave_valor *entrada = contenido;
-	espacioUsado += tam_min_entrada(entrada->largo_valor);
-}
-

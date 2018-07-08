@@ -893,3 +893,77 @@ STORE futbol:messi
 [INFO] 19:35:30:161 ESI/(11238:11238): envio mensaje a planificador: OK
 [INFO] 19:35:30:162 ESI/(11238:11238): Recibida instruccion de ejecutar
 [INFO] 19:35:30:162 ESI/(11238:11238): envio mensaje a planificador: FIN_ARCHIVO
+[TRACE] 20:05:15:363 ESI/(6540:6540): Inicia el proceso ESI
+[TRACE] 20:05:15:364 ESI/(6540:6540): El puerto del coordinador es: 8087
+[TRACE] 20:05:15:364 ESI/(6540:6540): La ip del coordinador es: 10.0.2.15
+[TRACE] 20:05:15:364 ESI/(6540:6540): El puerto del planificador es: 8002
+[TRACE] 20:05:15:364 ESI/(6540:6540): La ip del planificador es: 10.0.2.15
+[TRACE] 20:05:15:364 ESI/(6540:6540): El nombre del script es: ESI_MultiClave
+[INFO] 20:05:15:364 ESI/(6540:6540): ESI se conecto con el Coordinador
+[INFO] 20:05:15:364 ESI/(6540:6540): ESI se conecto con el Planificador
+[INFO] 20:05:15:365 ESI/(6540:6540): envio mensaje a planificador: conexion
+[INFO] 20:05:15:365 ESI/(6540:6540): Recibido el contenido del script
+[INFO] 20:05:15:365 ESI/(6540:6540): envio mensaje a planificador: OK
+[INFO] 20:05:15:365 ESI/(6540:6540): Recibida instruccion de ejecutar
+[INFO] 20:05:15:365 ESI/(6540:6540): se envia el mensaje a coordinador para la operacion: GET futbol:ansaldi
+[INFO] 20:05:16:367 ESI/(6540:6540): resultado: NO_HAY_INSTANCIAS
+[INFO] 20:05:16:367 ESI/(6540:6540): envio mensaje a planificador: NO_HAY_INSTANCIAS
+[INFO] 20:05:16:367 ESI/(6540:6540): Recibida instruccion de ejecutar
+[INFO] 20:05:16:367 ESI/(6540:6540): se envia el mensaje a coordinador para la operacion: GET futbol:ansaldi
+[INFO] 20:05:17:368 ESI/(6540:6540): resultado: CLAVE_DUPLICADA
+[INFO] 20:05:17:368 ESI/(6540:6540): envio mensaje a planificador: CLAVE_DUPLICADA
+[TRACE] 20:05:41:596 ESI/(6568:6568): Inicia el proceso ESI
+[TRACE] 20:05:41:601 ESI/(6568:6568): El puerto del coordinador es: 8087
+[TRACE] 20:05:41:601 ESI/(6568:6568): La ip del coordinador es: 10.0.2.15
+[TRACE] 20:05:41:601 ESI/(6568:6568): El puerto del planificador es: 8002
+[TRACE] 20:05:41:601 ESI/(6568:6568): La ip del planificador es: 10.0.2.15
+[TRACE] 20:05:41:601 ESI/(6568:6568): El nombre del script es: ESI_MultiClave
+[INFO] 20:05:41:601 ESI/(6568:6568): ESI se conecto con el Coordinador
+[INFO] 20:05:41:601 ESI/(6568:6568): ESI se conecto con el Planificador
+[INFO] 20:05:41:602 ESI/(6568:6568): envio mensaje a planificador: conexion
+[INFO] 20:05:41:602 ESI/(6568:6568): Recibido el contenido del script
+[INFO] 20:05:41:602 ESI/(6568:6568): envio mensaje a planificador: OK
+[INFO] 20:05:41:602 ESI/(6568:6568): Recibida instruccion de ejecutar
+[INFO] 20:05:41:602 ESI/(6568:6568): se envia el mensaje a coordinador para la operacion: GET futbol:ansaldi
+[INFO] 20:05:42:603 ESI/(6568:6568): resultado: OK
+[INFO] 20:05:42:603 ESI/(6568:6568): envio mensaje a planificador: OK
+[INFO] 20:05:42:604 ESI/(6568:6568): Recibida instruccion de ejecutar
+[INFO] 20:05:42:604 ESI/(6568:6568): se envia el mensaje a coordinador para la operacion: SET futbol:ansaldi
+[INFO] 20:05:43:605 ESI/(6568:6568): resultado: OK
+[INFO] 20:05:43:606 ESI/(6568:6568): envio mensaje a planificador: OK
+[INFO] 20:05:43:606 ESI/(6568:6568): Recibida instruccion de ejecutar
+[INFO] 20:05:43:606 ESI/(6568:6568): se envia el mensaje a coordinador para la operacion: GET futbol:messi
+[INFO] 20:05:44:607 ESI/(6568:6568): resultado: CLAVE_DUPLICADA
+[INFO] 20:05:44:607 ESI/(6568:6568): envio mensaje a planificador: CLAVE_DUPLICADA
+[INFO] 20:05:44:607 ESI/(6568:6568): Recibida instruccion de ejecutar
+[INFO] 20:05:44:607 ESI/(6568:6568): se envia el mensaje a coordinador para la operacion: GET futbol:messi
+[INFO] 20:05:45:607 ESI/(6568:6568): resultado: CLAVE_DUPLICADA
+[INFO] 20:05:45:607 ESI/(6568:6568): envio mensaje a planificador: CLAVE_DUPLICADA
+[ERROR] 20:05:56:970 ESI/(6568:6568): error de recepcion
+[TRACE] 20:07:24:710 ESI/(6636:6636): Inicia el proceso ESI
+[TRACE] 20:07:24:711 ESI/(6636:6636): El puerto del coordinador es: 8087
+[TRACE] 20:07:24:711 ESI/(6636:6636): La ip del coordinador es: 10.0.2.15
+[TRACE] 20:07:24:711 ESI/(6636:6636): El puerto del planificador es: 8002
+[TRACE] 20:07:24:711 ESI/(6636:6636): La ip del planificador es: 10.0.2.15
+[TRACE] 20:07:24:711 ESI/(6636:6636): El nombre del script es: ESI_MultiClave
+[INFO] 20:07:24:711 ESI/(6636:6636): ESI se conecto con el Coordinador
+[INFO] 20:07:24:711 ESI/(6636:6636): ESI se conecto con el Planificador
+[INFO] 20:07:24:712 ESI/(6636:6636): envio mensaje a planificador: conexion
+[INFO] 20:07:24:712 ESI/(6636:6636): Recibido el contenido del script
+[INFO] 20:07:24:712 ESI/(6636:6636): envio mensaje a planificador: OK
+[INFO] 20:07:24:712 ESI/(6636:6636): Recibida instruccion de ejecutar
+[INFO] 20:07:24:712 ESI/(6636:6636): se envia el mensaje a coordinador para la operacion: GET futbol:ansaldi
+[INFO] 20:07:25:715 ESI/(6636:6636): resultado: OK
+[INFO] 20:07:25:715 ESI/(6636:6636): envio mensaje a planificador: OK
+[INFO] 20:07:25:715 ESI/(6636:6636): Recibida instruccion de ejecutar
+[INFO] 20:07:25:715 ESI/(6636:6636): se envia el mensaje a coordinador para la operacion: SET futbol:ansaldi
+[INFO] 20:07:26:716 ESI/(6636:6636): resultado: OK
+[INFO] 20:07:26:716 ESI/(6636:6636): envio mensaje a planificador: OK
+[INFO] 20:07:26:716 ESI/(6636:6636): Recibida instruccion de ejecutar
+[INFO] 20:07:26:716 ESI/(6636:6636): se envia el mensaje a coordinador para la operacion: GET futbol:messi
+[INFO] 20:07:27:717 ESI/(6636:6636): resultado: CLAVE_DUPLICADA
+[INFO] 20:07:27:717 ESI/(6636:6636): envio mensaje a planificador: CLAVE_DUPLICADA
+[INFO] 20:07:27:717 ESI/(6636:6636): Recibida instruccion de ejecutar
+[INFO] 20:07:27:717 ESI/(6636:6636): se envia el mensaje a coordinador para la operacion: GET futbol:messi
+[INFO] 20:07:28:718 ESI/(6636:6636): resultado: CLAVE_DUPLICADA
+[INFO] 20:07:28:718 ESI/(6636:6636): envio mensaje a planificador: CLAVE_DUPLICADA
