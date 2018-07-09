@@ -24,27 +24,30 @@ int decodificar_comando() {
 
 	log_info(log_consola,"consola: %s", comando_consola);
 
-	string_to_upper(comando_consola);
 	list_comandos = string_split(comando_consola," ");
+
+	char* nombreComando = malloc(strlen(list_comandos[0]) + 1);
+	strcpy(nombreComando,list_comandos[0]);
+	string_to_upper(nombreComando);
 
 	while (list_comandos[i] != NULL) {
 		quitar_salto_linea(list_comandos[i]); //saco el \n si es que lo tiene
 		i++;
 	}
 
-	if (strcmp(list_comandos[0],"CONTINUAR") == 0)
+	if (strcmp(nombreComando,"CONTINUAR") == 0)
 		resultado = comando_continuar(list_comandos);
-	else if (strcmp(list_comandos[0],"PAUSAR") == 0)
+	else if (strcmp(nombreComando,"PAUSAR") == 0)
 		resultado = comando_pausar(list_comandos);
-	else if (strcmp(list_comandos[0],"BLOQUEAR") == 0)
+	else if (strcmp(nombreComando,"BLOQUEAR") == 0)
 		resultado = comando_bloquear(list_comandos);
-	else if (strcmp(list_comandos[0],"DESBLOQUEAR") == 0)
+	else if (strcmp(nombreComando,"DESBLOQUEAR") == 0)
 		resultado = comando_desbloquear(list_comandos);
-	else if (strcmp(list_comandos[0],"LISTAR") == 0)
+	else if (strcmp(nombreComando,"LISTAR") == 0)
 		resultado = comando_listar(list_comandos);
-	else if (strcmp(list_comandos[0],"KILL") == 0)
+	else if (strcmp(nombreComando,"KILL") == 0)
 		resultado = comando_kill(list_comandos);
-	else if (strcmp(list_comandos[0],"STATUS") == 0)
+	else if (strcmp(nombreComando,"STATUS") == 0)
 		resultado = comando_status(list_comandos);
 	else
 	{
@@ -52,6 +55,7 @@ int decodificar_comando() {
 		resultado = ERROR;
 	}
 
+	free(nombreComando);
 	return resultado;
 }
 

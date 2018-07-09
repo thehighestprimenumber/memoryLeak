@@ -27,6 +27,7 @@ char* arch_config;
 //pthread_t threadConsola;
 int pidConsola;
 int pidCoordinador;
+int pidCoordinadorStatus;
 
 bool flag_instruccion;
 int nroComando;

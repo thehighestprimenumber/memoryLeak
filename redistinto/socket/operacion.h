@@ -56,5 +56,5 @@ Message* empaquetar_config_storage(tipoRemitente remitente, int cantEntradas, in
 ConfigStorage* desempaquetar_config_storage(Message *msg);
 
 Message* empaquetar_STATUS(char* clave, char* nombre_instancia, int largo_clave, int largo_nombre_instancia, tipoRemitente remitente, unsigned int real);
-int desempaquetar_status (Message* msg, char* clave, char* idInstancia);
+int desempaquetar_status (Message* msg, char** clave, char** idInstancia);
 #endif

@@ -227,19 +227,19 @@ Message* empaquetar_STATUS(char* clave, char* nombre_instancia, int largo_clave,
 }
 
 
-int desempaquetar_status (Message* msg, char* clave, char* idInstancia) {
+int desempaquetar_status (Message* msg, char** clave, char** idInstancia) {
 	//Copiamos el header de la operacion
 	StatusHeader *statusHeader = malloc(sizeof(StatusHeader));
 	memcpy(statusHeader, msg->contenido, sizeof(StatusHeader));
 
-	clave = calloc(1, statusHeader->largo_clave+1);
-	idInstancia = calloc(1, statusHeader->largo_valor+1);
+	*clave = calloc(1, statusHeader->largo_clave+1);
+	*idInstancia = calloc(1, statusHeader->largo_valor+1);
 	int real = statusHeader->real;
 	//Copiamos la clave y el valor
 	if (statusHeader->largo_clave>1)
-	memcpy(clave, msg->contenido + sizeof(StatusHeader), statusHeader->largo_clave);
+	memcpy(*clave, msg->contenido + sizeof(StatusHeader), statusHeader->largo_clave);
 	if (statusHeader->largo_valor>1)
-	memcpy(idInstancia, msg->contenido + sizeof(StatusHeader)+ statusHeader->largo_clave, statusHeader->largo_valor);
+	memcpy(*idInstancia, msg->contenido + sizeof(StatusHeader)+ statusHeader->largo_clave, statusHeader->largo_valor);
 	free(statusHeader);
 
 	return real;
