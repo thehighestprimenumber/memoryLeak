@@ -19,6 +19,7 @@
 
 #define OK 0
 #define LOGUEAR_DUMPS 0
+#define configuracionDefault "configInstancia2.txt\0"
 
 typedef enum algorimoReemplazo{CIRC, LRU, BSU} algorimoReemplazo;
 
@@ -27,9 +28,12 @@ typedef struct{
 	char* clave;
 	int largo_valor;
 	int nroEntrada;
+	void *datos;
 } t_clave_valor;
 
 #include "circular.h"
+#include "lru.h"
+#include "bsu.h"
 
 typedef struct {
 	int identificador;

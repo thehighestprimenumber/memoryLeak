@@ -57,7 +57,8 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 		log_info(log_planificador, "Planificador se conecto con el Coordinador");
 	}
 
-	Message * mensaje = empaquetar_conexion(PLANIFICADOR, "planificador\0");
+	Message* mensaje;
+	empaquetar_conexion("planificador\0", strlen("planificador"), PLANIFICADOR, &mensaje);
 	int resultado = enviar_y_loguear_mensaje(pidCoordinador, *mensaje, "coordinador\0");
 
 	if (resultado < 0) {
@@ -213,7 +214,8 @@ int manejador_de_eventos(int socket, Message* msg){
 				//y actuo según el caso
 				int resultado_operacion = manejar_operacion(socket,msg);
 
-				Message* mensaje = empaquetar_resultado(PLANIFICADOR, resultado_operacion);
+				Message* mensaje;
+				empaquetar_resultado(PLANIFICADOR, resultado_operacion, &mensaje);
 				int result = enviar_y_loguear_mensaje(socket, *mensaje, "coordinador\0");
 				if (result) {
 					log_info(log_planificador, "error al enviar resultado al coordinador");
@@ -240,8 +242,8 @@ int manejador_de_eventos(int socket, Message* msg){
 void aceptar_conexion(int socket, char* nombreScript) {
 	//Por último envío mensaje de confirmación al esi que se conecto
 	leer_script_completo(nombreScript);
-	Message* mensaje = empaquetar_texto(contenidoScript, strlen(contenidoScript), PLANIFICADOR);
-	mensaje->header->tipo_mensaje = CONEXION;
+	Message* mensaje;
+	empaquetar_conexion(contenidoScript, strlen(contenidoScript), PLANIFICADOR, &mensaje);
 	enviar_y_loguear_mensaje(socket, *mensaje, "desconocido");
 	free_msg(&mensaje);
 }
@@ -423,11 +425,11 @@ int manejar_desconexion_esi(int socket){
 	if (esiRunning.pid == 0)
 		ejecutar_nueva_esi();
 
-	return -18;
+	return FIN_ARCHIVO;
 }
 
 int manejar_operacion(int socket,Message* msg) {
-	operacionEnMemoria = desempaquetar_operacion(msg);
+	desempaquetar_operacion(msg, &operacionEnMemoria);
 
 	if (operacionEnMemoria->largo_clave - 2 > 40)
 	{
@@ -455,7 +457,8 @@ int manejar_operacion(int socket,Message* msg) {
 }
 
 int manejar_resultado(int socket,Message* msg) {
-	int resultado = desempaquetar_resultado(msg);
+	int resultado;
+	resultado = desempaquetar_resultado(msg);
 	loguear_resultado(log_planificador, resultado);
 
 	switch(resultado){
@@ -481,7 +484,7 @@ int manejar_resultado(int socket,Message* msg) {
 			return envio_desconexion(socket);
 		default:
 		//fuck
-		return -2;
+		return -2; //FIXME que significa este error?
 	}
 
 }
@@ -565,7 +568,8 @@ int ejecutar_nueva_esi() {
 		flag_instruccion = true;
 		//Envío mensaje para pedirle al esi que ejecute. El ESI es quien debería abrir su archivo
 		//y comenzar a procesar instrucciones
-		Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
+		Message* mensajeEjec;
+		empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR, &mensajeEjec);
 		mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
 		int res_ejecutar = enviar_y_loguear_mensaje(esi_seleccionado.pid, *mensajeEjec, "ESI\0");
@@ -650,7 +654,8 @@ void desbloquear_esi() {
 
 int envio_ejecutar(int socket) {
 	flag_instruccion = true;
-	Message* mensajeEjec = empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
+	Message* mensajeEjec;
+	empaquetar_texto("Planificador pide ejecutar ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR, &mensajeEjec);
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
 	int res_ejecutar = enviar_y_loguear_mensaje(socket, *mensajeEjec, "ESI\0");
@@ -661,7 +666,8 @@ int envio_ejecutar(int socket) {
 }
 
 int envio_desconexion(int socket) {
-	Message* mensajeDesc = empaquetar_texto("Planificador pide desconectar al ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR);
+	Message* mensajeDesc;
+	empaquetar_texto("Planificador pide desconectar al ESI", strlen("Planificador pide ejecutar ESI") + 1, PLANIFICADOR, &mensajeDesc);
 	mensajeDesc->header->tipo_mensaje = DESCONEXION;
 
 	int res_desconectar = enviar_y_loguear_mensaje(socket, *mensajeDesc, "ESI\0");
@@ -751,7 +757,9 @@ void listar_esis_porClave(char* clave) {
 int obtener_status() {
 	//Envío mensaje al esi preguntando en que instancia se encuentra (o se debería)
 	//encontrar la clave
-	Message * mensaje = empaquetar_STATUS(list_comandos[1], "",strlen(list_comandos[1]),0,PLANIFICADOR,0);
+
+	Message * mensaje;
+	empaquetar_STATUS(list_comandos[1], "",strlen(list_comandos[1]) + 1,0,PLANIFICADOR,0, &mensaje);
 
 	if (enviar_y_loguear_mensaje(pidCoordinadorStatus, *mensaje, "COORDINADOR\0")<0)
 		return ERROR_DE_ENVIO;

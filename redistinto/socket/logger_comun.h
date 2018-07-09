@@ -14,5 +14,6 @@ void loguear_resultado(t_log* log, int resultado);
 void loguear_error_envio(t_log* log, Message * m, char* id_del_socket);
 void loguear_envio_OK(t_log* log, Message * m, char* id_del_socket);
 void loguear_operacion_no_soportada(t_log* log, Message * m, int id_socket);
+void desempaquetar_varios(Message * m, char** texto);
 
 #endif

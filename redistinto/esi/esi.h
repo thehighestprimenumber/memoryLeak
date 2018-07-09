@@ -32,9 +32,6 @@ char* path_script;
 
 bool esi_correr;
 
-pthread_t threadPlanificador;
-pthread_t threadCoordinador;
-
 typedef struct {
 	char* script_contenido;
 	int script_largo;

@@ -1,9 +1,6 @@
 #include "instancia.h"
-#define configuracionDefault "configInstancia2.txt"
-int calcular_entradas_libres();
 
 int main(int argc,char *argv[]) {
-
 	int socket_coordinador = inicializar(argv);
 	if (socket_coordinador < 0) return EXIT_FAILURE;
 	semTabla = malloc(sizeof(sem_t));
@@ -59,10 +56,12 @@ int inicializar(char* argv[]){
 	if(strcmp(alg, "LRU")==0){
 		instancia.algorimoActual = LRU;
 		log_debug(log_inst, "Algoritmo: LRU");
+		inicializar_lru();
 	}
 	else if(strcmp(alg, "BSU")==0){
 		instancia.algorimoActual = BSU;
 		log_debug(log_inst, "Algoritmo: BSU");
+		inicializar_bsu();
 	}
 	else {
 		instancia.algorimoActual = CIRC;
@@ -81,7 +80,8 @@ int inicializar(char* argv[]){
 	 return -10;
 	}
 	log_debug(log_inst, "Se pudo conectar con el coordinador");
-	Message* msg = empaquetar_conexion(INSTANCIA, instancia.nombre_inst);
+	Message* msg;
+	empaquetar_conexion(instancia.nombre_inst, strlen(instancia.nombre_inst), INSTANCIA, &msg);
 
 	if (send_msg(instancia.socket_coordinador, (*msg))<0)
 		return ERROR_DE_ENVIO;
@@ -104,12 +104,20 @@ int inicializar(char* argv[]){
 }
 
 int manejar_operacion(Message * msg) {
-	t_operacion * operacion = desempaquetar_operacion(msg);
+	t_operacion * operacion;
+	desempaquetar_operacion(msg, &operacion);
 	int resultado;
 	sem_wait(semTabla);
 	switch (operacion->tipo) {
 		case op_GET:
-			resultado = OK;//agregar_clave_a_lista(operacion->clave, operacion->largo_clave);
+			switch(instancia.algorimoActual){
+				case LRU:
+					registrar_set_lru(operacion->clave);
+					break;
+				default:
+				break;
+			}
+			resultado = OK;
 			break;
 		case op_SET:
 			resultado = asignar_valor_a_clave(operacion->clave, operacion->largo_clave, operacion->valor, operacion->largo_valor);
@@ -119,7 +127,8 @@ int manejar_operacion(Message * msg) {
 			break;
 	}
 	sem_post(semTabla);
-	Message* m_resultado= empaquetar_resultado(INSTANCIA, resultado);
+	Message* m_resultado;
+	empaquetar_resultado(INSTANCIA, resultado, &m_resultado);
 	if (send_msg(instancia.socket_coordinador, *m_resultado)<0)
 		return ERROR_DE_ENVIO;
 	log_debug(log_inst, "Se envio el resultado de la operacion");
@@ -137,6 +146,7 @@ int agregar_clave_a_lista(char* clave, int largo_clave){
 	clave_valor->largo_valor=0;
 	clave_valor->clave = calloc(largo_clave+1, 1);
 	clave_valor->nroEntrada = -1;
+	clave_valor->datos = NULL;
 	memcpy(clave_valor->clave, clave, largo_clave);
 	list_add(instancia.tabla_entradas, clave_valor);
 	log_debug(log_inst, "GET %s", clave_valor->clave);
@@ -155,6 +165,12 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 		switch(instancia.algorimoActual){
 			case CIRC:
 				if(guardar_circular(entrada, valor) < 0) return ERROR_VALOR_NULO;
+				break;
+			case LRU:
+				if(guardar_lru(entrada, valor) < 0) return ERROR_VALOR_NULO;
+				break;
+			case BSU:
+				if(guardar_bsu(entrada, valor) < 0) return ERROR_VALOR_NULO;
 				break;
 			default:
 				break;
@@ -180,16 +196,6 @@ int guardar_entrada(char* clave, int largo_clave){
 	log_debug(log_inst, "STORE %s", clave_valor_existente->clave);
 	guardar(clave_valor_existente);
 	return OK;
-}
-
-bool conClave(void* input){
-	t_clave_valor* entrada = (t_clave_valor* ) entrada;
-	bool res = (entrada->clave != NULL && strcmp(entrada->clave, "") && strcmp(entrada->clave, "\0"));
-	free(entrada);
-	return res;
-}
-int calcular_entradas_libres(){
-	return (instancia.cantEntradas - list_count_satisfying(instancia.tabla_entradas, ((void*) conClave)));
 }
 
 bool buscador(void *contenido){

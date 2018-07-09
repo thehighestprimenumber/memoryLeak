@@ -9,7 +9,8 @@ bool recibir_config_storage(){
 	await_msg(instancia.socket_coordinador, msg);
 	if(msg->header->tipo_mensaje != CONFSTORAGE)
 		return false;
-	ConfigStorage *cs = desempaquetar_config_storage(msg);
+	ConfigStorage *cs;
+	desempaquetar_config_storage(msg, &cs);
 	instancia.cantEntradas = cs->cantEntradas;
 	instancia.tamEntrada = cs->tamEntrada;
 	free_msg(&msg);

@@ -157,7 +157,7 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void 
 			//Si ocurre esto es porque tuvo un problema creando el hilo
 			close_conection(conexion);
 		}
-
+		//TODO free conexion
 	}
 }
 
@@ -317,10 +317,10 @@ bool close_conection_condition(void *conexion){
 void free_msg(Message **msg){
 	if(msg != NULL && (*msg) != NULL){
 		if((*msg)->header != NULL){
-			if((*msg)->contenido != NULL && (*msg)->header->size > 0) free_memory(&((*msg)->contenido));
-			free_memory(&((*msg)->header));
+			if((void** ) (*msg)->contenido != NULL && (*msg)->header->size > 0) free_memory((void** ) &((*msg)->contenido));
+			free_memory((void** )&((*msg)->header));
 		}
-		free_memory(msg);
+		free_memory((void** ) msg);
 	}
 }
 

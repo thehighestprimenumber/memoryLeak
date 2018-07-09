@@ -1,4 +1,6 @@
 #include "esi.h"
+#define nombre_script "ESI_Bar1"
+
 esi_configuracion* inicializar_configuracion(char* argv[]);
 int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario);
 
@@ -117,7 +119,8 @@ t_operacion * convertir_operacion(t_esi_operacion operacionOriginal){
 }
 
 void enviar_operacion_a_coordinador(t_operacion* operacion){
-	Message * msg = empaquetar_op_en_mensaje(operacion, ESI);
+	Message* msg;
+	empaquetar_op_en_mensaje(operacion, ESI, &msg);
 
 	int res = enviar_y_loguear_mensaje(cliente_coordinador, *msg, "coordinador\0");
 	free_msg(&msg);
@@ -126,7 +129,8 @@ void enviar_operacion_a_coordinador(t_operacion* operacion){
 
 void enviar_ruta_script_al_planificador(char* path){
 
-	Message* msg = empaquetar_texto(path, strlen(path), ESI);
+	Message* msg;
+	empaquetar_texto(path, strlen(path), ESI, &msg);
 	msg->header->tipo_mensaje = CONEXION;
 
 	int res = enviar_y_loguear_mensaje(socket_planificador, (*msg), "planificador\0");
@@ -163,12 +167,13 @@ int ejecutar_proxima_operacion(){
 		exit(ERROR_DE_RECEPCION);
 	}
 
-	int resultado = desempaquetar_resultado(rta);
+	int resultado;
+	resultado = desempaquetar_resultado(rta);
 	if(resultado != OK){
 		loguear_resultado(log_esi, resultado);
 		return resultado;
 	}
-	loguear_resultado(log_esi, desempaquetar_resultado(rta));
+	loguear_resultado(log_esi, resultado);
 	free_msg(&rta);
 	list_remove(operaciones, 0);
 	return OK;
@@ -196,7 +201,8 @@ void manejar_mensajes(Message mensaje) {
 		default:
 			log_error(log_esi, "se recibio un mensaje de tipo inesperado");
 		}
-		Message * m = empaquetar_resultado(ESI, resultado);
+		Message * m;
+		empaquetar_resultado(ESI, resultado, &m);
 		resultado = enviar_y_loguear_mensaje(socket_planificador, *m, "planificador\0");
 		free_msg(&m);
 }
@@ -229,7 +235,7 @@ esi_configuracion* inicializar_configuracion(char* argv[]) {
 		config = config_create("../configESI.txt");
 	}
 	if (argv == NULL || argv[1] == NULL) {
-		argv[1] = "ESI_MultiClave";
+		argv[1] = nombre_script;
 	}
 	path_script = malloc(strlen(argv[1]) + 1);
 	memcpy(path_script, argv[1], strlen(argv[1]));

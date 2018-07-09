@@ -22,54 +22,51 @@ void free_operacion(t_operacion ** operacion) {
 	}
 }
 
-Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente){
+void empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente, Message**  output){
 	if (texto == NULL || length < 1)
-		return NULL;
-	Message *msg = malloc(sizeof(Message));
+		return;
+	Message*  msg = malloc(sizeof(Message));
 	msg->header = malloc(sizeof(ContentHeader));
 	msg->header->tipo_mensaje = TEXTO;
 	msg->header->remitente = remitente;
 	msg->header->size = length + 1;
-	msg->contenido = malloc(length + 1);
+	msg->contenido = calloc(1, length + 1);
 	memcpy(msg->contenido, texto, length);
-	((char*) msg->contenido)[length] = '\0';
-	return msg;
+	*output = msg;
 }
 
-Message* empaquetar_ack(tipoRemitente remitente){
-	Message *msg = malloc(sizeof(Message));
+void empaquetar_conexion (char* texto, unsigned int length, tipoRemitente remitente, Message**  output){
+	if (texto == NULL || length < 1)
+		return;
+	Message*  msg = malloc(sizeof(Message));
 	msg->header = malloc(sizeof(ContentHeader));
-	msg->header->tipo_mensaje = ACK;
-	msg->header->size = 0;
+	msg->header->tipo_mensaje = CONEXION;
 	msg->header->remitente = remitente;
-	return msg;
+	msg->header->size = length + 1;
+	msg->contenido = calloc(1, length + 1);
+	memcpy(msg->contenido, texto, length);
+	*output = msg;
 }
 
-Message* empaquetar_resultado(tipoRemitente remitente, int resultado){
-	Message *msg = malloc(sizeof(Message));
+void empaquetar_resultado(tipoRemitente remitente, int resultado, Message** output){
+	Message*  msg = malloc(sizeof(Message));
 	msg->header = malloc(sizeof(ContentHeader));
 	msg->header->tipo_mensaje = RESULTADO;
 	msg->header->size = sizeof(int);
 	msg->header->remitente = remitente;
 	msg->contenido = calloc(1, sizeof(int));
 	memcpy(msg->contenido, &resultado, sizeof(int));
-	return msg;
+	*output = msg;
 }
 
 int desempaquetar_resultado(Message* msg){
+	int output;
 	if (msg == NULL || msg->header == NULL || msg->header->size < 1|| msg->contenido == NULL)
-		return 0;
-	int* resultado = calloc (1, sizeof(int));
-	memcpy (resultado, (int*) msg->contenido,  sizeof(int));
-	return *resultado;
+		output=ERROR_DE_RECEPCION;
+	output = *((int*) msg->contenido);
+	return output;
 }
 
-
-tipoRemitente desempaquetar_ack(Message* m){
-	Message *msg = malloc(sizeof(Message));
-	msg->header = malloc(sizeof(ContentHeader));
-	return msg->header->remitente;
-}
 
 t_operacion * crear_operacion(char* clave, int len_clave, char* valor, int len_valor, enum tipoOperacion tipo){
 	t_operacion * op = (t_operacion *) malloc(sizeof(t_operacion));
@@ -91,9 +88,8 @@ t_operacion * crear_operacion(char* clave, int len_clave, char* valor, int len_v
 
 }
 
-Message* empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente) {
-
-	Message *msg = malloc(sizeof(Message));
+void empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente, Message** output) {
+	Message*  msg = malloc(sizeof(Message));
 
 	//Preparo el ContentHeader
 	msg->header = malloc(sizeof(ContentHeader));
@@ -117,32 +113,32 @@ Message* empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente) {
 	memcpy(msg->contenido + sizeof(OperacionHeader) + op->largo_clave, op->valor, op->largo_valor);
 
 	//Liberamos lo que ya no nos sirve
-	free(opHeader);
-
-	return msg;
+	free_memory(&opHeader);
+	*output = msg;
 
 }
 
-char* desempaquetar_texto(Message* msg) {
+void desempaquetar_texto(Message* msg, char** texto) {
+	if (msg == NULL || msg->header == NULL
+			|| msg->header->size < 1|| msg->contenido == NULL) {
+		texto = calloc(1, strlen("Error al desempaquetar texto\0")+1);
+		memcpy(texto, msg->contenido, strlen("Error al desempaquetar texto")+1);
+	} else {
+		texto = calloc(1, msg->header->size+1);
+		memcpy(texto, msg->contenido, msg->header->size);
+	}
+}
+
+void desempaquetar_conexion(Message* msg, char** texto) {
 	if (msg == NULL || msg->header == NULL
 			|| msg->header->size < 1|| msg->contenido == NULL)
-		return NULL;
-	char* texto = calloc(1, msg->header->size+1);
-	memcpy(texto, msg->contenido, msg->header->size);
-	return texto;
+		return;
+	*texto = calloc(1, msg->header->size+1);
+	memcpy(*texto, msg->contenido, msg->header->size);
 }
 
-char* desempaquetar_conexion(Message* msg) {
-	if (msg == NULL || msg->header == NULL
-			|| msg->header->size < 1|| msg->contenido == NULL)
-		return NULL;
-	char* texto = calloc(1, msg->header->size+1);
-	memcpy(texto, msg->contenido, msg->header->size);
-	return texto;
-}
-
-t_operacion* desempaquetar_operacion(Message* msg) {
-	t_operacion* operacion = malloc(sizeof(t_operacion));
+void desempaquetar_operacion(Message* msg, t_operacion** output) {
+	t_operacion * operacion = malloc(sizeof(t_operacion));
 
 	//Copiamos el header de la operacion
 	OperacionHeader *opHeader = malloc(sizeof(OperacionHeader));
@@ -163,17 +159,11 @@ t_operacion* desempaquetar_operacion(Message* msg) {
 	if (operacion->largo_valor>1)
 	memcpy(operacion->valor, msg->contenido + sizeof(OperacionHeader) + operacion->largo_clave, operacion->largo_valor);
 
-	return operacion;
+	*output = operacion;
 }
 
-Message* empaquetar_conexion(tipoRemitente remitente, char* idRemitente) {
-	Message *msg = empaquetar_texto(idRemitente, strlen(idRemitente), remitente);
-	msg->header->tipo_mensaje = CONEXION;
-	return msg;
-}
-
-Message* empaquetar_config_storage(tipoRemitente remitente, int cantEntradas, int tamEntrada){
-	Message *msg = malloc(sizeof(Message));
+void empaquetar_config_storage(tipoRemitente remitente, int cantEntradas, int tamEntrada, Message** output){
+	Message* msg = malloc(sizeof(Message));
 	msg->header = malloc(sizeof(ContentHeader));
 	ConfigStorage *config = malloc(sizeof(ConfigStorage));
 
@@ -184,19 +174,17 @@ Message* empaquetar_config_storage(tipoRemitente remitente, int cantEntradas, in
 	config->cantEntradas = cantEntradas;
 	config->tamEntrada = tamEntrada;
 	msg->contenido = config;
+	*output = msg;
 
-	return msg;
 }
 
-ConfigStorage* desempaquetar_config_storage(Message *msg){
-	ConfigStorage *cs = malloc(sizeof(ConfigStorage));
-	memcpy(cs,msg->contenido, sizeof(ConfigStorage));
-	return cs;
+void desempaquetar_config_storage(Message *msg, ConfigStorage** cs){
+	*cs = malloc(sizeof(ConfigStorage));
+	memcpy(*cs,msg->contenido, sizeof(ConfigStorage));
 }
 
-Message* empaquetar_STATUS(char* clave, char* nombre_instancia, int largo_clave, int largo_nombre_instancia, tipoRemitente remitente, unsigned int real) {
-
-	Message *msg = malloc(sizeof(Message));
+void empaquetar_STATUS(char* clave, char* nombre_instancia, int largo_clave, int largo_nombre_instancia, tipoRemitente remitente, unsigned int real, Message** output) {
+	Message* msg = malloc(sizeof(Message));
 
 		//Preparo el ContentHeader
 		msg->header = malloc(sizeof(ContentHeader));
@@ -221,9 +209,7 @@ Message* empaquetar_STATUS(char* clave, char* nombre_instancia, int largo_clave,
 
 		//Liberamos lo que ya no nos sirve
 		free(opHeader);
-
-		return msg;
-
+		*output = msg;
 }
 
 

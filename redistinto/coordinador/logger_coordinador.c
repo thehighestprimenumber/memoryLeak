@@ -16,13 +16,15 @@ char* buscar_id_conexion (int socket){
 }
 
 void registrar_conexion(Message * m, int socket) {
-	t_socket_nombre* dato_conexion = calloc(1, sizeof(dato_conexion));
-		char* nombre = desempaquetar_conexion(m);
+	t_socket_nombre* dato_conexion = calloc(1, sizeof(t_socket_nombre));
+		char* nombre;
+		desempaquetar_conexion(m, &nombre);
 		dato_conexion->socket = socket;
 		dato_conexion->nombre = calloc(1, strlen(nombre)+1);
 		strcpy(dato_conexion->nombre, nombre);
 		list_add(coordinador.conexiones, dato_conexion);
 		loguear_conexion(log_coordinador, m, dato_conexion->nombre);
+		free(nombre);
 }
 
 

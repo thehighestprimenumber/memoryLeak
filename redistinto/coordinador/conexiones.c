@@ -22,7 +22,6 @@ void* recibir_conexion(void* con) {
 			manejar_desconexion(conexion->socket);
 			free_msg(&msg);
 			break;
-
 		}
 		enum tipoMensaje tipo = msg->header->tipo_mensaje;
 
@@ -34,12 +33,13 @@ void* recibir_conexion(void* con) {
 				break;
 			case DESCONEXION:
 				manejar_desconexion(conexion->socket);
+				pthread_exit(OK);
 				break;
 			case ACK:
-				break;
 			case VALIDAR_BLOQUEO:
 			case TEXTO:
 			case RESULTADO:
+				pthread_exit(OK);
 				break;
 			case OPERACION:
 				manejar_operacion(msg, conexion->socket);
@@ -54,9 +54,9 @@ void* recibir_conexion(void* con) {
 		}
 		free_msg(&msg);
 	}
-free(conexion);
-
-return 0;
+	free(conexion);
+	pthread_exit(0);
+	return 0;
 }
 
 int iniciar_servicio() {

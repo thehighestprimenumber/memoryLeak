@@ -30,36 +30,31 @@ int criterio_socket(fila_tabla_instancias* fila, void * socket){
 	return (fila->socket_instancia == numero_socket);
 }
 
-int criterio_clave(fila_tabla_instancias* fila, void* nombre_clave){
-	t_link_element *element = fila->claves->head;
-	char una_clave[41] = {'\0'};
-	int i=0;
-
-		while (element != NULL) {
-			strcpy (una_clave, element->data);
-			i++;
-
-			if (!strcmp (una_clave, (char*) nombre_clave)) {
+int criterio_clave(fila_tabla_instancias* instancia, void* nombre_clave){
+	int i = 0;
+		for(i=0;i<MAX_CLAVES_INSTANCIA;i++){
+			if (strcmp(instancia->claves[i],"\0")==0) {
+				return NO_HAY_INSTANCIAS;
+			}
+			if (strcmp(instancia->claves[i],nombre_clave)==0) {
 				return i;
 			}
-			element = element->next;
 		}
-		free(element);
-		return 0;
-
+	return NO_HAY_INSTANCIAS;
 }
 
-fila_tabla_instancias * buscar_instancia_por_valor_criterio (void* valor, int criterio (fila_tabla_instancias*, void*)){
+void buscar_instancia_por_valor_criterio (void* valor, int criterio (fila_tabla_instancias*, void*), fila_tabla_instancias** output){
 	t_link_element *element = coordinador.tabla_instancias->head;
 	fila_tabla_instancias *fila;
 		while (element != NULL && element->data != NULL) {
 			fila = (fila_tabla_instancias*) (element->data);
-			if (criterio(fila, valor)) {
-				return fila;
+			if (criterio(fila, valor)>-1) {
+				*output=fila;
+				return;
 			}
 			element = element->next;
-		}
-	return NULL;
+	}
+	*output=NULL;
 }
 
 int cambiar_estado_instancia(fila_tabla_instancias* fila, int esta_activa){
@@ -80,7 +75,8 @@ fila_tabla_instancias* seleccionar_instancia_EL(){
 fila_tabla_instancias * seleccionar_instancia_LSU (){
 	t_link_element *element = coordinador.tabla_instancias->head;
 	int activa = 1;
-	fila_tabla_instancias *mejor_opcion = buscar_instancia_por_valor_criterio(&activa, criterio_esta_activa);
+	fila_tabla_instancias *mejor_opcion;
+	buscar_instancia_por_valor_criterio(&activa, criterio_esta_activa, &mejor_opcion);
 	if (mejor_opcion==NULL)
 		return NULL;
 	fila_tabla_instancias *fila_test = (fila_tabla_instancias*) element->data;
@@ -108,10 +104,11 @@ fila_tabla_instancias* seleccionar_instancia(char* clave) {
 void esperar_operacion(fila_tabla_instancias* instancia){
 	while (instancia->esta_activa) {
 		sem_wait(&instancia->lock);
-		Message * mensaje = empaquetar_op_en_mensaje(coordinador.operacion_global_threads, COORDINADOR);
+		Message * mensaje;
+		empaquetar_op_en_mensaje(coordinador.operacion_global_threads, COORDINADOR, &mensaje);
 		if (enviar_y_loguear_mensaje(instancia->socket_instancia, *mensaje)<0)
 			coordinador.resultado_global = ERROR_DE_ENVIO;
-		free(mensaje);
+		free_msg(&mensaje);
 			//log_debug(logger_coordinador, "se solicita %s %s %s", tipoMensajeNombre[operacion->header->tipo], operacion->clave, operacion->valor);
 
 		Message *respuesta = malloc(sizeof(Message));
@@ -121,25 +118,26 @@ void esperar_operacion(fila_tabla_instancias* instancia){
 			}
 
 			else coordinador.resultado_global = desempaquetar_resultado(respuesta);
-
-			free(respuesta);
+			free_msg(&respuesta);
 
 		sem_post(&coordinador.lock_operaciones);
 	}
+	pthread_exit(OK);
 }
 
 fila_tabla_instancias* registrar_instancia(char* nombre_instancia, int socket_instancia) {
-	fila_tabla_instancias* fila = buscar_instancia_por_valor_criterio(nombre_instancia, criterio_nombre);
+	fila_tabla_instancias* fila;
+	buscar_instancia_por_valor_criterio(nombre_instancia, criterio_nombre, &fila);
 	if (fila !=NULL)
 		cambiar_estado_instancia(fila, 1);
 	else {
 		free_fila_tabla_instancias(&fila);
-		fila = (fila_tabla_instancias*) calloc(sizeof(fila_tabla_instancias), 1);
+		fila = calloc(sizeof(fila_tabla_instancias), 1); //TODO (fila_tabla_instancias*)
 			fila->socket_instancia = socket_instancia;
 			fila->esta_activa = 1;
 			fila->entradas_libres = tabla_instancias.cantidad_entradas;
+			fila->max_claves_instancia = MAX_CLAVES_INSTANCIA;
 			strcpy(fila->nombre_instancia, (char*) nombre_instancia);
-			fila->claves = list_create();
 			sem_init(&(fila->lock), 0, 0);
 			list_add(coordinador.tabla_instancias, fila);
 	}
@@ -147,7 +145,8 @@ fila_tabla_instancias* registrar_instancia(char* nombre_instancia, int socket_in
 }
 
 int desconectar_instancia(int socket){
-	fila_tabla_instancias* fila = buscar_instancia_por_valor_criterio(&socket, criterio_socket);
+	fila_tabla_instancias* fila;
+	buscar_instancia_por_valor_criterio(&socket, criterio_socket, &fila);
 	if (fila!=NULL)
 		return cambiar_estado_instancia(fila, 0);
 	return OK;
@@ -157,8 +156,34 @@ int desconectar_instancia(int socket){
 void free_fila_tabla_instancias(fila_tabla_instancias** fila){
 	if(fila != NULL && (*fila) != NULL){
 	//if ((*fila)->lock != NULL) pthread_mutex_destroy(&((*fila)->lock));
-	//if((*fila)->claves != NULL) list_destroy_and_destroy_elements((fila)->claves, free_lista_claves);
-	if( (*fila)->claves != NULL) list_destroy((*fila)->claves);
 	free(*fila);
 	}
 }
+
+void agregarClave(fila_tabla_instancias *instancia, char* clave){
+	int i=0;
+	for(;i<instancia->max_claves_instancia;i++){
+		char * pt = instancia->claves[i];
+		char c = pt[0];
+		if (c=='\0') {
+			memcpy(instancia->claves[i], clave, strlen(clave)+1);
+			return;
+		}
+	}
+		//se lleno el array
+			int nuevoArray[instancia->max_claves_instancia][MAX_LEN_NOMBRE_CLAVE];
+			for(i=0;i<instancia->max_claves_instancia;i++){
+				memcpy(nuevoArray[i], instancia->claves[i], strlen(instancia->claves[i])+1);
+				//free(instancia->claves[i]);
+			}
+
+			memcpy(nuevoArray[i], clave, strlen(clave)+1);
+			i++;
+			for(;i<instancia->max_claves_instancia;i++){
+				memcpy(nuevoArray[i], "\0", 1);
+			}
+			instancia->max_claves_instancia *= 2;
+			*instancia->claves[0] = *nuevoArray[0];
+
+	}
+
