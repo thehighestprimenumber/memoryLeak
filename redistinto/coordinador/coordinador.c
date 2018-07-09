@@ -63,7 +63,6 @@ int manejar_status(Message* msg, int socket){
 	char* idInstancia;
 	int real;
 	desempaquetar_status(msg, &clave, &idInstancia);
-	instancia = buscar_instancia_por_valor_criterio(clave, &criterio_clave);
 	buscar_instancia_por_valor_criterio(clave, &criterio_clave, &instancia);
 
 	if (instancia != NULL) {
