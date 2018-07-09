@@ -56,6 +56,7 @@ void eliminar_lru_entrada(){
 
 void registrar_set_lru(char *clave){
 	t_clave_valor *entrada = buscar_clave_valor(clave);
+	if(entrada == NULL) return;
 	((t_info_lru*) entrada->datos)->instant = get_time_millisec();
 }
 
