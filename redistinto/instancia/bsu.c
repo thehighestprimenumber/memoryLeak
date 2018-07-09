@@ -1,5 +1,9 @@
 #include "bsu.h"
 
+void eliminar_bsu_entrada();
+void guardar_eliminando_bsu(t_clave_valor *entrada, char *valor);
+
+
 void inicializar_bsu(){
 	cirularFinalizo2 = false;
 	inicializar_circular();
