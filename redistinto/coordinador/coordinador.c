@@ -63,7 +63,9 @@ int manejar_status(Message* msg, int socket){
 	char* idInstancia;
 	int real;
 	desempaquetar_status(msg, &clave, &idInstancia);
+	instancia = buscar_instancia_por_valor_criterio(clave, &criterio_clave);
 	buscar_instancia_por_valor_criterio(clave, &criterio_clave, &instancia);
+
 	if (instancia != NULL) {
 		real = 1;
 		idInstancia = calloc(1, strlen(instancia->nombre_instancia)+1);
@@ -74,9 +76,12 @@ int manejar_status(Message* msg, int socket){
 		if (instancia != NULL) {
 			idInstancia = calloc(1, strlen(instancia->nombre_instancia)+1);
 			strcpy(idInstancia, instancia->nombre_instancia);
-		} else
+		}
+		else
+		{
 			idInstancia = calloc(1, strlen("No hay instancias conectadas")+1);
 			strcpy(idInstancia, "No hay instancias conectadas");
+		}
 	}
 	Message* rta;
 	empaquetar_STATUS(clave, idInstancia, strlen(clave), strlen(idInstancia), COORDINADOR, real, &rta);
@@ -151,13 +156,19 @@ int validar_bloqueo_con_planificador(t_operacion* operacion){
 }
 
 void registrar_coordinador_y_quedar_esperando(int socket){
-	coordinador.socket_planificador = socket;
-	while (	coordinador.socket_planificador != 0) {
-		sem_wait(&coordinador.lock_planificador);
-		coordinador.resultado_global = validar_bloqueo_con_planificador(coordinador.operacion_global_threads);
-		sem_post(&coordinador.lock_operaciones);
+	if (coordinador.socket_planificador != 0)
+	{
+		coordinador.socket_planificador_status = socket;
 	}
-
+	else
+	{
+		coordinador.socket_planificador = socket;
+		while (	coordinador.socket_planificador != 0) {
+			sem_wait(&coordinador.lock_planificador);
+			coordinador.resultado_global = validar_bloqueo_con_planificador(coordinador.operacion_global_threads);
+			sem_post(&coordinador.lock_operaciones);
+		}
+	}
 }
 
 int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* instancia){

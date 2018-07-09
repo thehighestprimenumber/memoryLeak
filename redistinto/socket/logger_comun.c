@@ -154,6 +154,10 @@ void desempaquetar_varios(Message * m, char** output) {
 		memcpy(contenido, "ejecutar\0", strlen("ejecutar"));
 		*output = contenido;
 		break;
+	case STATUS_CLAVE:
+		contenido = calloc(1, strlen("status")+1);
+		strcpy(contenido, "status");
+		break;
 	default:
 		contenido = calloc(1, strlen("tipo no definido")+1);
 		memcpy(contenido, "tipo no definido\0", strlen("tipo definido"));

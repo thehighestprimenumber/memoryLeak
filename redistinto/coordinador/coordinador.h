@@ -35,6 +35,7 @@ typedef struct {
 	int retardo;
 	t_operacion * operacion_global_threads;
 	int socket_planificador;
+	int socket_planificador_status;
 	sem_t lock_operaciones;
 	sem_t lock_planificador;
 	int resultado_global;

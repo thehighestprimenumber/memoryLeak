@@ -23,6 +23,9 @@ int main(void) {
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	pidCoordinador = conectar_a_coordinador(pConfig);
 
+	//2da conexion a coordinador para STATUS
+	pidCoordinadorStatus = conectar_a_coordinador(pConfig);
+
 	log_info(log_consola,"\nInicio de la consola\n");
 
 	//Abrir Consola
@@ -587,7 +590,6 @@ bool clave_ya_bloqueada_config(char* clave) {
 bool clave_verificar_config(char* clave) {
 	char cadena[strlen(clave)];
 	strcpy(cadena,clave);
-	string_to_upper(cadena);
 	return (strcmp(list_comandos[1],cadena) == 0);
 }
 
@@ -610,7 +612,6 @@ bool buscar_esi_a_bloquear(struct_ready* elemento) {
 bool buscar_esi_a_desbloquear(struct_blocked* elemento) {
 	char cadena[strlen(elemento->clave)];
 	strcpy(cadena,elemento->clave);
-	string_to_upper(cadena);
 	return strcmp(cadena,list_comandos[1]) == 0;
 }
 
@@ -619,7 +620,6 @@ bool buscar_esi_kill(struct_blocked* elemento) {
 }
 
 bool esi_espera_clave(struct_blocked* elemento) {
-	string_to_upper(elemento->clave);
 	bool resultado = strcmp(list_comandos[1],elemento->clave) == 0;
 	return resultado;
 }
@@ -757,20 +757,21 @@ void listar_esis_porClave(char* clave) {
 int obtener_status() {
 	//Envío mensaje al esi preguntando en que instancia se encuentra (o se debería)
 	//encontrar la clave
+
 	Message * mensaje;
 	empaquetar_STATUS(list_comandos[1], "",strlen(list_comandos[1]) + 1,0,PLANIFICADOR,0, &mensaje);
 
-	if (enviar_y_loguear_mensaje(pidCoordinador, *mensaje, "COORDINADOR\0")<0)
+	if (enviar_y_loguear_mensaje(pidCoordinadorStatus, *mensaje, "COORDINADOR\0")<0)
 		return ERROR_DE_ENVIO;
 
 	free_msg(&mensaje);
 	Message * respuesta = malloc(sizeof(Message));
 
-	if (await_msg(pidCoordinador, respuesta)<0)
+	if (await_msg(pidCoordinadorStatus, respuesta)<0)
 		return ERROR_DE_RECEPCION;
 
-	char* clave_resp = NULL;
-	char* inst_resp = NULL;
+	char* clave_resp;
+	char* inst_resp;
 
 	int es_instancia_real = desempaquetar_status(respuesta,&clave_resp,&inst_resp);
 
@@ -778,11 +779,11 @@ int obtener_status() {
 	//Reutilizando funcionalidad del listar para obtener ESIS que esperan por dicha clave
 	if (es_instancia_real == 1)
 	{
-		log_info(log_planificador,"Instancia Real para la clave %s : %s", clave_resp,inst_resp);
+		log_info(log_consola,"Instancia Real para la clave %s : %s", clave_resp,inst_resp);
 	}
 	else if (es_instancia_real == 0)
 	{
-		log_info(log_planificador,"Instancia Simulada segun algoritmo para la clave %s : %s", clave_resp,inst_resp);
+		log_info(log_consola,"Instancia Simulada segun algoritmo para la clave %s : %s", clave_resp,inst_resp);
 
 	}
 	else

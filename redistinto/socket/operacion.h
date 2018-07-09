@@ -49,7 +49,6 @@ void desempaquetar_conexion(Message* msg, char** texto);
 void empaquetar_resultado(tipoRemitente remitente, int resultado, Message** msg);
 int desempaquetar_resultado(Message* msg);
 
-
 void empaquetar_config_storage(tipoRemitente remitente, int cantEntradas, int tamEntrada, Message** msg);
 void desempaquetar_config_storage(Message *msg, ConfigStorage** cs);
 
