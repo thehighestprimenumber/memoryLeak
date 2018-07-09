@@ -56,3 +56,16 @@ void mover_entrada(int nuevaPosicion, t_clave_valor *entrada){
 	entrada->nroEntrada = nuevaPosicion;
 }
 
+int obtener_ultima_entrada_libre(){
+	int cantEntradas = list_size(instancia.tabla_entradas), entradaMaxima = 0, indexEntradaMaxima = 0;
+
+	for(int i = 0; i < cantEntradas; i++){
+		t_clave_valor *aComparar = list_get(instancia.tabla_entradas, i);
+		if(aComparar->nroEntrada > entradaMaxima){
+			entradaMaxima = aComparar->nroEntrada;
+			indexEntradaMaxima = i;
+		}
+	}
+	t_clave_valor *maximo = list_get(instancia.tabla_entradas, indexEntradaMaxima);
+	return entradaMaxima + tam_min_entrada(maximo->largo_valor);
+}

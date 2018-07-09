@@ -59,6 +59,7 @@ int inicializar(char* argv[]){
 	if(strcmp(alg, "LRU")==0){
 		instancia.algorimoActual = LRU;
 		log_debug(log_inst, "Algoritmo: LRU");
+		inicializar_lru();
 	}
 	else if(strcmp(alg, "BSU")==0){
 		instancia.algorimoActual = BSU;
@@ -109,7 +110,14 @@ int manejar_operacion(Message * msg) {
 	sem_wait(semTabla);
 	switch (operacion->tipo) {
 		case op_GET:
-			resultado = OK;//agregar_clave_a_lista(operacion->clave, operacion->largo_clave);
+			switch(instancia.algorimoActual){
+				case LRU:
+					registrar_set_lru(operacion->clave);
+					break;
+				default:
+				break;
+			}
+			resultado = OK;
 			break;
 		case op_SET:
 			resultado = asignar_valor_a_clave(operacion->clave, operacion->largo_clave, operacion->valor, operacion->largo_valor);
@@ -137,6 +145,7 @@ int agregar_clave_a_lista(char* clave, int largo_clave){
 	clave_valor->largo_valor=0;
 	clave_valor->clave = calloc(largo_clave+1, 1);
 	clave_valor->nroEntrada = -1;
+	clave_valor->datos = NULL;
 	memcpy(clave_valor->clave, clave, largo_clave);
 	list_add(instancia.tabla_entradas, clave_valor);
 	log_debug(log_inst, "GET %s", clave_valor->clave);
@@ -155,6 +164,9 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 		switch(instancia.algorimoActual){
 			case CIRC:
 				if(guardar_circular(entrada, valor) < 0) return ERROR_VALOR_NULO;
+				break;
+			case LRU:
+				if(guardar_lru(entrada, valor) < 0) return ERROR_VALOR_NULO;
 				break;
 			default:
 				break;
@@ -289,3 +301,6 @@ void recuperar_claves(){
 	}
 
 }
+
+
+

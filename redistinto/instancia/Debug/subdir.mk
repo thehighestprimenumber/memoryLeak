@@ -8,21 +8,24 @@ C_SRCS += \
 ../compactador.c \
 ../configuracionInstancia.c \
 ../handlerCoordinador.c \
-../instancia.c 
+../instancia.c \
+../lru.c 
 
 OBJS += \
 ./circular.o \
 ./compactador.o \
 ./configuracionInstancia.o \
 ./handlerCoordinador.o \
-./instancia.o 
+./instancia.o \
+./lru.o 
 
 C_DEPS += \
 ./circular.d \
 ./compactador.d \
 ./configuracionInstancia.d \
 ./handlerCoordinador.d \
-./instancia.d 
+./instancia.d \
+./lru.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

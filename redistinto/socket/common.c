@@ -55,3 +55,11 @@ int cantidad_lineas_script(char* script){
 	return n_lineas + 1;
 
 }
+
+long long int get_time_millisec(){
+	  struct timeb timer_msec;
+	  ftime(&timer_msec);
+	  long long int timestamp_msec = ((long long int) timer_msec.time) * 1000ll +
+	                        			(long long int) timer_msec.millitm;
+	  return timestamp_msec;
+}
