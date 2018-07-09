@@ -69,3 +69,4 @@ int obtener_ultima_entrada_libre(){
 	t_clave_valor *maximo = list_get(instancia.tabla_entradas, indexEntradaMaxima);
 	return entradaMaxima + tam_min_entrada(maximo->largo_valor);
 }
+

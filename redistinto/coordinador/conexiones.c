@@ -22,7 +22,6 @@ void* recibir_conexion(void* con) {
 			manejar_desconexion(conexion->socket);
 			free_msg(&msg);
 			break;
-
 		}
 		enum tipoMensaje tipo = msg->header->tipo_mensaje;
 
@@ -40,25 +39,23 @@ void* recibir_conexion(void* con) {
 			case VALIDAR_BLOQUEO:
 			case TEXTO:
 			case RESULTADO:
-				//pthread_exit(OK);
+				pthread_exit(OK);
 				break;
 			case OPERACION:
 				manejar_operacion(msg, conexion->socket);
-				pthread_exit(OK);
 				break;
 			case CONFSTORAGE:
 			case EJECUTAR:
 				loguear_operacion_no_soportada(log_coordinador, msg, conexion->socket);
-				pthread_exit(OK);
 				break;
 			case STATUS_CLAVE:
 				manejar_status(msg, conexion->socket);
-				//pthread_exit(OK);
 				break;
 		}
 		free_msg(&msg);
 	}
 	free(conexion);
+	pthread_exit(0);
 	return 0;
 }
 

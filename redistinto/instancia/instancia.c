@@ -80,7 +80,8 @@ int inicializar(char* argv[]){
 	 return -10;
 	}
 	log_debug(log_inst, "Se pudo conectar con el coordinador");
-	Message* msg = empaquetar_conexion(INSTANCIA, instancia.nombre_inst);
+	Message* msg;
+	empaquetar_conexion(instancia.nombre_inst, strlen(instancia.nombre_inst), INSTANCIA, &msg);
 
 	if (send_msg(instancia.socket_coordinador, (*msg))<0)
 		return ERROR_DE_ENVIO;
@@ -103,7 +104,8 @@ int inicializar(char* argv[]){
 }
 
 int manejar_operacion(Message * msg) {
-	t_operacion * operacion = desempaquetar_operacion(msg);
+	t_operacion * operacion;
+	desempaquetar_operacion(msg, &operacion);
 	int resultado;
 	sem_wait(semTabla);
 	switch (operacion->tipo) {
@@ -125,7 +127,8 @@ int manejar_operacion(Message * msg) {
 			break;
 	}
 	sem_post(semTabla);
-	Message* m_resultado= empaquetar_resultado(INSTANCIA, resultado);
+	Message* m_resultado;
+	empaquetar_resultado(INSTANCIA, resultado, &m_resultado);
 	if (send_msg(instancia.socket_coordinador, *m_resultado)<0)
 		return ERROR_DE_ENVIO;
 	log_debug(log_inst, "Se envio el resultado de la operacion");
@@ -152,8 +155,10 @@ int agregar_clave_a_lista(char* clave, int largo_clave){
 
 int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_valor){
 	t_clave_valor* entrada = buscar_clave_valor (clave);
-	if (entrada == NULL)
-			return CLAVE_INEXISTENTE;
+	if (entrada == NULL){
+		agregar_clave_a_lista(clave, largo_clave);
+		entrada = buscar_clave_valor (clave);
+	}
 
 	entrada->largo_valor = largo_valor;
 	if(entrada->nroEntrada < 0){//Solo ocurre si todavia no se le  asigno una entrada
@@ -178,9 +183,7 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 		memcpy(storage+entrada->nroEntrada*instancia.tamEntrada, valor, largo_valor);
 	}
 	log_debug(log_inst, "SET %s", entrada->clave);
-	espacioUsado = 0;
-	list_iterate(instancia.tabla_entradas, sumardor_parcial_espacio_usado);
-	return (instancia.cantEntradas*instancia.tamEntrada-espacioUsado)/instancia.tamEntrada;
+	return cantidad_entradas_libres();
 }
 
 int guardar_entrada(char* clave, int largo_clave){
