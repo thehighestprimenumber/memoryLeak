@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../bsu.c \
 ../circular.c \
 ../compactador.c \
 ../configuracionInstancia.c \
@@ -12,6 +13,7 @@ C_SRCS += \
 ../lru.c 
 
 OBJS += \
+./bsu.o \
 ./circular.o \
 ./compactador.o \
 ./configuracionInstancia.o \
@@ -20,6 +22,7 @@ OBJS += \
 ./lru.o 
 
 C_DEPS += \
+./bsu.d \
 ./circular.d \
 ./compactador.d \
 ./configuracionInstancia.d \

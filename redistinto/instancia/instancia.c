@@ -64,6 +64,7 @@ int inicializar(char* argv[]){
 	else if(strcmp(alg, "BSU")==0){
 		instancia.algorimoActual = BSU;
 		log_debug(log_inst, "Algoritmo: BSU");
+		inicializar_bsu();
 	}
 	else {
 		instancia.algorimoActual = CIRC;
@@ -165,6 +166,9 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 				break;
 			case LRU:
 				if(guardar_lru(entrada, valor) < 0) return ERROR_VALOR_NULO;
+				break;
+			case BSU:
+				if(guardar_bsu(entrada, valor) < 0) return ERROR_VALOR_NULO;
 				break;
 			default:
 				break;

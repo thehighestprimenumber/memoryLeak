@@ -31,6 +31,7 @@ typedef struct{
 
 #include "circular.h"
 #include "lru.h"
+#include "bsu.h"
 
 typedef struct {
 	int identificador;
