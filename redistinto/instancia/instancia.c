@@ -1,9 +1,6 @@
 #include "instancia.h"
-#define configuracionDefault "configInstancia2.txt"
-int calcular_entradas_libres();
 
 int main(int argc,char *argv[]) {
-
 	int socket_coordinador = inicializar(argv);
 	if (socket_coordinador < 0) return EXIT_FAILURE;
 	semTabla = malloc(sizeof(sem_t));
@@ -196,16 +193,6 @@ int guardar_entrada(char* clave, int largo_clave){
 	log_debug(log_inst, "STORE %s", clave_valor_existente->clave);
 	guardar(clave_valor_existente);
 	return OK;
-}
-
-bool conClave(void* input){
-	t_clave_valor* entrada = (t_clave_valor* ) entrada;
-	bool res = (entrada->clave != NULL && strcmp(entrada->clave, "") && strcmp(entrada->clave, "\0"));
-	free(entrada);
-	return res;
-}
-int calcular_entradas_libres(){
-	return (instancia.cantEntradas - list_count_satisfying(instancia.tabla_entradas, ((void*) conClave)));
 }
 
 bool buscador(void *contenido){
