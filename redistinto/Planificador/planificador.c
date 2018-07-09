@@ -420,7 +420,7 @@ int manejar_desconexion_esi(int socket){
 	if (esiRunning.pid == 0)
 		ejecutar_nueva_esi();
 
-	return -18;
+	return FIN_ARCHIVO;
 }
 
 int manejar_operacion(int socket,Message* msg) {
@@ -478,7 +478,7 @@ int manejar_resultado(int socket,Message* msg) {
 			return envio_desconexion(socket);
 		default:
 		//fuck
-		return -2;
+		return -2; //FIXME que significa este error?
 	}
 
 }

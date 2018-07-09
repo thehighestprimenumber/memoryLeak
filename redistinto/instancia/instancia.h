@@ -15,7 +15,6 @@
 #include <commons/txt.h>
 #include <pthread.h>
 #include <dirent.h>
-#include "compactador.h"
 
 #define OK 0
 #define LOGUEAR_DUMPS 0
@@ -53,6 +52,7 @@ char *storage;
 char *claveEnBusqueda;
 struct stat pepito;
 sem_t *semTabla;
+int espacioUsado;
 
 
 int inicializar();

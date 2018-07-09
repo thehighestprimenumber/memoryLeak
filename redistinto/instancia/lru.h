@@ -15,5 +15,6 @@ bool cirularFinalizo;
 
 void inicializar_lru();
 int guardar_lru(t_clave_valor *entrada, char *valor);
+void registrar_set_lru(char *clave);
 
 #endif /* LRU_H_ */

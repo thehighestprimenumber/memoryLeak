@@ -154,10 +154,8 @@ int agregar_clave_a_lista(char* clave, int largo_clave){
 
 int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_valor){
 	t_clave_valor* entrada = buscar_clave_valor (clave);
-	if (entrada == NULL){
-		agregar_clave_a_lista(clave, largo_clave);
-		entrada = buscar_clave_valor (clave);
-	}
+	if (entrada == NULL)
+			return CLAVE_INEXISTENTE;
 
 	entrada->largo_valor = largo_valor;
 	if(entrada->nroEntrada < 0){//Solo ocurre si todavia no se le  asigno una entrada
@@ -179,7 +177,9 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 		memcpy(storage+entrada->nroEntrada*instancia.tamEntrada, valor, largo_valor);
 	}
 	log_debug(log_inst, "SET %s", entrada->clave);
-	return cantidad_entradas_libres();
+	espacioUsado = 0;
+	list_iterate(instancia.tabla_entradas, sumardor_parcial_espacio_usado);
+	return (instancia.cantEntradas*instancia.tamEntrada-espacioUsado)/instancia.tamEntrada;
 }
 
 int guardar_entrada(char* clave, int largo_clave){
@@ -301,6 +301,3 @@ void recuperar_claves(){
 	}
 
 }
-
-
-
