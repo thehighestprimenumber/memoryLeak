@@ -35,26 +35,24 @@ typedef struct {
 
 void free_operacion(t_operacion ** operacion);
 
-Message* empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente);
-char* desempaquetar_texto(Message* msg);
+void empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente, Message** msg);
+void desempaquetar_texto(Message* msg, char** texto);
 
 t_operacion * crear_operacion(char* clave, int len_clave, char* valor, int len_valor, enum tipoOperacion tipo);
 
-Message* empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente);
-t_operacion* desempaquetar_operacion(Message* msg);
+void empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente, Message** msg);
+void desempaquetar_operacion(Message* msg, t_operacion** operacion);
 
-Message* empaquetar_conexion(tipoRemitente remitente, char* idRemitente);
-char* desempaquetar_conexion(Message* msg);
+void empaquetar_conexion (char* texto, unsigned int length, tipoRemitente remitente, Message**  msg);
+void desempaquetar_conexion(Message* msg, char** texto);
 
-Message* empaquetar_ack(tipoRemitente remitente);
-tipoRemitente desempaquetar_ack(Message* m);
-
+void empaquetar_resultado(tipoRemitente remitente, int resultado, Message** msg);
 int desempaquetar_resultado(Message* msg);
-Message* empaquetar_resultado(tipoRemitente remitente, int resultado);
 
-Message* empaquetar_config_storage(tipoRemitente remitente, int cantEntradas, int tamEntrada);
-ConfigStorage* desempaquetar_config_storage(Message *msg);
 
-Message* empaquetar_STATUS(char* clave, char* nombre_instancia, int largo_clave, int largo_nombre_instancia, tipoRemitente remitente, unsigned int real);
-int desempaquetar_status (Message* msg, char* clave, char* idInstancia);
+void empaquetar_config_storage(tipoRemitente remitente, int cantEntradas, int tamEntrada, Message** msg);
+void desempaquetar_config_storage(Message *msg, ConfigStorage** cs);
+
+void empaquetar_STATUS(char* clave, char* nombre_instancia, int largo_clave, int largo_nombre_instancia, tipoRemitente remitente, unsigned int real, Message** msg);
+int desempaquetar_status (Message* msg, char** clave, char** idInstancia);
 #endif

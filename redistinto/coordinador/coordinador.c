@@ -1,12 +1,11 @@
 # include "coordinador.h"
 # include "configuracion.h"
 # include "conexiones.h"
-#define activar_retardo 0
+# define activar_retardo 0
 
 
-int procesarSolicitudDeEsi(Message * msg, int socket_solicitante);
+int procesarSolicitudDeEsi(Message* msg, int socket_solicitante);
 int validar_bloqueo_con_planificador(t_operacion* operacion);
-// int informar_resultado_al_planificador(int resultado);
 void manejar_kill(int signal);
 int despertar_hilo_instancia(t_operacion * operacion, fila_tabla_instancias* instancia);
 void registrar_coordinador_y_quedar_esperando(int socket);
@@ -16,17 +15,17 @@ int main() {
 	iniciar_servicio();//cuando llegue un mensaje se va a correr recibir_mensaje (en conexiones.c)
 	sem_init(&coordinador.lock_operaciones, 0, 1);
 	sem_init(&coordinador.lock_planificador, 0, 1);
-
-	//sem_post(&coordinador.lock_operaciones);
 }
 
-int manejar_conexion(Message * m, int socket){
+int manejar_conexion(Message* m, int socket){
 	registrar_conexion(m, socket);
 
 	if (m->header->remitente == INSTANCIA) {
-		char* nombre_instancia = desempaquetar_conexion(m);
+		char* nombre_instancia;
+		desempaquetar_conexion(m, &nombre_instancia);
 		fila_tabla_instancias * fila = registrar_instancia(nombre_instancia, socket);
-		Message * configuracion_instancia = empaquetar_config_storage(COORDINADOR, tabla_instancias.cantidad_entradas, tabla_instancias.tamanio_entrada);
+		Message* configuracion_instancia;
+		empaquetar_config_storage(COORDINADOR, tabla_instancias.cantidad_entradas, tabla_instancias.tamanio_entrada, &configuracion_instancia);
 		if (enviar_y_loguear_mensaje(socket, *configuracion_instancia)<0)
 			return ERROR_DE_ENVIO;
 		esperar_operacion(fila);
@@ -44,7 +43,7 @@ void manejar_desconexion(int socket){
 	desconectar_instancia(socket);
 	close(socket);
 }
-int manejar_operacion(Message * msg, int socket){
+int manejar_operacion(Message* msg, int socket){
 	int res;
 	enum tipoRemitente remitente = msg->header->remitente;
 		switch (remitente) {
@@ -54,16 +53,17 @@ int manejar_operacion(Message * msg, int socket){
 		default:
 			loguear_operacion_no_soportada(log_coordinador, msg, socket);
 		}
+
 		return res;
 }
 
-int manejar_status(Message * msg, int socket){
+int manejar_status(Message* msg, int socket){
 	fila_tabla_instancias * instancia;
 	char* clave;
 	char* idInstancia;
 	int real;
-	desempaquetar_status(msg, clave, idInstancia);
-	instancia = buscar_instancia_por_valor_criterio(clave, &criterio_clave);
+	desempaquetar_status(msg, &clave, &idInstancia);
+	buscar_instancia_por_valor_criterio(clave, &criterio_clave, &instancia);
 	if (instancia != NULL) {
 		real = 1;
 		idInstancia = calloc(1, strlen(instancia->nombre_instancia)+1);
@@ -78,19 +78,20 @@ int manejar_status(Message * msg, int socket){
 			idInstancia = calloc(1, strlen("No hay instancias conectadas")+1);
 			strcpy(idInstancia, "No hay instancias conectadas");
 	}
-	Message * rta = empaquetar_STATUS(clave, idInstancia, strlen(clave), strlen(idInstancia), COORDINADOR, real);
+	Message* rta;
+	empaquetar_STATUS(clave, idInstancia, strlen(clave), strlen(idInstancia), COORDINADOR, real, &rta);
 	int resultado = enviar_y_loguear_mensaje(socket, *rta);
 	free_msg(&rta);
 	return resultado;
 }
 
-int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
+int procesarSolicitudDeEsi(Message* msg, int socket_solicitante) {
 	if (activar_retardo) sleep(coordinador.retardo);
 
-	t_operacion * op = desempaquetar_operacion(msg);
+	t_operacion * op;
+	desempaquetar_operacion(msg, &op);
 
 	//enviar_mensaje(socket_solicitante, *empaquetar_ack(COORDINADOR));
-	char* clave = op->clave;
 	coordinador.operacion_global_threads = op;
 	sem_post(&coordinador.lock_planificador); //ESTO DEBE DESPERTAR A registrar_coordinador_y_quedar_esperando
 	sem_wait(&coordinador.lock_operaciones);
@@ -100,11 +101,11 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 //	log_info(logger_coordinador, "procesando solicitud: %s %s %s de ESI socket# %d"
 //			, tipoMensajeNombre[op->tipo], clave, op->valor, socket);
 		if (op->tipo == op_GET){
-			instancia = seleccionar_instancia(clave);
+			instancia = seleccionar_instancia(op->clave);
 			if (instancia != NULL)
-				list_add(instancia->claves, clave);
+				agregarClave(instancia, op->clave);
 		} else {
-			instancia = buscar_instancia_por_valor_criterio(clave, &criterio_clave);
+			buscar_instancia_por_valor_criterio(op->clave, &criterio_clave, &instancia );
 		}
 		if (instancia == NULL) {
 			resultado = NO_HAY_INSTANCIAS;
@@ -120,9 +121,8 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 			}
 		}
 	}
-	//free(clave);
-
-	Message* rta_a_esi = empaquetar_resultado(COORDINADOR, resultado);
+	Message* rta_a_esi;
+	empaquetar_resultado(COORDINADOR, resultado, &rta_a_esi);
 	enviar_y_loguear_mensaje(socket_solicitante, *rta_a_esi);
 	loguear_resultado(log_coordinador, resultado);
 	free_msg(&rta_a_esi);
@@ -131,16 +131,18 @@ int procesarSolicitudDeEsi(Message * msg, int socket_solicitante) {
 
 int validar_bloqueo_con_planificador(t_operacion* operacion){
 
-	Message * mensaje = empaquetar_op_en_mensaje(operacion, COORDINADOR);
+	Message* mensaje;
+	empaquetar_op_en_mensaje(operacion, COORDINADOR, &mensaje);
 
 	if (enviar_y_loguear_mensaje(coordinador.socket_planificador, *mensaje)<0)
 		return ERROR_DE_ENVIO;
 		//log_debug(logger_coordinador, "se solicita bloqueo de clave %s", (char*) operacion->clave);
 	free_msg(&mensaje);
-	Message * respuesta = malloc(sizeof(Message));
+	Message* respuesta = malloc(sizeof(Message));
 	if (await_msg(coordinador.socket_planificador, respuesta)<0)
 		return ERROR_DE_RECEPCION;
-	int contenido_respuesta = desempaquetar_resultado(respuesta);
+	int contenido_respuesta;
+	contenido_respuesta = desempaquetar_resultado(respuesta);
 	free_msg(&respuesta);
 	//int contenido_respuesta = OK;
 	loguear_resultado(log_coordinador, contenido_respuesta);
