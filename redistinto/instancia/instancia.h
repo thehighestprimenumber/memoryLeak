@@ -27,9 +27,12 @@ typedef struct{
 	char* clave;
 	int largo_valor;
 	int nroEntrada;
+	void *datos;
 } t_clave_valor;
 
 #include "circular.h"
+#include "lru.h"
+#include "bsu.h"
 
 typedef struct {
 	int identificador;

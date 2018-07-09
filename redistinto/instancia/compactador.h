@@ -11,5 +11,7 @@ int espacioUsado;
 
 void compactar();
 int cantidad_entradas_libres();
+int obtener_ultima_entrada_libre();
+
 
 #endif
