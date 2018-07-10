@@ -95,7 +95,7 @@ void loguear_envio_OK(t_log* log, Message * m, char* id_socket) {
 				"envio mensaje a %s: %s",
 				id_socket, contenido);
 		free(contenido);
-
+		//free_msg(&contenido);
 	}
 }
 void loguear_operacion_no_soportada(t_log* log, Message * m, int id_socket) {
@@ -157,6 +157,7 @@ void desempaquetar_varios(Message * m, char** output) {
 	case STATUS_CLAVE:
 		contenido = calloc(1, strlen("status")+1);
 		strcpy(contenido, "status");
+		*output = contenido;
 		break;
 	default:
 		contenido = calloc(1, strlen("tipo no definido")+1);
