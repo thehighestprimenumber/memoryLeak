@@ -55,6 +55,7 @@ typedef struct {
 typedef struct {
 	struct_pcb pcb;
 	char* clave;
+	char* valor; //lo necesito para status
 } struct_blocked;
 
 typedef struct {

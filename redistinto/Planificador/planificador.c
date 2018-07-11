@@ -23,10 +23,10 @@ int main(void) {
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	pidCoordinador = conectar_a_coordinador(pConfig);
 
-	//sleep(1);
+	sleep(1);
 
 	//2da conexion a coordinador para STATUS
-	//pidCoordinadorStatus = conectar_a_coordinador(pConfig);
+	pidCoordinadorStatus = conectar_a_coordinador(pConfig);
 
 	log_info(log_consola,"\nInicio de la consola\n");
 
@@ -260,11 +260,13 @@ void agregar_ready(struct_pcb pcb) {
 	log_debug(log_planificador,"\nSe agrego el esi %d, a la lista de listos",pcb.pid);
 }
 
-void agregar_blocked(struct_pcb pcb, char* clave) {
+void agregar_blocked(struct_pcb pcb, char* clave, char* valor) {
 	struct_blocked* elemento = malloc(sizeof(struct_blocked));
 	elemento->pcb = pcb;
 	elemento->clave = (char*)malloc(strlen(clave)+1);
+	elemento->valor = (char*)malloc(strlen(valor)+1);
 	strcpy(elemento->clave,clave);
+	strcpy(elemento->valor,valor);
 	list_add(cola_blocked,elemento);
 	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de bloqueados",pcb.pid,clave);
 }
@@ -586,7 +588,7 @@ int validar_operacion_get() {
 	}
 
 	//Si la clave no está tomada, la agrego a lista de bloqueados
-	agregar_blocked(esiRunning, operacionEnMemoria->clave);
+	agregar_blocked(esiRunning, operacionEnMemoria->clave, operacionEnMemoria->valor);
 	free_operacion(&operacionEnMemoria);
 	return OK;
 }
@@ -596,6 +598,15 @@ int validar_operacion_set() {
 	{
 		free_operacion(&operacionEnMemoria);
 		return CLAVE_INEXISTENTE;
+	}
+	else
+	{
+		//Busco el elemento que cumple la condicion, y lo reagrego con el valor correspondiente
+		struct_blocked* elemento = (struct_blocked*)list_find(cola_blocked, ((void*) clave_set_disponible));
+		elemento->valor = realloc(elemento->valor,operacionEnMemoria->largo_valor);
+		strcpy(elemento->valor,operacionEnMemoria->valor);
+		list_remove_by_condition(cola_blocked,((void*) clave_set_disponible));
+		agregar_blocked(elemento->pcb, elemento->clave, elemento->valor);
 	}
 
 	//Si puede tomar la clave sin problemas, simplemente retorna ok
@@ -882,6 +893,15 @@ int obtener_status() {
 
 	char* clave_resp;
 	char* inst_resp;
+
+	struct_blocked* elemento_clave = list_find(cola_blocked,(void*)buscar_esi_a_desbloquear);
+	if (elemento_clave != NULL)
+	{
+		log_info(log_consola,"El valor para la clave %s es: %s", list_comandos[1],elemento_clave->valor);
+		free(elemento_clave);
+	}
+	else
+		log_info(log_consola,"La clave %s no tiene valor asignado", list_comandos[1]);
 
 	int es_instancia_real = desempaquetar_status(respuesta,&clave_resp,&inst_resp);
 
