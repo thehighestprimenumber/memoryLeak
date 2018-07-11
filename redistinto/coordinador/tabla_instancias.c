@@ -26,7 +26,7 @@ int criterio_esta_activa(fila_tabla_instancias* fila, void* nombre_instancia){
 }
 
 int criterio_socket(fila_tabla_instancias* fila, void * socket){
-	int numero_socket = (int) socket;
+	int numero_socket = *(int*) socket;
 	return (fila->socket_instancia == numero_socket);
 }
 
@@ -37,24 +37,24 @@ int criterio_clave(fila_tabla_instancias* instancia, void* nombre_clave){
 				return NO_HAY_INSTANCIAS;
 			}
 			if (strcmp(instancia->claves[i],nombre_clave)==0) {
-				return i;
+				return ++i;
 			}
 		}
 	return NO_HAY_INSTANCIAS;
 }
 
 void buscar_instancia_por_valor_criterio (void* valor, int criterio (fila_tabla_instancias*, void*), fila_tabla_instancias** output){
+	*output = NULL;
 	t_link_element *element = coordinador.tabla_instancias->head;
 	fila_tabla_instancias *fila;
 		while (element != NULL && element->data != NULL) {
 			fila = (fila_tabla_instancias*) (element->data);
-			if (criterio(fila, valor)>-1) {
+			if (criterio(fila, valor)>0) {
 				*output=fila;
 				return;
 			}
 			element = element->next;
 	}
-	*output=NULL;
 }
 
 int cambiar_estado_instancia(fila_tabla_instancias* fila, int esta_activa){
