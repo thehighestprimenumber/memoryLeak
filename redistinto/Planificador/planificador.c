@@ -292,10 +292,53 @@ void finalizar_esi(int socket_esi) {
 	esi_a_eliminar = socket_esi;
 	agregar_finished(socket_esi);
 	list_remove_by_condition(cola_ready, (void*)buscar_esi_kill);
-	list_remove_by_condition(cola_blocked, (void*)buscar_esi_kill);
+	//list_remove_by_condition(cola_blocked, (void*)buscar_esi_kill);
 	list_remove_by_condition(cola_esi_blocked, (void*)buscar_esi_kill);
+	esi_liberar_claves(socket_esi);
 	if (socket_esi == esiRunning.pid)
 		esiRunning = inicializar_pcb();
+}
+
+void esi_liberar_claves(int socket) {
+	//Verifico si el esi a borrar tenía alguna clave tomada
+	int lista_claves_esi = list_count_satisfying(cola_blocked, (void*)buscar_esi_kill);
+
+	if (lista_claves_esi > 0) {
+		//Si tiene claves tomadas, las filtro de la lista original
+		t_list* lista_claves_a_liberar = list_filter(cola_blocked, (void*)buscar_esi_kill);
+
+		//Por cada clave, desbloqueo un solo esi (si hay alguno esperando)
+		list_iterate(lista_claves_a_liberar, (void*)liberar_esi_por_clave);
+
+		list_destroy(lista_claves_a_liberar);
+
+		//Borro todas las claves tomadas por ese esi en la lista de bloqueados
+		while (list_count_satisfying(cola_blocked, (void*)buscar_esi_kill) > 0) {
+			list_remove_by_condition(cola_blocked, ((void*) buscar_esi_kill));
+		}
+	}
+}
+
+void liberar_esi_por_clave(struct_blocked* pcb) {
+	struct_blocked* esi_a_desbloquear;
+	clave_a_eliminar = malloc(strlen(pcb->clave) + 1);
+	strcpy(clave_a_eliminar,pcb->clave);
+	esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)buscar_esi_a_desbloquear_desconexion);
+	if (esi_a_desbloquear != NULL)
+	{
+		list_remove_by_condition(cola_esi_blocked, ((void*) buscar_esi_a_desbloquear_desconexion));
+
+		//Recalculo estimaciones
+		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
+		esi_a_desbloquear->pcb.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esi_a_desbloquear->pcb.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esi_a_desbloquear->pcb.estimado_rafaga_actual;
+		esi_a_desbloquear->pcb.rafaga_actual_real = 0;
+		esi_a_desbloquear->pcb.tiempo_espera = 0;
+		esi_a_desbloquear->pcb.tiempo_respuesta = 0;
+
+		agregar_ready(esi_a_desbloquear->pcb);
+	}
+
+	free(clave_a_eliminar);
 }
 
 struct_pcb planificar_esis() {
@@ -647,6 +690,10 @@ bool buscar_esi_a_desbloquear(struct_blocked* elemento) {
 	char cadena[strlen(elemento->clave)];
 	strcpy(cadena,elemento->clave);
 	return strcmp(cadena,list_comandos[1]) == 0;
+}
+
+bool buscar_esi_a_desbloquear_desconexion(struct_blocked* elemento) {
+	return strcmp(clave_a_eliminar,elemento->clave) == 0;
 }
 
 bool buscar_esi_kill(struct_blocked* elemento) {

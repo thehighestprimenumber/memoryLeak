@@ -46,6 +46,7 @@ typedef struct {
 
 struct_pcb esiRunning = {0,0,0};
 int esi_a_eliminar = 0;
+char* clave_a_eliminar;
 
 typedef struct {
 	struct_pcb pcb;
@@ -133,6 +134,8 @@ void consola_desbloquear();
 void consola_kill();
 void buscar_y_correr_comando();
 int obtener_id_esi(struct_blocked* elemento);
+void esi_liberar_claves(int socket);
+void liberar_esi_por_clave(struct_blocked* elemento);
 
 int actualizar_tiempos_espera();
 int actualizar_tiempos_respuesta();
@@ -144,6 +147,7 @@ bool clave_set_disponible(struct_blocked* elemento);
 bool buscar_esi_ready(struct_ready* elemento);
 bool buscar_esi_a_bloquear(struct_ready* elemento);
 bool buscar_esi_a_desbloquear(struct_blocked* elemento);
+bool buscar_esi_a_desbloquear_desconexion(struct_blocked* elemento);
 bool buscar_esi_kill(struct_blocked* elemento);
 bool ordenar_menos_instrucciones(struct_ready* readyA, struct_ready* readyB);
 bool ordenar_menos_tiempo_respuesta(struct_ready* readyA, struct_ready* readyB);
