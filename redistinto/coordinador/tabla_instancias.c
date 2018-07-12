@@ -82,7 +82,7 @@ fila_tabla_instancias * seleccionar_instancia_LSU (){
 	fila_tabla_instancias *fila_test = (fila_tabla_instancias*) element->data;
 		while (element != NULL && element->data != NULL) {
 			fila_test = (fila_tabla_instancias*) (element->data);
-			if (mejor_opcion->esta_activa && fila_test->entradas_libres > mejor_opcion->entradas_libres) {
+			if (fila_test->esta_activa && fila_test->entradas_libres > mejor_opcion->entradas_libres) {
 				mejor_opcion = fila_test;
 			}
 			element = element->next;
