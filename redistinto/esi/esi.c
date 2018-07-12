@@ -108,7 +108,7 @@ t_operacion * convertir_operacion(t_esi_operacion operacionOriginal){
 		break;
 	case SET:
 		return crearOperacion(op_SET, operacionOriginal.argumentos.SET.clave, strlen(operacionOriginal.argumentos.SET.clave) + 1,
-				operacionOriginal.argumentos.SET.valor, strlen(operacionOriginal.argumentos.SET.valor));
+				operacionOriginal.argumentos.SET.valor, strlen(operacionOriginal.argumentos.SET.valor) + 1);
 		break;
 	case STORE:
 		return crearOperacion(op_STORE, operacionOriginal.argumentos.STORE.clave, strlen(operacionOriginal.argumentos.STORE.clave) + 1, "__", 2);

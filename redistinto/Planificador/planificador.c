@@ -23,8 +23,10 @@ int main(void) {
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	pidCoordinador = conectar_a_coordinador(pConfig);
 
+	//sleep(1);
+
 	//2da conexion a coordinador para STATUS
-	pidCoordinadorStatus = conectar_a_coordinador(pConfig);
+	//pidCoordinadorStatus = conectar_a_coordinador(pConfig);
 
 	log_info(log_consola,"\nInicio de la consola\n");
 
@@ -151,6 +153,8 @@ struct_pcb inicializar_pcb() {
 	pcb.estimado_rafaga_actual = planificador.estimacion_inicial;
 	pcb.estimado_proxima_rafaga = 0;
 	pcb.tamanio_script = 0;
+	pcb.tiempo_espera = 0;
+	pcb.tiempo_respuesta = 0;
 	return pcb;
 }
 
@@ -256,11 +260,13 @@ void agregar_ready(struct_pcb pcb) {
 	log_debug(log_planificador,"\nSe agrego el esi %d, a la lista de listos",pcb.pid);
 }
 
-void agregar_blocked(struct_pcb pcb, char* clave) {
+void agregar_blocked(struct_pcb pcb, char* clave, char* valor) {
 	struct_blocked* elemento = malloc(sizeof(struct_blocked));
 	elemento->pcb = pcb;
 	elemento->clave = (char*)malloc(strlen(clave)+1);
+	elemento->valor = (char*)malloc(strlen(valor)+1);
 	strcpy(elemento->clave,clave);
+	strcpy(elemento->valor,valor);
 	list_add(cola_blocked,elemento);
 	log_debug(log_planificador,"\nSe agrego el esi %d, clave %s a la lista de bloqueados",pcb.pid,clave);
 }
@@ -288,10 +294,53 @@ void finalizar_esi(int socket_esi) {
 	esi_a_eliminar = socket_esi;
 	agregar_finished(socket_esi);
 	list_remove_by_condition(cola_ready, (void*)buscar_esi_kill);
-	list_remove_by_condition(cola_blocked, (void*)buscar_esi_kill);
+	//list_remove_by_condition(cola_blocked, (void*)buscar_esi_kill);
 	list_remove_by_condition(cola_esi_blocked, (void*)buscar_esi_kill);
+	esi_liberar_claves(socket_esi);
 	if (socket_esi == esiRunning.pid)
 		esiRunning = inicializar_pcb();
+}
+
+void esi_liberar_claves(int socket) {
+	//Verifico si el esi a borrar tenía alguna clave tomada
+	int lista_claves_esi = list_count_satisfying(cola_blocked, (void*)buscar_esi_kill);
+
+	if (lista_claves_esi > 0) {
+		//Si tiene claves tomadas, las filtro de la lista original
+		t_list* lista_claves_a_liberar = list_filter(cola_blocked, (void*)buscar_esi_kill);
+
+		//Por cada clave, desbloqueo un solo esi (si hay alguno esperando)
+		list_iterate(lista_claves_a_liberar, (void*)liberar_esi_por_clave);
+
+		list_destroy(lista_claves_a_liberar);
+
+		//Borro todas las claves tomadas por ese esi en la lista de bloqueados
+		while (list_count_satisfying(cola_blocked, (void*)buscar_esi_kill) > 0) {
+			list_remove_by_condition(cola_blocked, ((void*) buscar_esi_kill));
+		}
+	}
+}
+
+void liberar_esi_por_clave(struct_blocked* pcb) {
+	struct_blocked* esi_a_desbloquear;
+	clave_a_eliminar = malloc(strlen(pcb->clave) + 1);
+	strcpy(clave_a_eliminar,pcb->clave);
+	esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)buscar_esi_a_desbloquear_desconexion);
+	if (esi_a_desbloquear != NULL)
+	{
+		list_remove_by_condition(cola_esi_blocked, ((void*) buscar_esi_a_desbloquear_desconexion));
+
+		//Recalculo estimaciones
+		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
+		esi_a_desbloquear->pcb.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esi_a_desbloquear->pcb.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esi_a_desbloquear->pcb.estimado_rafaga_actual;
+		esi_a_desbloquear->pcb.rafaga_actual_real = 0;
+		esi_a_desbloquear->pcb.tiempo_espera = 0;
+		esi_a_desbloquear->pcb.tiempo_respuesta = 0;
+
+		agregar_ready(esi_a_desbloquear->pcb);
+	}
+
+	free(clave_a_eliminar);
 }
 
 struct_pcb planificar_esis() {
@@ -311,7 +360,7 @@ struct_pcb planificar_esis() {
 	}
 
 	else if (strcmp(planificador.algoritmo_planif,"HRRN") == 0) {
-
+		esi_elegido = seleccionar_esi_ready_hrrn();
 	}
 
 	else
@@ -383,6 +432,32 @@ struct_ready* seleccionar_esi_ready_sjf_cd() {
 	return NULL;
 }
 
+struct_ready* seleccionar_esi_ready_hrrn() {
+	struct_ready* esi_seleccionado;
+
+	//Si hay esis esperando, selecciona al que tiene menos instrucciones pendientes
+	//Para esto reordeno la lista por este criterio
+	if (list_size(cola_ready) > 0) {
+		actualizar_tiempos_respuesta();
+		list_sort(cola_ready,(void*)ordenar_menos_tiempo_respuesta);
+		esi_seleccionado = list_get(cola_ready, 0);
+
+		//Logueo para ver comparacion
+		log_info(log_planificador,"ESI actual: %d, Tiempo respuesta: %lf",esiRunning.pid,esiRunning.tiempo_respuesta);
+		log_info(log_planificador,"ESI seleccionado: %d, Tiempo respuesta: %lf",esi_seleccionado->pcb.pid,esi_seleccionado->pcb.tiempo_respuesta);
+
+		//Si el esi_seleccionado tiene una estimación menor al esiRunning lo selecciono, sino retorno null
+		if ((esiRunning.pid == 0) || (esi_seleccionado->pcb.tiempo_respuesta < esiRunning.tiempo_respuesta))
+		{
+			list_remove(cola_ready, 0);
+			return esi_seleccionado;
+		}
+	}
+
+	//Si no encuentro nada retorno null
+	return NULL;
+}
+
 //Funciones dummy para que corra provisionalmente
 int manejar_nueva_esi(int socket){
 	int resultado = 0;
@@ -395,6 +470,9 @@ int manejar_nueva_esi(int socket){
 	//Al conectarse queda parado en la primera instruccion
 	pcb.rafaga_actual_real++;
 	pcb.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)pcb.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * pcb.estimado_rafaga_actual;
+
+	//En el caso de la conexión, inicio el tiempo de espera en 1
+	pcb.tiempo_espera = 1;
 	agregar_ready(pcb);
 
 	//Verifico si algún esi está corriendo, caso contrario
@@ -467,6 +545,7 @@ int manejar_resultado(int socket,Message* msg) {
 		//y comenzar a procesar instrucciones
 		esiRunning.rafaga_actual_real++;
 		esiRunning.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)esiRunning.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * esiRunning.estimado_rafaga_actual;
+		actualizar_tiempos_espera();
 		if (flag_puede_ejecutar == true && esiRunning.pid != 0)
 			return envio_ejecutar(esiRunning.pid);
 		else
@@ -509,7 +588,7 @@ int validar_operacion_get() {
 	}
 
 	//Si la clave no está tomada, la agrego a lista de bloqueados
-	agregar_blocked(esiRunning, operacionEnMemoria->clave);
+	agregar_blocked(esiRunning, operacionEnMemoria->clave, operacionEnMemoria->valor);
 	free_operacion(&operacionEnMemoria);
 	return OK;
 }
@@ -519,6 +598,15 @@ int validar_operacion_set() {
 	{
 		free_operacion(&operacionEnMemoria);
 		return CLAVE_INEXISTENTE;
+	}
+	else
+	{
+		//Busco el elemento que cumple la condicion, y lo reagrego con el valor correspondiente
+		struct_blocked* elemento = (struct_blocked*)list_find(cola_blocked, ((void*) clave_set_disponible));
+		elemento->valor = realloc(elemento->valor,operacionEnMemoria->largo_valor);
+		strcpy(elemento->valor,operacionEnMemoria->valor);
+		list_remove_by_condition(cola_blocked,((void*) clave_set_disponible));
+		agregar_blocked(elemento->pcb, elemento->clave, elemento->valor);
 	}
 
 	//Si puede tomar la clave sin problemas, simplemente retorna ok
@@ -615,6 +703,10 @@ bool buscar_esi_a_desbloquear(struct_blocked* elemento) {
 	return strcmp(cadena,list_comandos[1]) == 0;
 }
 
+bool buscar_esi_a_desbloquear_desconexion(struct_blocked* elemento) {
+	return strcmp(clave_a_eliminar,elemento->clave) == 0;
+}
+
 bool buscar_esi_kill(struct_blocked* elemento) {
 	return (elemento->pcb.pid == esi_a_eliminar);
 }
@@ -631,6 +723,33 @@ bool ordenar_menos_instrucciones(struct_ready* readyA, struct_ready* readyB) {
 	return readyA->pcb.estimado_proxima_rafaga <= readyB->pcb.estimado_proxima_rafaga;
 }
 
+bool ordenar_menos_tiempo_respuesta(struct_ready* readyA, struct_ready* readyB) {
+	log_info(log_planificador,"ESI: %d, Tiempo respuesta: %lf",readyA->pcb.pid,readyA->pcb.tiempo_respuesta);
+	log_info(log_planificador,"ESI: %d, Tiempo respuesta: %lf",readyB->pcb.pid,readyB->pcb.tiempo_respuesta);
+
+	return readyA->pcb.tiempo_respuesta <= readyB->pcb.tiempo_respuesta;
+}
+
+int actualizar_tiempos_espera() {
+	cola_ready = list_map(cola_ready, ((void*) esi_actualizar_espera));
+	return OK;
+}
+
+int actualizar_tiempos_respuesta() {
+	cola_ready = list_map(cola_ready, ((void*) esi_actualizar_respuesta));
+	return OK;
+}
+
+struct_ready* esi_actualizar_espera(struct_ready* esi) {
+	esi->pcb.tiempo_espera++;
+	return esi;
+}
+
+struct_ready* esi_actualizar_respuesta(struct_ready* esi) {
+	esi->pcb.tiempo_respuesta = (esi->pcb.tiempo_espera + esi->pcb.estimado_proxima_rafaga) / esi->pcb.estimado_proxima_rafaga;
+	return esi;
+}
+
 void desbloquear_esi() {
 	struct_blocked* esi_a_desbloquear;
 	esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)clave_ya_bloqueada);
@@ -642,6 +761,8 @@ void desbloquear_esi() {
 		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
 		esi_a_desbloquear->pcb.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esi_a_desbloquear->pcb.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esi_a_desbloquear->pcb.estimado_rafaga_actual;
 		esi_a_desbloquear->pcb.rafaga_actual_real = 0;
+		esi_a_desbloquear->pcb.tiempo_espera = 0;
+		esi_a_desbloquear->pcb.tiempo_respuesta = 0;
 
 		agregar_ready(esi_a_desbloquear->pcb);
 
@@ -773,6 +894,15 @@ int obtener_status() {
 	char* clave_resp;
 	char* inst_resp;
 
+	struct_blocked* elemento_clave = list_find(cola_blocked,(void*)buscar_esi_a_desbloquear);
+	if (elemento_clave != NULL)
+	{
+		log_info(log_consola,"El valor para la clave %s es: %s", list_comandos[1],elemento_clave->valor);
+		free(elemento_clave);
+	}
+	else
+		log_info(log_consola,"La clave %s no tiene valor asignado", list_comandos[1]);
+
 	int es_instancia_real = desempaquetar_status(respuesta,&clave_resp,&inst_resp);
 
 	//Logueo y muestro resultados por la consola
@@ -812,6 +942,8 @@ void consola_bloquear() {
 	if (list_any_satisfy(cola_ready, (void*)buscar_esi_a_bloquear)) {
 		struct_ready* esiBloqueado = list_get((void*)list_filter(cola_ready, (void*)buscar_esi_a_bloquear),1);
 		list_remove_by_condition(cola_ready, (void*)buscar_esi_a_bloquear);
+		esiBloqueado->pcb.tiempo_espera = 0;
+		esiBloqueado->pcb.tiempo_respuesta = 0;
 		agregar_esi_blocked(esiBloqueado->pcb, list_comandos[1]);
 		free(esiBloqueado);
 		bloqueo_ok = true;

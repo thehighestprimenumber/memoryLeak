@@ -26,14 +26,14 @@ int decodificar_comando() {
 
 	list_comandos = string_split(comando_consola," ");
 
-	char* nombreComando = malloc(strlen(list_comandos[0]) + 1);
-	strcpy(nombreComando,list_comandos[0]);
-	string_to_upper(nombreComando);
-
 	while (list_comandos[i] != NULL) {
 		quitar_salto_linea(list_comandos[i]); //saco el \n si es que lo tiene
 		i++;
 	}
+
+	char* nombreComando = malloc(strlen(list_comandos[0]) + 1);
+	strcpy(nombreComando,list_comandos[0]);
+	string_to_upper(nombreComando);
 
 	if (strcmp(nombreComando,"CONTINUAR") == 0)
 		resultado = comando_continuar(list_comandos);

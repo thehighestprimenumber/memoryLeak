@@ -40,10 +40,13 @@ typedef struct {
 	int rafaga_actual_real;
 	double estimado_rafaga_actual;
 	double estimado_proxima_rafaga;
+	int tiempo_espera;
+	double tiempo_respuesta;
 } struct_pcb;
 
 struct_pcb esiRunning = {0,0,0};
 int esi_a_eliminar = 0;
+char* clave_a_eliminar;
 
 typedef struct {
 	struct_pcb pcb;
@@ -52,6 +55,7 @@ typedef struct {
 typedef struct {
 	struct_pcb pcb;
 	char* clave;
+	char* valor; //lo necesito para status
 } struct_blocked;
 
 typedef struct {
@@ -102,6 +106,7 @@ void agregar_esi_blocked(struct_pcb pcb,char* clave);
 struct_ready* seleccionar_esi_ready_fifo();
 struct_ready* seleccionar_esi_ready_sjf_sd();
 struct_ready* seleccionar_esi_ready_sjf_cd();
+struct_ready* seleccionar_esi_ready_hrrn();
 
 //Funciones inicio y fin de instrucciones esi
 int manejar_nueva_esi(int socket); //Añade una esi a la lista de prioridades o cola o lo que diga el algoritmo(mirar var global)
@@ -129,8 +134,13 @@ void consola_bloquear();
 void consola_desbloquear();
 void consola_kill();
 void buscar_y_correr_comando();
-
 int obtener_id_esi(struct_blocked* elemento);
+void esi_liberar_claves(int socket);
+void liberar_esi_por_clave(struct_blocked* elemento);
+
+int actualizar_tiempos_espera();
+int actualizar_tiempos_respuesta();
+
 bool clave_ya_bloqueada_config(char*clave);
 bool clave_verificar_config(char*clave);
 bool clave_ya_bloqueada(struct_blocked* elemento);
@@ -138,7 +148,12 @@ bool clave_set_disponible(struct_blocked* elemento);
 bool buscar_esi_ready(struct_ready* elemento);
 bool buscar_esi_a_bloquear(struct_ready* elemento);
 bool buscar_esi_a_desbloquear(struct_blocked* elemento);
+bool buscar_esi_a_desbloquear_desconexion(struct_blocked* elemento);
 bool buscar_esi_kill(struct_blocked* elemento);
 bool ordenar_menos_instrucciones(struct_ready* readyA, struct_ready* readyB);
+bool ordenar_menos_tiempo_respuesta(struct_ready* readyA, struct_ready* readyB);
+
+struct_ready* esi_actualizar_espera(struct_ready* readyA);
+struct_ready* esi_actualizar_respuesta(struct_ready* readyA);
 
 #endif /* PRUEBA_H_ */
