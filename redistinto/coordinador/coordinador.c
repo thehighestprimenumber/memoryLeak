@@ -119,7 +119,7 @@ int procesarSolicitudDeEsi(Message* msg, int socket_solicitante) {
 			despertar_hilo_instancia(op, instancia);
 			free_operacion(&op);
 			resultado = coordinador.resultado_global;
-			if (resultado > 0) {
+			if (resultado >= 0) {
 				instancia->entradas_libres = resultado;
 				resultado = OK;
 			}

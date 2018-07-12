@@ -32,10 +32,17 @@ void sumardor_parcial_espacio_usado(void *contenido){
 	espacioUsado += tam_min_entrada(entrada->largo_valor);
 }
 
+void sumador_entradas_libres (void *contenido){
+	t_clave_valor *entrada = contenido;
+	entradasOcupadas += tam_min_entrada(entrada->largo_valor);
+}
+
+
 int cantidad_entradas_libres(){
-	espacioUsado = 0;
-	list_iterate(instancia.tabla_entradas, sumardor_parcial_espacio_usado);
-	return instancia.cantEntradas-espacioUsado;
+	entradasOcupadas = 0;
+	list_iterate(instancia.tabla_entradas, sumador_entradas_libres);
+	int output = instancia.cantEntradas-entradasOcupadas<0;
+	return output<0?0:output;
 }
 
 bool comparar_entradas_posicion(void *contenido1, void *contenido2){

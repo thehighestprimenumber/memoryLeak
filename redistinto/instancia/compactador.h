@@ -6,6 +6,7 @@
 
 
 int espacioUsado;
+int entradasOcupadas;
 
 
 
