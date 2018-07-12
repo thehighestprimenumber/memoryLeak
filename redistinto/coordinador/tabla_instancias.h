@@ -7,7 +7,7 @@
 
 #define MAX_LEN_INSTANCE_NAME 20
 #define MAX_LEN_NOMBRE_CLAVE 40
-#define MAX_CLAVES_INSTANCIA 20
+#define MAX_CLAVES_INSTANCIA 100
 
 
 typedef struct {

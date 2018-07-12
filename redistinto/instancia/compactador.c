@@ -35,7 +35,7 @@ void sumardor_parcial_espacio_usado(void *contenido){
 int cantidad_entradas_libres(){
 	espacioUsado = 0;
 	list_iterate(instancia.tabla_entradas, sumardor_parcial_espacio_usado);
-	return (instancia.cantEntradas*instancia.tamEntrada-espacioUsado)/instancia.tamEntrada;
+	return instancia.cantEntradas-espacioUsado;
 }
 
 bool comparar_entradas_posicion(void *contenido1, void *contenido2){

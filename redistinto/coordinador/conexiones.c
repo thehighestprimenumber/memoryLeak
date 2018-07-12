@@ -14,49 +14,57 @@ int enviar_y_loguear_mensaje(int socket, Message msg) {
 
 void* recibir_conexion(void* con) {
 	Conexion* conexion = (Conexion*) con;
-
 	while (1) {
 		Message * msg = (Message *) calloc(sizeof(Message), 1);
 		int res = await_msg(conexion->socket, msg);
 		if (res < 0) {
 			manejar_desconexion(conexion->socket);
 			free_msg(&msg);
-			break;
-		}
-		enum tipoMensaje tipo = msg->header->tipo_mensaje;
+			free(conexion);
+			pthread_exit(0);
+		} else {
+			enum tipoMensaje tipo = msg->header->tipo_mensaje;
 
-		loguear_recepcion(log_coordinador, msg, buscar_id_conexion(conexion->socket));
+			loguear_recepcion(log_coordinador, msg, buscar_id_conexion(conexion->socket));
 
-		switch (tipo){
-			case CONEXION:
-				manejar_conexion(msg, conexion->socket);
-				break;
-			case DESCONEXION:
-				manejar_desconexion(conexion->socket);
-				pthread_exit(OK);
-				break;
-			case ACK:
-			case VALIDAR_BLOQUEO:
-			case TEXTO:
-			case RESULTADO:
-				pthread_exit(OK);
-				break;
-			case OPERACION:
-				manejar_operacion(msg, conexion->socket);
-				break;
-			case CONFSTORAGE:
-			case EJECUTAR:
-				loguear_operacion_no_soportada(log_coordinador, msg, conexion->socket);
-				break;
-			case STATUS_CLAVE:
-				manejar_status(msg, conexion->socket);
-				break;
+			switch (tipo){
+				case CONEXION:
+					manejar_conexion(msg, conexion->socket);
+					free_msg(&msg);
+					pthread_exit(0);
+					break;
+				case DESCONEXION:
+					manejar_desconexion(conexion->socket);
+					free_msg(&msg);
+					pthread_exit(0);
+					break;
+				case OPERACION:
+					manejar_operacion(msg, conexion->socket);
+					free_msg(&msg);
+					break;
+				case ACK:
+				case VALIDAR_BLOQUEO:
+				case TEXTO:
+				case RESULTADO:
+					free_msg(&msg);
+					pthread_exit(0);
+					break;
+				case CONFSTORAGE:
+				case EJECUTAR:
+					loguear_operacion_no_soportada(log_coordinador, msg, conexion->socket);
+					free_msg(&msg);
+					break;
+				case STATUS_CLAVE:
+					manejar_status(msg, conexion->socket);
+					free_msg(&msg);
+					break;
+			}
+
 		}
-		free_msg(&msg);
 	}
 	free(conexion);
 	pthread_exit(0);
-	return 0;
+	exit(0);
 }
 
 int iniciar_servicio() {
