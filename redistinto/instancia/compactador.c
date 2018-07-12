@@ -41,7 +41,7 @@ void sumador_entradas_libres (void *contenido){
 int cantidad_entradas_libres(){
 	entradasOcupadas = 0;
 	list_iterate(instancia.tabla_entradas, sumador_entradas_libres);
-	int output = instancia.cantEntradas-entradasOcupadas<0;
+	int output = instancia.cantEntradas-entradasOcupadas;
 	return output<0?0:output;
 }
 

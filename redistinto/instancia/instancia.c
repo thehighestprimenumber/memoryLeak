@@ -128,6 +128,7 @@ int manejar_operacion(Message * msg) {
 	}
 	sem_post(semTabla);
 	Message* m_resultado;
+	if (resultado>=0) resultado = cantidad_entradas_libres();
 	empaquetar_resultado(INSTANCIA, resultado, &m_resultado);
 	if (send_msg(instancia.socket_coordinador, *m_resultado)<0)
 		return ERROR_DE_ENVIO;

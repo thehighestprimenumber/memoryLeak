@@ -19,7 +19,7 @@
 
 #define OK 0
 #define LOGUEAR_DUMPS 0
-#define configuracionDefault "configInstancia2.txt\0"
+#define configuracionDefault "configInstancia.txt\0"
 
 typedef enum algorimoReemplazo{CIRC, LRU, BSU} algorimoReemplazo;
 
