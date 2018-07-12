@@ -1,5 +1,6 @@
 #include "esi.h"
-#define nombre_script "ESI_Bar1"
+//#define nombre_script "ESI_Spoiler"
+#define nombre_script "ESI_ClaveLarga"
 
 esi_configuracion* inicializar_configuracion(char* argv[]);
 int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario);
@@ -218,7 +219,8 @@ int armar_estructura_script(char* contenidoScript) {
 	for(int i = 0; split[i] != NULL; i++){
 		t_esi_operacion operacionOriginal = parse(split[i]);
 		if (!operacionOriginal.valido) {
-			return CLAVE_MUY_GRANDE;
+			//return CLAVE_MUY_GRANDE;
+			return OK;
 		}
 		t_operacion * op = convertir_operacion(operacionOriginal);
 		list_add(operaciones, op);
