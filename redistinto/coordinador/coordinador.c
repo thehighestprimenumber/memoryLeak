@@ -1,7 +1,7 @@
 # include "coordinador.h"
 # include "configuracion.h"
 # include "conexiones.h"
-# define activar_retardo 1
+# define activar_retardo 0
 
 
 int procesarSolicitudDeEsi(Message* msg, int socket_solicitante);

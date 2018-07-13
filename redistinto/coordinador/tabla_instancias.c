@@ -74,9 +74,8 @@ fila_tabla_instancias* seleccionar_instancia_EL(){
 
 fila_tabla_instancias * seleccionar_instancia_LSU (){
 	t_link_element *element = coordinador.tabla_instancias->head;
-	int activa = 1;
-	fila_tabla_instancias *mejor_opcion;
-	buscar_instancia_por_valor_criterio(&activa, criterio_esta_activa, &mejor_opcion);
+	fila_tabla_instancias *mejor_opcion = seleccionar_instancia_EL();
+	//buscar_instancia_por_valor_criterio(&activa, criterio_esta_activa, &mejor_opcion);
 	if (mejor_opcion==NULL)
 		return NULL;
 	fila_tabla_instancias *fila_test = (fila_tabla_instancias*) element->data;
@@ -91,6 +90,11 @@ fila_tabla_instancias * seleccionar_instancia_LSU (){
 }
 
 fila_tabla_instancias* seleccionar_instancia(char* clave) {
+	fila_tabla_instancias* fila;
+	buscar_instancia_por_valor_criterio(clave, &criterio_clave, &fila);
+	if (fila != NULL)
+		return fila;
+	else
 	switch (coordinador.algoritmo) {
 		case EQUITATIVE_LOAD:
 			return seleccionar_instancia_EL();

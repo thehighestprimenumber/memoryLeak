@@ -1,6 +1,19 @@
 #include "esi.h"
-#define nombre_script "ESI_MultiReemplazo"
+//#define nombre_script "ESI_MenuParrilla"
+//#define nombre_script "ESI_Bar1"
+//#define nombre_script "ESI_MilanesaCompleta"
+//#define nombre_script "ESI_MultiClave"
+//#define nombre_script "ESI_MultiReemplazo"
+//#define nombre_script "ESI_Compactador1"
+#define nombre_script "ESI_Westworld"
+//#define nombre_script "ESI_Remixado"
+
+
 //#define nombre_script "ESI_ClaveLarga"
+
+
+
+
 
 esi_configuracion* inicializar_configuracion(char* argv[]);
 int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario);
