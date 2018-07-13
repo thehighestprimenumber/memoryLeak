@@ -23,7 +23,7 @@ int main(void) {
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	pidCoordinador = conectar_a_coordinador(pConfig);
 
-	//sleep(1);
+	sleep(2);
 
 	//2da conexion a coordinador para STATUS
 	//pidCoordinadorStatus = conectar_a_coordinador(pConfig);
@@ -62,6 +62,8 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 	Message* mensaje;
 	empaquetar_conexion("planificador\0", strlen("planificador"), PLANIFICADOR, &mensaje);
 	int resultado = enviar_y_loguear_mensaje(pidCoordinador, *mensaje, "coordinador\0");
+
+	free_msg(&mensaje);
 
 	if (resultado < 0) {
 		log_error(log_planificador, "Fallo envio mensaje conexion al Coordinador");
@@ -644,13 +646,6 @@ int validar_operacion_store() {
 		//Desbloqueo al primer esi que tuviera la clave tomada
 		desbloquear_esi();
 
-		free_operacion(&operacionEnMemoria);
-	}
-
-
-	return OK;
-}
-
 int ejecutar_nueva_esi() {
 	struct_pcb esi_seleccionado = planificar_esis();
 
@@ -663,7 +658,7 @@ int ejecutar_nueva_esi() {
 		mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
 		int res_ejecutar = enviar_y_loguear_mensaje(esi_seleccionado.pid, *mensajeEjec, "ESI\0");
-		free(mensajeEjec);
+		free_msg(&mensajeEjec);
 		if (res_ejecutar < 0) {
 			exit_proceso(-1);
 		}
@@ -782,7 +777,7 @@ int envio_ejecutar(int socket) {
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
 	int res_ejecutar = enviar_y_loguear_mensaje(socket, *mensajeEjec, "ESI\0");
-	free(mensajeEjec);
+	free_msg(&mensajeEjec);
 	if (res_ejecutar < 0) {exit_proceso(-1);}
 
 	return 0;
