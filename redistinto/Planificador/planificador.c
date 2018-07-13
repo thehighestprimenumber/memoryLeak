@@ -26,7 +26,7 @@ int main(void) {
 	sleep(2);
 
 	//2da conexion a coordinador para STATUS
-	pidCoordinadorStatus = conectar_a_coordinador(pConfig);
+	pidCoordinadorStatus = conectar_a_coordinador_sin_mensaje(pConfig);
 
 	log_info(log_consola,"\nInicio de la consola\n");
 
@@ -68,6 +68,19 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 	if (resultado < 0) {
 		log_error(log_planificador, "Fallo envio mensaje conexion al Coordinador");
 		return -1;
+	}
+
+	return pidCoordinador;
+}
+
+int conectar_a_coordinador_sin_mensaje(t_planificador* pConfig) {
+	int pidCoordinador = connect_to_server(pConfig->IP_coordinador,pConfig->puerto_coordinador);
+	//Verifico conexion con el coordinador
+	if (pidCoordinador < 0) {
+		log_error(log_planificador, "Fallo conexion Planificador con el Coordinador");
+		return -1;
+	} else {
+		log_info(log_planificador, "Planificador se conecto con el Coordinador");
 	}
 
 	return pidCoordinador;

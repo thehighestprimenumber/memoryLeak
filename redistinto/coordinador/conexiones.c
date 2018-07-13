@@ -31,7 +31,7 @@ void* recibir_conexion(void* con) {
 				case CONEXION:
 					manejar_conexion(msg, conexion->socket);
 					free_msg(&msg);
-					//pthread_exit(0);
+					pthread_exit(0);
 					break;
 				case DESCONEXION:
 					manejar_desconexion(conexion->socket);
@@ -53,10 +53,12 @@ void* recibir_conexion(void* con) {
 				case EJECUTAR:
 					loguear_operacion_no_soportada(log_coordinador, msg, conexion->socket);
 					free_msg(&msg);
+					//pthread_exit(0);
 					break;
 				case STATUS_CLAVE:
 					manejar_status(msg, conexion->socket);
 					free_msg(&msg);
+					//pthread_exit(0);
 					break;
 			}
 

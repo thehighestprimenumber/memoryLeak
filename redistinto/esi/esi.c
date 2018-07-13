@@ -1,6 +1,6 @@
 #include "esi.h"
-//#define nombre_script "ESI_Spoiler"
-#define nombre_script "ESI_ClaveLarga"
+#define nombre_script "ESI_Spoilers"
+//#define nombre_script "ESI_ClaveLarga"
 
 esi_configuracion* inicializar_configuracion(char* argv[]);
 int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario);
