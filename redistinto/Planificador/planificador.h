@@ -92,6 +92,7 @@ char* armarPathScript(char* cadenaPath,char* nombreScript);
 void leer_script_completo(char* nombreScript);
 void liberar_split(char** array);
 int conectar_a_coordinador(t_planificador* pConfig);
+int conectar_a_coordinador_sin_mensaje(t_planificador* pConfig);
 int manejador_de_eventos(int socket, Message* msj);
 int realizar_evento(Conexion* con, Message* msj);
 int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) ;

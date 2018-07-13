@@ -162,14 +162,14 @@ void start_listening_threads(int socket, void* (*manejadorDeNuevaConexion)(void 
 }
 
 
-void start_listening_select(int socketListener, int socketCoordinador, int (*manejadorDeEvento)(int, Message*)){
+void start_listening_select(int socketListener, int socketCoordinador, int socketCoordinadorStatus, int (*manejadorDeEvento)(int, Message*)){
 	//Por si me mandan un socket con problemas
-	if(socketListener == -1 || socketCoordinador == -1) return;
+	if(socketListener == -1 || socketCoordinador == -1 || socketCoordinadorStatus == - 1) return;
 
 	int socketConsola = 0;
 
 	t_list *conexiones = list_create();
-	int activity, fdMax = socketListener > socketCoordinador ? socketListener:socketCoordinador;
+	int activity, fdMax = socketListener > socketCoordinadorStatus ? socketListener:socketCoordinadorStatus;
 	fd_set readfds;
 
 	while(1){
@@ -179,6 +179,7 @@ void start_listening_select(int socketListener, int socketCoordinador, int (*man
 		FD_SET(socketConsola, &readfds);
 		FD_SET(socketListener, &readfds);
 		FD_SET(socketCoordinador, &readfds);
+		FD_SET(socketCoordinadorStatus, &readfds);
 
 		//readfds = master;
 

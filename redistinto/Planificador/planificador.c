@@ -667,6 +667,13 @@ int validar_operacion_store() {
 		//Desbloqueo al primer esi que tuviera la clave tomada
 		desbloquear_esi();
 
+		free_operacion(&operacionEnMemoria);
+	}
+
+
+	return OK;
+}
+
 int ejecutar_nueva_esi() {
 	struct_pcb esi_seleccionado = planificar_esis();
 
