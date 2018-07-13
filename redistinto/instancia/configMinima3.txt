@@ -1,0 +1,6 @@
+IP_coordinador=10.0.2.15
+puerto_coordinador=8087
+algoritmo=CIRC
+punto_montaje=/home/utnso/inst3/
+nombre_instancia=Inst3
+dump=50
