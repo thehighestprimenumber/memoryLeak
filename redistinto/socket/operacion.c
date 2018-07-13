@@ -148,7 +148,7 @@ void desempaquetar_operacion(Message* msg, t_operacion** output) {
 	operacion->largo_clave = opHeader->largo_clave;
 	operacion->clave = calloc(1, operacion->largo_clave);
 	operacion->largo_valor = opHeader->largo_valor;
-	operacion->valor = calloc(1, operacion->largo_valor);
+	operacion->valor = calloc(1, operacion->largo_valor + 1);
 	operacion->tipo = opHeader->tipo;
 	free(opHeader);
 

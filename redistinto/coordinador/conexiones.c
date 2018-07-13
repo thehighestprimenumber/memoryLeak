@@ -31,7 +31,7 @@ void* recibir_conexion(void* con) {
 				case CONEXION:
 					manejar_conexion(msg, conexion->socket);
 					free_msg(&msg);
-					pthread_exit(0);
+					//FIXME hay que restaurar esto pthread_exit(0);
 					break;
 				case DESCONEXION:
 					manejar_desconexion(conexion->socket);
