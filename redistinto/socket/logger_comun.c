@@ -181,8 +181,8 @@ void desempaquetar_varios(Message * m, char** output) {
 		*output = contenido;
 		break;
 	default:
-		contenido = calloc(1, strlen("tipo no definido")+1);
-		memcpy(contenido, "tipo no definido\0", strlen("tipo definido"));
+		contenido = calloc(1, strlen("comando")+1);
+		memcpy(contenido, "comando\0", strlen("tipo definido"));
 		*output = contenido;
 	}
 }

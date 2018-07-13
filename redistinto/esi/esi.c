@@ -1,6 +1,6 @@
 #include "esi.h"
-//#define nombre_script "ESI_Spoiler"
-#define nombre_script "ESI_ClaveLarga"
+#define nombre_script "ESI_MultiReemplazo"
+//#define nombre_script "ESI_ClaveLarga"
 
 esi_configuracion* inicializar_configuracion(char* argv[]);
 int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario);
@@ -104,14 +104,14 @@ t_operacion * crearOperacion(tipoOperacion tipo, char* clave, int largoClave, ch
 t_operacion * convertir_operacion(t_esi_operacion operacionOriginal){
 	switch(operacionOriginal.keyword){
 	case GET:
-		return crearOperacion(op_GET, operacionOriginal.argumentos.GET.clave, strlen(operacionOriginal.argumentos.GET.clave) + 1, "__", 2);
+		return crearOperacion(op_GET, operacionOriginal.argumentos.GET.clave, strlen(operacionOriginal.argumentos.GET.clave) + 1, "\0", 0);
 		break;
 	case SET:
 		return crearOperacion(op_SET, operacionOriginal.argumentos.SET.clave, strlen(operacionOriginal.argumentos.SET.clave) + 1,
 				operacionOriginal.argumentos.SET.valor, strlen(operacionOriginal.argumentos.SET.valor) + 1);
 		break;
 	case STORE:
-		return crearOperacion(op_STORE, operacionOriginal.argumentos.STORE.clave, strlen(operacionOriginal.argumentos.STORE.clave) + 1, "__", 2);
+		return crearOperacion(op_STORE, operacionOriginal.argumentos.STORE.clave, strlen(operacionOriginal.argumentos.STORE.clave) + 1, "\0", 0);
 		break;
 	}
 

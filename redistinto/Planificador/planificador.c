@@ -26,7 +26,7 @@ int main(void) {
 	sleep(2);
 
 	//2da conexion a coordinador para STATUS
-	//pidCoordinadorStatus = conectar_a_coordinador(pConfig);
+	pidCoordinadorStatus = conectar_a_coordinador_sin_mensaje(pConfig);
 
 	log_info(log_consola,"\nInicio de la consola\n");
 
@@ -73,6 +73,19 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 	return pidCoordinador;
 }
 
+int conectar_a_coordinador_sin_mensaje(t_planificador* pConfig) {
+	int pidCoordinador = connect_to_server(pConfig->IP_coordinador,pConfig->puerto_coordinador);
+	//Verifico conexion con el coordinador
+	if (pidCoordinador < 0) {
+		log_error(log_planificador, "Fallo conexion Planificador con el Coordinador");
+		return -1;
+	} else {
+		log_info(log_planificador, "Planificador se conecto con el Coordinador");
+	}
+
+	return pidCoordinador;
+}
+
 int enviar_y_loguear_mensaje(int socket, Message msg, char* destinatario) {
 	int res = send_msg(socket, msg);
 		if (res<0) {
@@ -93,7 +106,7 @@ int iniciar(){
 
 	free(ipLocal);
 
-	start_listening_select(socket_fd, pidCoordinador, *manejador_de_eventos);
+	start_listening_select(socket_fd, pidCoordinador, pidCoordinadorStatus, *manejador_de_eventos);
 
 	return 0;
 }
@@ -101,6 +114,7 @@ int iniciar(){
 void exit_proceso(int retorno) {
   log_destroy(log_planificador);
   log_destroy(log_consola);
+  list_destroy(cola_ready);
   exit(retorno);
 }
 
@@ -121,14 +135,18 @@ char* armarPathScript(char* cadenaPath,char* nombreScript) {
 }
 
 void leer_script_completo(char* nombreArchivo) {
+	char * conA = armarPathScript(scriptTxtDebug,nombreArchivo);
+	char * conB = armarPathScript(scriptTxt,nombreArchivo);
+
 	//Abrir archivo para los esis
-	FILE *f = fopen(armarPathScript(scriptTxtDebug,nombreArchivo), "rb");
+	FILE *f = fopen(conA, "rb");
 		if (f == NULL) {
-			f = fopen(armarPathScript(scriptTxt,nombreArchivo), "rb");
+			f = fopen(conB, "rb");
 			if (f == NULL) {
 				contenidoScript = malloc(strlen(" "));
 				memcpy(contenidoScript," ",strlen(" "));
-
+				free(conA);
+				free(conB);
 				return;
 			}
 		}
@@ -140,9 +158,13 @@ void leer_script_completo(char* nombreArchivo) {
 		contenidoScript = malloc(fsize + 1);
 		if (contenidoScript == NULL) {
 			perror("malloc");
+			free(conA);
+			free(conB);
 			exit(EXIT_FAILURE);
 		}
 
+		free(conA);
+		free(conB);
 		fread(contenidoScript, fsize, 1, f);
 		fclose(f);
 		contenidoScript[fsize] = '\0';
@@ -159,10 +181,8 @@ struct_pcb inicializar_pcb() {
 	pcb.tiempo_respuesta = 0;
 	return pcb;
 }
-
 int manejador_de_eventos(int socket, Message* msg){
 	loguear_recepcion_remitente(log_planificador, msg, msg->header->remitente);
-
 	int resp = 0;
 
 	//En el caso de las operaciones el socket ya escucha el mensaje por lo que esto no va
@@ -224,6 +244,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				Message* mensaje;
 				empaquetar_resultado(PLANIFICADOR, resultado_operacion, &mensaje);
 				int result = enviar_y_loguear_mensaje(socket, *mensaje, "coordinador\0");
+				free_msg(&mensaje);
 				if (result) {
 					log_info(log_planificador, "error al enviar resultado al coordinador");
 					return ERROR_DE_ENVIO;
@@ -549,7 +570,7 @@ int manejar_resultado(int socket,Message* msg) {
 		esiRunning.rafaga_actual_real++;
 		esiRunning.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)esiRunning.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * esiRunning.estimado_rafaga_actual;
 		actualizar_tiempos_espera();
-		planificar_esis();
+		//TODO revisar si hace falta planificar_esis();
 		if (flag_puede_ejecutar == true && esiRunning.pid != 0)
 			return envio_ejecutar(esiRunning.pid);
 		else
@@ -895,7 +916,7 @@ int obtener_status() {
 	if (elemento_clave != NULL)
 	{
 		log_info(log_consola,"El valor para la clave %s es: %s", list_comandos[1],elemento_clave->valor);
-		free(elemento_clave);
+		//free(elemento_clave);
 	}
 	else
 		log_info(log_consola,"La clave %s no tiene valor asignado", list_comandos[1]);
