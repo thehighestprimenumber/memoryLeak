@@ -32,6 +32,25 @@ void loguear_conexion(t_log* log, Message * m, char* id_socket) {
 	free(nombre);
 }
 
+void loguear_recepcion_remitente(t_log* log, Message * m, int tipoRemitente) {
+
+	if (m->header->tipo_mensaje == OPERACION) {
+		t_operacion * op;
+		desempaquetar_operacion(m, &op);
+		log_info(log,
+				"recibio un mensaje de %s para la operacion %s %s", nombres_modulos[tipoRemitente],
+				nombres_operacion[op->tipo], op->clave);
+		free_operacion(&op);
+	} else {
+		char * contenido;
+		desempaquetar_varios(m, &contenido);
+		log_info(log,
+				"recibio un mensaje de %s: %s", nombres_modulos[tipoRemitente],
+				contenido);
+		free(contenido);
+	}
+}
+
 void loguear_recepcion(t_log* log, Message * m, char* id_socket) {
 
 	if (m->header->tipo_mensaje == OPERACION) {

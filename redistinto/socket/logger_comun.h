@@ -7,6 +7,7 @@
 char* nombres_modulos[5];
 char* nombres_operacion[3];
 void loguear_conexion(t_log* log, Message * m, char* id_del_socket);
+void loguear_recepcion_remitente(t_log* log, Message * m, int tipoRemitente);
 void loguear_recepcion(t_log* log, Message * m, char* id_del_socket);
 void loguear_desconexion(t_log* log, char* id_del_socket);
 void loguear_desconexion_int(t_log* log, int id_socket);

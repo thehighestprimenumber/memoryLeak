@@ -159,7 +159,8 @@ struct_pcb inicializar_pcb() {
 }
 
 int manejador_de_eventos(int socket, Message* msg){
-	log_info(log_planificador, "Ocurrio un evento del tipo: %d", msg->header->tipo_mensaje);
+	loguear_recepcion_remitente(log_planificador, msg, msg->header->remitente);
+
 	int resp = 0;
 
 	//En el caso de las operaciones el socket ya escucha el mensaje por lo que esto no va
@@ -248,7 +249,7 @@ void aceptar_conexion(int socket, char* nombreScript) {
 	leer_script_completo(nombreScript);
 	Message* mensaje;
 	empaquetar_conexion(contenidoScript, strlen(contenidoScript), PLANIFICADOR, &mensaje);
-	enviar_y_loguear_mensaje(socket, *mensaje, "desconocido");
+	enviar_y_loguear_mensaje(socket, *mensaje, "esi");
 	free_msg(&mensaje);
 }
 
@@ -546,6 +547,7 @@ int manejar_resultado(int socket,Message* msg) {
 		esiRunning.rafaga_actual_real++;
 		esiRunning.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)esiRunning.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * esiRunning.estimado_rafaga_actual;
 		actualizar_tiempos_espera();
+		planificar_esis();
 		if (flag_puede_ejecutar == true && esiRunning.pid != 0)
 			return envio_ejecutar(esiRunning.pid);
 		else

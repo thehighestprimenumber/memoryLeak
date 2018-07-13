@@ -131,8 +131,9 @@ void enviar_operacion_a_coordinador(t_operacion* operacion){
 void enviar_ruta_script_al_planificador(char* path){
 
 	Message* msg;
-	empaquetar_texto(path, strlen(path), ESI, &msg);
-	msg->header->tipo_mensaje = CONEXION;
+	empaquetar_conexion(path, strlen(path), ESI, &msg);
+	//empaquetar_texto(path, strlen(path), ESI, &msg);
+	//msg->header->tipo_mensaje = CONEXION;
 
 	int res = enviar_y_loguear_mensaje(socket_planificador, (*msg), "planificador\0");
 		free_msg(&msg);
@@ -187,6 +188,8 @@ void manejar_mensajes(Message mensaje) {
 		case CONEXION:
 			log_info(log_esi, "Recibido el contenido del script");
 			resultado = armar_estructura_script(mensaje.contenido);
+			Message confirmacion;
+			await_msg(socket_planificador, &confirmacion);
 			break;
 		case DESCONEXION:
 			esi_correr = false;
