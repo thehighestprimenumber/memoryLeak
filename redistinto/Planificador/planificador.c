@@ -261,6 +261,21 @@ int manejador_de_eventos(int socket, Message* msg){
 void aceptar_conexion(int socket, char* nombreScript) {
 	//Por último envío mensaje de confirmación al esi que se conecto
 	leer_script_completo(nombreScript);
+
+	//Agrego la nueva conexión a lista de preparados
+	struct_pcb pcb = inicializar_pcb();
+	pcb.pid = socket;
+	pcb.tamanio_script = cantidad_lineas_script(contenidoScript);
+
+	//Al conectarse queda parado en la primera instruccion
+	pcb.rafaga_actual_real++;
+	pcb.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)pcb.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * pcb.estimado_rafaga_actual;
+
+	//En el caso de la conexión, inicio el tiempo de espera en 1
+	pcb.tiempo_espera = 1;
+	agregar_ready(pcb);
+
+
 	Message* mensaje;
 	empaquetar_conexion(contenidoScript, strlen(contenidoScript), PLANIFICADOR, &mensaje);
 	enviar_y_loguear_mensaje(socket, *mensaje, "esi");
@@ -477,19 +492,6 @@ struct_ready* seleccionar_esi_ready_hrrn() {
 int manejar_nueva_esi(int socket){
 	int resultado = 0;
 
-	//Agrego la nueva conexión a lista de preparados
-	struct_pcb pcb = inicializar_pcb();
-	pcb.pid = socket;
-	pcb.tamanio_script = cantidad_lineas_script(contenidoScript);
-
-	//Al conectarse queda parado en la primera instruccion
-	pcb.rafaga_actual_real++;
-	pcb.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)pcb.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * pcb.estimado_rafaga_actual;
-
-	//En el caso de la conexión, inicio el tiempo de espera en 1
-	pcb.tiempo_espera = 1;
-	agregar_ready(pcb);
-
 	//Verifico si algún esi está corriendo, caso contrario
 	//envio un esi a ejecutarse según el algorimto seleccionado
 	if (flag_puede_ejecutar == true)
@@ -570,7 +572,13 @@ int manejar_resultado(int socket,Message* msg) {
 		break;
 		//En este caso como ya estaría bloqueado en mi lista queda esperando
 		case CLAVE_DUPLICADA:
-			esiRunning = inicializar_pcb();
+			if (socket == esiRunning.pid)
+			{
+				esiRunning = inicializar_pcb();
+				planificar_esis();
+				if (esiRunning.pid > 0)
+					envio_ejecutar(esiRunning.pid);
+			}
 			return 0;
 		//En estos casos envío mensaje al esi para que se desconecte saliendo del bucle
 		case CLAVE_INEXISTENTE:
