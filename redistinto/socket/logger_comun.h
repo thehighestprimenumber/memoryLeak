@@ -4,7 +4,7 @@
 #include "socket.h"
 #include "operacion.h"
 #include <commons/log.h>
-char* nombres_modulos[5];
+char* nombres_modulos[6];
 char* nombres_operacion[3];
 void loguear_conexion(t_log* log, Message * m, char* id_del_socket);
 void loguear_recepcion_remitente(t_log* log, Message * m, int tipoRemitente);
