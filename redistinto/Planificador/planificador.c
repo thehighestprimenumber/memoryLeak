@@ -923,7 +923,7 @@ int obtener_status() {
 	if (elemento_clave != NULL)
 	{
 		log_info(log_consola,"El valor para la clave %s es: %s", list_comandos[1],elemento_clave->valor);
-		free(elemento_clave);
+		//free(elemento_clave);
 	}
 	else
 		log_info(log_consola,"La clave %s no tiene valor asignado", list_comandos[1]);
