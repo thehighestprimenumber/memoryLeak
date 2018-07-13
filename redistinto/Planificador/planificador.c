@@ -23,10 +23,10 @@ int main(void) {
 	t_planificador* pConfig = (t_planificador*)&planificador;
 	pidCoordinador = conectar_a_coordinador(pConfig);
 
-	//sleep(1);
+	sleep(2);
 
 	//2da conexion a coordinador para STATUS
-	//pidCoordinadorStatus = conectar_a_coordinador(pConfig);
+	pidCoordinadorStatus = conectar_a_coordinador(pConfig);
 
 	log_info(log_consola,"\nInicio de la consola\n");
 
@@ -91,7 +91,7 @@ int iniciar(){
 
 	free(ipLocal);
 
-	start_listening_select(socket_fd, pidCoordinador, *manejador_de_eventos);
+	start_listening_select(socket_fd, pidCoordinador, pidCoordinadorStatus, *manejador_de_eventos);
 
 	return 0;
 }
