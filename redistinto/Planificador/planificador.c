@@ -63,6 +63,8 @@ int conectar_a_coordinador(t_planificador* pConfig) {
 	empaquetar_conexion("planificador\0", strlen("planificador"), PLANIFICADOR, &mensaje);
 	int resultado = enviar_y_loguear_mensaje(pidCoordinador, *mensaje, "coordinador\0");
 
+	free_msg(&mensaje);
+
 	if (resultado < 0) {
 		log_error(log_planificador, "Fallo envio mensaje conexion al Coordinador");
 		return -1;
@@ -99,6 +101,7 @@ int iniciar(){
 void exit_proceso(int retorno) {
   log_destroy(log_planificador);
   log_destroy(log_consola);
+  list_destroy(cola_ready);
   exit(retorno);
 }
 
@@ -119,14 +122,18 @@ char* armarPathScript(char* cadenaPath,char* nombreScript) {
 }
 
 void leer_script_completo(char* nombreArchivo) {
+	char * conA = armarPathScript(scriptTxtDebug,nombreArchivo);
+	char * conB = armarPathScript(scriptTxt,nombreArchivo);
+
 	//Abrir archivo para los esis
-	FILE *f = fopen(armarPathScript(scriptTxtDebug,nombreArchivo), "rb");
+	FILE *f = fopen(conA, "rb");
 		if (f == NULL) {
-			f = fopen(armarPathScript(scriptTxt,nombreArchivo), "rb");
+			f = fopen(conB, "rb");
 			if (f == NULL) {
 				contenidoScript = malloc(strlen(" "));
 				memcpy(contenidoScript," ",strlen(" "));
-
+				free(conA);
+				free(conB);
 				return;
 			}
 		}
@@ -138,9 +145,13 @@ void leer_script_completo(char* nombreArchivo) {
 		contenidoScript = malloc(fsize + 1);
 		if (contenidoScript == NULL) {
 			perror("malloc");
+			free(conA);
+			free(conB);
 			exit(EXIT_FAILURE);
 		}
 
+		free(conA);
+		free(conB);
 		fread(contenidoScript, fsize, 1, f);
 		fclose(f);
 		contenidoScript[fsize] = '\0';
@@ -221,6 +232,7 @@ int manejador_de_eventos(int socket, Message* msg){
 				Message* mensaje;
 				empaquetar_resultado(PLANIFICADOR, resultado_operacion, &mensaje);
 				int result = enviar_y_loguear_mensaje(socket, *mensaje, "coordinador\0");
+				free_msg(&mensaje);
 				if (result) {
 					log_info(log_planificador, "error al enviar resultado al coordinador");
 					return ERROR_DE_ENVIO;
@@ -661,7 +673,7 @@ int ejecutar_nueva_esi() {
 		mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
 		int res_ejecutar = enviar_y_loguear_mensaje(esi_seleccionado.pid, *mensajeEjec, "ESI\0");
-		free(mensajeEjec);
+		free_msg(&mensajeEjec);
 		if (res_ejecutar < 0) {
 			exit_proceso(-1);
 		}
@@ -780,7 +792,7 @@ int envio_ejecutar(int socket) {
 	mensajeEjec->header->tipo_mensaje = EJECUTAR;
 
 	int res_ejecutar = enviar_y_loguear_mensaje(socket, *mensajeEjec, "ESI\0");
-	free(mensajeEjec);
+	free_msg(&mensajeEjec);
 	if (res_ejecutar < 0) {exit_proceso(-1);}
 
 	return 0;
