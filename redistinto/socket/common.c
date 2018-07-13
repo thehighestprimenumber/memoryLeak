@@ -56,6 +56,16 @@ int cantidad_lineas_script(char* script){
 
 }
 
+void liberar_split(char** array){
+	int i = 0;
+	while (array[i] != NULL) {
+		free(array[i]);
+		i++;
+	}
+	free(array);
+}
+
+
 long long int get_time_millisec(){
 	  struct timeb timer_msec;
 	  ftime(&timer_msec);

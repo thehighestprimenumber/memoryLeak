@@ -19,5 +19,6 @@ void free_memory(void **puntero);
 char* get_local_ip();
 int cantidad_lineas_script(char* script);
 long long int get_time_millisec();
+void liberar_split(char** array);
 
 #endif /* REDISTINTO_COMMON_H_ */

@@ -210,9 +210,8 @@ void manejar_mensajes(Message mensaje) {
 }
 
 int armar_estructura_script(char* contenidoScript) {
-	script.script_contenido = malloc(strlen(contenidoScript));
-	memcpy(script.script_contenido,"",1);
-	strcat(script.script_contenido,contenidoScript);
+	script.script_contenido = malloc(strlen(contenidoScript) + 1);
+	memcpy(script.script_contenido,contenidoScript,strlen(contenidoScript) + 1);
 	//memcpy(script.script_contenido,contenidoScript,strlen(contenidoScript));
 	((char*) script.script_contenido)[strlen(script.script_contenido)] = '\0';
 	script.script_largo = cantidad_lineas_script(script.script_contenido);
@@ -221,11 +220,15 @@ int armar_estructura_script(char* contenidoScript) {
 		t_esi_operacion operacionOriginal = parse(split[i]);
 		if (!operacionOriginal.valido) {
 			//return CLAVE_MUY_GRANDE;
+			liberar_split(split);
 			return OK;
 		}
 		t_operacion * op = convertir_operacion(operacionOriginal);
 		list_add(operaciones, op);
-	} return OK;
+	}
+
+	liberar_split(split);
+	return OK;
 }
 
 esi_configuracion* inicializar_configuracion(char* argv[]) {

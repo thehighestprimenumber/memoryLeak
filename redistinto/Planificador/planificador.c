@@ -118,15 +118,6 @@ void exit_proceso(int retorno) {
   exit(retorno);
 }
 
-void liberar_split(char** array){
-	int i = 0;
-	while (array[i] != NULL) {
-		free(array[i]);
-		i++;
-	}
-	free(array);
-}
-
 char* armarPathScript(char* cadenaPath,char* nombreScript) {
 	char* cadenaScript = malloc(strlen(cadenaPath) + strlen(nombreScript) + 1);
 	memcpy(cadenaScript,cadenaPath,strlen(cadenaPath) + 1);
