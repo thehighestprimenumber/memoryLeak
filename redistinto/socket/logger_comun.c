@@ -20,7 +20,7 @@ const char* nombres_resultados[] = {
 								[-CLAVE_BLOQUEADA] = "CLAVE BLOQUEADA" ,
 							};
 
-char* nombres_modulos[] = {"DESCONOCIDO", "ESI", "PLANIFICADOR", "INSTANCIA", "COORDINADOR"};
+char* nombres_modulos[] = {"DESCONOCIDO", "ESI", "PLANIFICADOR", "INSTANCIA", "COORDINADOR", "CONSOLA"};
 
 
 
@@ -129,7 +129,9 @@ void desempaquetar_varios(Message * m, char** output) {
 	char* contenido;
 	switch (m->header->tipo_mensaje) {
 	case TEXTO:
-		desempaquetar_texto(m, &contenido);
+		//desempaquetar_texto(m, &contenido);
+		contenido = calloc(1, strlen("texto")+1);
+		memcpy(contenido, "texto\0", strlen("operacion"));
 		*output = contenido;
 		break;
 	case OPERACION:
@@ -179,8 +181,8 @@ void desempaquetar_varios(Message * m, char** output) {
 		*output = contenido;
 		break;
 	default:
-		contenido = calloc(1, strlen("tipo no definido")+1);
-		memcpy(contenido, "tipo no definido\0", strlen("tipo definido"));
+		contenido = calloc(1, strlen("comando")+1);
+		memcpy(contenido, "comando\0", strlen("tipo definido"));
 		*output = contenido;
 	}
 }
