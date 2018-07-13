@@ -1,7 +1,7 @@
 # include "coordinador.h"
 # include "configuracion.h"
 # include "conexiones.h"
-# define activar_retardo 0
+# define activar_retardo 1
 
 
 int procesarSolicitudDeEsi(Message* msg, int socket_solicitante);
@@ -90,7 +90,7 @@ int manejar_status(Message* msg, int socket){
 }
 
 int procesarSolicitudDeEsi(Message* msg, int socket_solicitante) {
-	if (activar_retardo) sleep(coordinador.retardo);
+	if (activar_retardo) sleep(coordinador.retardo/1000);
 
 	t_operacion * op;
 	desempaquetar_operacion(msg, &op);
