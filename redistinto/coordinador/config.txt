@@ -1,6 +1,6 @@
 ip_coordinador=127.0.0.1
 puerto=8086
-retardo=300
+retardo=200
 algoritmo=EL
-cantidad_entradas=8
-tamanio_entrada=10
+cantidad_entradas=50
+tamanio_entrada=20
