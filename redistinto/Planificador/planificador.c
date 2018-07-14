@@ -261,6 +261,21 @@ int manejador_de_eventos(int socket, Message* msg){
 void aceptar_conexion(int socket, char* nombreScript) {
 	//Por último envío mensaje de confirmación al esi que se conecto
 	leer_script_completo(nombreScript);
+
+	//Agrego la nueva conexión a lista de preparados
+	struct_pcb pcb = inicializar_pcb();
+	pcb.pid = socket;
+	pcb.tamanio_script = cantidad_lineas_script(contenidoScript);
+
+	//Al conectarse queda parado en la primera instruccion
+	//pcb.rafaga_actual_real++;
+	//pcb.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)pcb.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * pcb.estimado_rafaga_actual;
+
+	//En el caso de la conexión, inicio el tiempo de espera en 1
+	//pcb.tiempo_espera = 1;
+	agregar_ready(pcb);
+
+
 	Message* mensaje;
 	empaquetar_conexion(contenidoScript, strlen(contenidoScript), PLANIFICADOR, &mensaje);
 	enviar_y_loguear_mensaje(socket, *mensaje, "esi");
@@ -348,7 +363,7 @@ void liberar_esi_por_clave(struct_blocked* pcb) {
 		//Recalculo estimaciones
 		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
 		esi_a_desbloquear->pcb.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esi_a_desbloquear->pcb.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esi_a_desbloquear->pcb.estimado_rafaga_actual;
-		esi_a_desbloquear->pcb.rafaga_actual_real = 0;
+		esi_a_desbloquear->pcb.rafaga_actual_real = 1;
 		esi_a_desbloquear->pcb.tiempo_espera = 0;
 		esi_a_desbloquear->pcb.tiempo_respuesta = 0;
 
@@ -415,7 +430,12 @@ struct_ready* seleccionar_esi_ready_sjf_sd() {
 		list_sort(cola_ready,(void*)ordenar_menos_instrucciones);
 		esi_seleccionado = list_get(cola_ready, 0);
 		list_remove(cola_ready, 0);
+		log_info(log_planificador,"ESI Seleccionado: %d", esi_seleccionado->pcb.pid);
 		return esi_seleccionado;
+	}
+	else
+	{
+		log_info(log_planificador,"No se encontro esi a seleccionar");
 	}
 
 	//Si no encuentro nada retorno null
@@ -439,6 +459,18 @@ struct_ready* seleccionar_esi_ready_sjf_cd() {
 		if ((esiRunning.pid == 0) || (esi_seleccionado->pcb.estimado_proxima_rafaga < esiRunning.estimado_proxima_rafaga))
 		{
 			list_remove(cola_ready, 0);
+
+			if (esiRunning.pid > 0)
+			{
+				//Recalculo estimaciones
+				esiRunning.estimado_rafaga_actual = esiRunning.estimado_proxima_rafaga;
+				esiRunning.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esiRunning.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esiRunning.estimado_rafaga_actual;
+				esiRunning.rafaga_actual_real = 1;
+				esiRunning.tiempo_espera = 0;
+				esiRunning.tiempo_respuesta = 0;
+				agregar_ready(esiRunning);
+			}
+
 			return esi_seleccionado;
 		}
 	}
@@ -476,19 +508,6 @@ struct_ready* seleccionar_esi_ready_hrrn() {
 //Funciones dummy para que corra provisionalmente
 int manejar_nueva_esi(int socket){
 	int resultado = 0;
-
-	//Agrego la nueva conexión a lista de preparados
-	struct_pcb pcb = inicializar_pcb();
-	pcb.pid = socket;
-	pcb.tamanio_script = cantidad_lineas_script(contenidoScript);
-
-	//Al conectarse queda parado en la primera instruccion
-	pcb.rafaga_actual_real++;
-	pcb.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)pcb.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * pcb.estimado_rafaga_actual;
-
-	//En el caso de la conexión, inicio el tiempo de espera en 1
-	pcb.tiempo_espera = 1;
-	agregar_ready(pcb);
 
 	//Verifico si algún esi está corriendo, caso contrario
 	//envio un esi a ejecutarse según el algorimto seleccionado
@@ -570,7 +589,24 @@ int manejar_resultado(int socket,Message* msg) {
 		break;
 		//En este caso como ya estaría bloqueado en mi lista queda esperando
 		case CLAVE_DUPLICADA:
-			esiRunning = inicializar_pcb();
+			if (socket == esiRunning.pid)
+			{
+				esiRunning = inicializar_pcb();
+				planificar_esis();
+				if (esiRunning.pid > 0)
+					envio_ejecutar(esiRunning.pid);
+			}
+			else if (socket != esiRunning.pid && esiRunning.pid > 0)
+			{
+				envio_ejecutar(esiRunning.pid);
+			}
+			else
+			{
+				planificar_esis();
+				if (esiRunning.pid > 0)
+					envio_ejecutar(esiRunning.pid);
+			}
+
 			return 0;
 		//En estos casos envío mensaje al esi para que se desconecte saliendo del bucle
 		case CLAVE_INEXISTENTE:
@@ -771,12 +807,12 @@ void desbloquear_esi() {
 	esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)clave_ya_bloqueada);
 	if (esi_a_desbloquear != NULL)
 	{
-		list_remove_by_condition(cola_esi_blocked, ((void*) clave_set_disponible));
+		list_remove_by_condition(cola_esi_blocked, ((void*) clave_ya_bloqueada));
 
 		//Recalculo estimaciones
 		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
 		esi_a_desbloquear->pcb.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esi_a_desbloquear->pcb.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esi_a_desbloquear->pcb.estimado_rafaga_actual;
-		esi_a_desbloquear->pcb.rafaga_actual_real = 0;
+		esi_a_desbloquear->pcb.rafaga_actual_real = 1;
 		esi_a_desbloquear->pcb.tiempo_espera = 0;
 		esi_a_desbloquear->pcb.tiempo_respuesta = 0;
 
@@ -1006,6 +1042,11 @@ void consola_desbloquear() {
 		struct_blocked* esi_a_desbloquear;
 		esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)buscar_esi_a_desbloquear);
 		list_remove_by_condition(cola_esi_blocked, ((void*) buscar_esi_a_desbloquear));
+		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
+		esi_a_desbloquear->pcb.estimado_proxima_rafaga = (double)((planificador.alfaPlanificacion / 100 * esi_a_desbloquear->pcb.rafaga_actual_real)) + ((double)(1 - planificador.alfaPlanificacion / 100) * esi_a_desbloquear->pcb.estimado_rafaga_actual);
+		esi_a_desbloquear->pcb.rafaga_actual_real = 1;
+		esi_a_desbloquear->pcb.tiempo_espera = 0;
+		esi_a_desbloquear->pcb.tiempo_respuesta = 0;
 		agregar_ready(esi_a_desbloquear->pcb);
 
 		log_info(log_consola,"Se desbloqueo el esi %d para la clave %s",esi_a_desbloquear->pcb.pid,esi_a_desbloquear->clave);
