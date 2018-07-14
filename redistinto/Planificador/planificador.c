@@ -114,7 +114,7 @@ int iniciar(){
 void exit_proceso(int retorno) {
   log_destroy(log_planificador);
   log_destroy(log_consola);
-  list_destroy(cola_ready);
+  list_destroy_and_destroy_elements(cola_ready, &destroy_struct_ready);
   exit(retorno);
 }
 
@@ -308,9 +308,9 @@ void agregar_finished(int idEsi) {
 void finalizar_esi(int socket_esi) {
 	esi_a_eliminar = socket_esi;
 	agregar_finished(socket_esi);
-	list_remove_by_condition(cola_ready, (void*)buscar_esi_kill);
-	//list_remove_by_condition(cola_blocked, (void*)buscar_esi_kill);
-	list_remove_by_condition(cola_esi_blocked, (void*)buscar_esi_kill);
+	list_remove_and_destroy_by_condition(cola_ready, (void*)buscar_esi_kill, &destroy_struct_ready);
+	//list_remove_and_destroy_by_condition(cola_blocked, (void*)buscar_esi_kil, &destroy_struct_blockedl);
+	list_remove_and_destroy_by_condition(cola_esi_blocked, (void*)buscar_esi_kill, &destroy_struct_blocked);
 	esi_liberar_claves(socket_esi);
 	if (socket_esi == esiRunning.pid)
 		esiRunning = inicializar_pcb();
@@ -331,7 +331,7 @@ void esi_liberar_claves(int socket) {
 
 		//Borro todas las claves tomadas por ese esi en la lista de bloqueados
 		while (list_count_satisfying(cola_blocked, (void*)buscar_esi_kill) > 0) {
-			list_remove_by_condition(cola_blocked, ((void*) buscar_esi_kill));
+			list_remove_and_destroy_by_condition(cola_blocked, ((void*) buscar_esi_kill), &destroy_struct_blocked);
 		}
 	}
 }
@@ -343,7 +343,7 @@ void liberar_esi_por_clave(struct_blocked* pcb) {
 	esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)buscar_esi_a_desbloquear_desconexion);
 	if (esi_a_desbloquear != NULL)
 	{
-		list_remove_by_condition(cola_esi_blocked, ((void*) buscar_esi_a_desbloquear_desconexion));
+		list_remove_and_destroy_by_condition(cola_esi_blocked, ((void*) buscar_esi_a_desbloquear_desconexion), &destroy_struct_blocked);
 
 		//Recalculo estimaciones
 		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
@@ -398,7 +398,7 @@ struct_ready* seleccionar_esi_ready_fifo() {
 	//Si hay esis esperando, selecciona al primero de la lista
 	if (list_size(cola_ready) > 0) {
 		esi_seleccionado = list_get(cola_ready, 0);
-		list_remove(cola_ready, 0);
+		list_remove_and_destroy_element(cola_ready, 0, &destroy_struct_ready);
 		return esi_seleccionado;
 	}
 
@@ -621,7 +621,7 @@ int validar_operacion_set() {
 		struct_blocked* elemento = (struct_blocked*)list_find(cola_blocked, ((void*) clave_set_disponible));
 		elemento->valor = realloc(elemento->valor,operacionEnMemoria->largo_valor);
 		strcpy(elemento->valor,operacionEnMemoria->valor);
-		list_remove_by_condition(cola_blocked,((void*) clave_set_disponible));
+		list_remove_and_destroy_by_condition(cola_blocked,((void*) clave_set_disponible), &destroy_struct_blocked);
 		agregar_blocked(elemento->pcb, elemento->clave, elemento->valor);
 	}
 
@@ -650,10 +650,10 @@ int validar_operacion_store() {
 
 	if (claveExiste) {
 		//Si está entre las claves bloqueadas por config lo libero
-		list_remove_by_condition(planificador.clavesBloqueadas, ((void*) clave_ya_bloqueada_config));
+		list_remove_and_destroy_by_condition(planificador.clavesBloqueadas, ((void*) clave_ya_bloqueada_config), &free);
 
 		//quito la clave con el respectivo esi que la tenía bloqueada
-		list_remove_by_condition(cola_blocked, ((void*) clave_set_disponible));
+		list_remove_and_destroy_by_condition(cola_blocked, ((void*) clave_set_disponible), &destroy_struct_blocked);
 
 		//Desbloqueo al primer esi que tuviera la clave tomada
 		desbloquear_esi();
@@ -771,7 +771,7 @@ void desbloquear_esi() {
 	esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)clave_ya_bloqueada);
 	if (esi_a_desbloquear != NULL)
 	{
-		list_remove_by_condition(cola_esi_blocked, ((void*) clave_set_disponible));
+		list_remove_and_destroy_by_condition(cola_esi_blocked, ((void*) clave_set_disponible), &destroy_struct_blocked);
 
 		//Recalculo estimaciones
 		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
@@ -957,7 +957,7 @@ void consola_bloquear() {
 	//Verifico si el esi a bloquear está en la cola de ready y si es así lo bloqueo
 	if (list_any_satisfy(cola_ready, (void*)buscar_esi_a_bloquear)) {
 		struct_ready* esiBloqueado = list_get((void*)list_filter(cola_ready, (void*)buscar_esi_a_bloquear),1);
-		list_remove_by_condition(cola_ready, (void*)buscar_esi_a_bloquear);
+		list_remove_and_destroy_by_condition(cola_ready, (void*)buscar_esi_a_bloquear, &destroy_struct_ready);
 		esiBloqueado->pcb.tiempo_espera = 0;
 		esiBloqueado->pcb.tiempo_respuesta = 0;
 		agregar_esi_blocked(esiBloqueado->pcb, list_comandos[1]);
@@ -999,13 +999,13 @@ void consola_desbloquear() {
 	//Desbloqueo la clave si esta se encuentra en la lista de claves bloqueadas
 	if (list_any_satisfy(planificador.clavesBloqueadas, ((void*) clave_verificar_config)))
 	{
-		list_remove_by_condition(planificador.clavesBloqueadas, ((void*) clave_verificar_config));
+		list_remove_and_destroy_by_condition(planificador.clavesBloqueadas, ((void*) clave_verificar_config), &free);
 	}
 
 	if (list_any_satisfy(cola_esi_blocked, (void*)buscar_esi_a_desbloquear)) {
 		struct_blocked* esi_a_desbloquear;
 		esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)buscar_esi_a_desbloquear);
-		list_remove_by_condition(cola_esi_blocked, ((void*) buscar_esi_a_desbloquear));
+		list_remove_and_destroy_by_condition(cola_esi_blocked, ((void*) buscar_esi_a_desbloquear), &destroy_struct_blocked);
 		agregar_ready(esi_a_desbloquear->pcb);
 
 		log_info(log_consola,"Se desbloqueo el esi %d para la clave %s",esi_a_desbloquear->pcb.pid,esi_a_desbloquear->clave);
@@ -1037,7 +1037,7 @@ void consola_desbloquear() {
 	}
 	else
 	{
-		list_remove_by_condition(cola_blocked, ((void*) buscar_esi_a_desbloquear));
+		list_remove_and_destroy_by_condition(cola_blocked, ((void*) buscar_esi_a_desbloquear), &destroy_struct_blocked);
 		log_info(log_consola,"La clave %s se encuentra liberada",list_comandos[1]);
 	}
 }
@@ -1075,3 +1075,22 @@ void consola_kill() {
 		log_info(log_consola,"No se encontro el ESI ingresado");
 	}
 }
+void destroy_struct_ready(void* in_struct_ready){
+	struct_ready* target = (struct_ready*) in_struct_ready;
+	if (target == NULL || &target->pcb == NULL) return;
+	free(&target->pcb);
+	free(target);
+}
+void destroy_struct_blocked(void* in_struct_blocked){
+	struct_blocked* target = (struct_blocked*) in_struct_blocked;
+	if (target == NULL || &target->pcb == NULL) return;
+	free(&target->pcb);
+	if (target->clave != NULL) free(target->clave);
+	if (target->valor != NULL) free(target->valor);
+	free(target);
+}
+
+void destroy_struct_finished(void* in_struct_finished){
+	free(in_struct_finished);
+}
+

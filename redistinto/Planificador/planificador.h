@@ -157,4 +157,9 @@ bool ordenar_menos_tiempo_respuesta(struct_ready* readyA, struct_ready* readyB);
 struct_ready* esi_actualizar_espera(struct_ready* readyA);
 struct_ready* esi_actualizar_respuesta(struct_ready* readyA);
 
+void destroy_struct_ready(void* in_struct_ready);
+void destroy_struct_blocked(void* in_struct_blocked);
+void destroy_struct_finished(void* in_struct_finished);
+
+
 #endif /* PRUEBA_H_ */
