@@ -9,11 +9,11 @@ int main(int argc,char *argv[]) {
 	pthread_create(&autoDumps, NULL, dump_automatico, NULL);
 
 	while (1) {
-		Message msg;
-		msg.contenido = NULL;
-		msg.header = NULL;
+		Message *msg = malloc(sizeof(Message));
+		msg->contenido = NULL;
+		msg->header = NULL;
 		log_debug(log_inst, "esperando mensaje");
-		int resultado = await_msg(socket_coordinador, &msg);
+		int resultado = await_msg(socket_coordinador, msg);
 		log_debug(log_inst, "llego un mensaje. parseando...");
 		if (resultado<0){
 			log_debug(log_inst, "error de recepcion");
@@ -21,14 +21,14 @@ int main(int argc,char *argv[]) {
 			//continue;
 		}
 
-		switch (msg.header->tipo_mensaje){
+		switch (msg->header->tipo_mensaje){
 			case ACK:
 				printf("ok");
 				break;
 			case OPERACION:
-				manejar_operacion(&msg);
+				manejar_operacion(msg);
 				break;
-			default: printf("%s: mensaje recibido: %s", instancia.nombre_inst, (char*) msg.contenido);
+			default: printf("%s: mensaje recibido: %s", instancia.nombre_inst, (char*) msg->contenido);
 				break;
 
 		}
