@@ -2,14 +2,14 @@
 //#define nombre_script "ESI_MenuParrilla"
 //#define nombre_script "ESI_Bar1"
 //#define nombre_script "ESI_MilanesaCompleta"
-#define nombre_script "ESI_MultiClave"
+//#define nombre_script "ESI_MultiClave"
 //#define nombre_script "ESI_MultiReemplazo"
 //#define nombre_script "ESI_Compactador1"
 //#define nombre_script "ESI_Westworld"
 //#define nombre_script "ESI_Remixado"
 
 //#define nombre_script "ESI_ClaveNoTomada"
-//#define nombre_script "ESI_ClaveInexistente"
+#define nombre_script "ESI_ClaveInexistente"
 
 //#define nombre_script "ESI_ClaveLarga"
 
@@ -184,14 +184,16 @@ int ejecutar_proxima_operacion(){
 
 	int resultado;
 	resultado = desempaquetar_resultado(rta);
-	if(resultado != OK){
-		loguear_resultado(log_esi, resultado);
-		return resultado;
+	if(resultado == OK){
+		list_remove_and_destroy_element(operaciones, 0, &destroy_operacion);
 	}
-	loguear_resultado(log_esi, resultado);
+	if (resultado == CLAVE_INEXISTENTE) {
+		log_error(log_esi, "la clave no existe o no fue tomada por la esi. abortar.");
+		exit(CLAVE_INEXISTENTE);
+	} loguear_resultado(log_esi, resultado);
 	free_msg(&rta);
-	list_remove_and_destroy_element(operaciones, 0, &destroy_operacion);
-	return OK;
+
+	return resultado;
 }
 
 void manejar_mensajes(Message mensaje) {
@@ -213,7 +215,13 @@ void manejar_mensajes(Message mensaje) {
 			break;
 		case RESULTADO:
 			mensaje.header->remitente = ESI;
+			int res = desempaquetar_resultado(&mensaje);
+			if (res == CLAVE_INEXISTENTE) {
+				exit(CLAVE_INEXISTENTE);
+			log_error(log_esi, "la clave no existe o no fue tomada por la esi. abortar.");
+			}
 			resultado = enviar_y_loguear_mensaje(socket_planificador, mensaje, "planificador/0");
+
 			break;
 		default:
 			log_error(log_esi, "se recibio un mensaje de tipo inesperado");

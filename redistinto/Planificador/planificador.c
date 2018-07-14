@@ -612,7 +612,7 @@ int manejar_resultado(int socket,Message* msg) {
 		case CLAVE_INEXISTENTE:
 		case CLAVE_MUY_GRANDE:
 		case ERROR_VALOR_NULO:
-			return envio_desconexion(socket);
+			//return envio_desconexion(socket);
 		default:
 		//fuck
 		return -2; //FIXME que significa este error?

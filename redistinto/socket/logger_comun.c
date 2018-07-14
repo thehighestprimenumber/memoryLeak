@@ -147,8 +147,9 @@ void desempaquetar_varios(Message * m, char** output) {
 	case RESULTADO:
 		r = desempaquetar_resultado(m);
 		if (r<=0) {
-			contenido = calloc(1, strlen(nombres_resultados[-r])+1);
-			memcpy(contenido, nombres_resultados[-r], strlen(nombres_resultados[-r]));
+			contenido = calloc(1, 50);
+			int h = r*-1;
+			memcpy(contenido, nombres_resultados[h], strlen(nombres_resultados[h]));
 		} else {
 			contenido = calloc(1,3);
 			sprintf(contenido, "%d", r);
