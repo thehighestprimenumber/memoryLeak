@@ -15,7 +15,7 @@ int guardar_circular(t_clave_valor *entrada, char *valor){
 	}
 	int nroEntrada = entradaActual;
 	entradaAEliminar = entradaActual;
-
+	log_debug(log_inst, "Guardado CIRC de %s en la entrada nro %d", valor, nroEntrada);
 	entradaActual += entradas_que_ocuparia(entrada);
 
 	while(entradaAEliminar<entradaActual){

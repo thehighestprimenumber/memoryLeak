@@ -110,8 +110,10 @@ int manejar_operacion(Message * msg) {
 	sem_wait(semTabla);
 	switch (operacion->tipo) {
 		case op_GET:
+			log_debug(log_inst, "GET %s", operacion->clave);
 			switch(instancia.algorimoActual){
 				case LRU:
+
 					registrar_set_lru(operacion->clave);
 					break;
 				default:
@@ -153,7 +155,7 @@ int agregar_clave_a_lista(char* clave, int largo_clave){
 	clave_valor->datos = NULL;
 	memcpy(clave_valor->clave, clave, largo_clave);
 	list_add(instancia.tabla_entradas, clave_valor);
-	log_debug(log_inst, "GET %s", clave_valor->clave);
+	//log_debug(log_inst, "GET %s", clave_valor->clave);
 	return OK;
 }
 
@@ -193,6 +195,8 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 		memcpy(storage+entrada->nroEntrada*instancia.tamEntrada, valor, largo_valor);
 	}
 	log_debug(log_inst, "SET %s", entrada->clave);
+	int entradasLibres = cantidad_entradas_libres();
+	log_debug(log_inst, "Informo %d entradas libres", entradasLibres);
 	return cantidad_entradas_libres();
 }
 
@@ -227,7 +231,7 @@ void guardar(void * contenido){
 	char* ruta = calloc(1, strlen(instancia.path)+entrada->largo_clave+1);
 	memcpy(ruta, instancia.path, strlen(instancia.path));
 	memcpy(ruta+strlen(instancia.path), entrada->clave, entrada->largo_clave);
-	log_debug(log_inst, "Guardando en %s", ruta);
+	if(LOGUEAR_DUMPS) log_debug(log_inst, "Guardando en %s", ruta);
 	FILE* file = fopen(ruta, "w");
 	char *ptrLectura = storage+entrada->nroEntrada*instancia.tamEntrada;
 	fwrite(ptrLectura, sizeof(char), entrada->largo_valor, file);
@@ -246,11 +250,11 @@ void* dump_automatico(void *pepe){
 	if(!HACER_DUMPS) return NULL;
 	while(true){
 		sleep(instancia.int_dump);
-		log_debug(log_inst, "Autodump iniciado");
+		if(LOGUEAR_DUMPS) log_debug(log_inst, "Autodump iniciado");
 		sem_wait(semTabla);
 		list_iterate(instancia.tabla_entradas, guardar);
 		sem_post(semTabla);
-		log_debug(log_inst, "Autodump finalizado");
+		if(LOGUEAR_DUMPS) log_debug(log_inst, "Autodump finalizado");
 	}
 	return NULL;
 }

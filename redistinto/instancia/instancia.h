@@ -17,7 +17,8 @@
 #include <dirent.h>
 
 #define OK 0
-#define HACER_DUMPS false
+#define HACER_DUMPS true
+#define LOGUEAR_DUMPS false
 #define configuracionDefault "configMinima2.txt\0"
 
 typedef enum algorimoReemplazo{CIRC, LRU, BSU} algorimoReemplazo;

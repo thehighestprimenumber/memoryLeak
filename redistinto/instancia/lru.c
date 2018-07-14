@@ -34,6 +34,7 @@ void guardar_eliminando_lru(t_clave_valor *entrada, char *valor){
 	}
 	compactar();
 	int posEntrada = obtener_ultima_entrada_libre();
+	log_debug(log_inst, "Guardado LRU de %s en la entrada nro %d", valor, posEntrada);
 	memcpy(storage + posEntrada, valor, entrada->largo_valor);
 	entrada->nroEntrada = posEntrada;
 	entrada->datos = malloc(sizeof(t_info_lru));
@@ -53,6 +54,10 @@ void eliminar_lru_entrada(){
 			indexEntradaEliminable = i;
 	}
 	t_clave_valor *aEliminar = list_get(instancia.tabla_entradas, indexEntradaEliminable);
+	char *valor = calloc(aEliminar->largo_valor+1,1);
+	memcpy(valor, storage + aEliminar->nroEntrada*instancia.tamEntrada, aEliminar->largo_valor);
+	log_debug(log_inst, "Borrado LRU de %s", valor);
+	free(valor);
 	list_remove(instancia.tabla_entradas, indexEntradaEliminable);
 	free(aEliminar->datos);
 	eliminar_entrada(aEliminar);
