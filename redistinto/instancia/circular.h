@@ -10,7 +10,6 @@ int entradaAEliminar;
 
 void inicializar_circular();
 int guardar_circular(t_clave_valor *entrada, char *valor);
-int espacio_sobrante();
 bool eliminable(void *contenido);
 
 #endif /* CIRCULAR_H_ */

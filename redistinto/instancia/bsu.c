@@ -13,7 +13,7 @@ int guardar_bsu(t_clave_valor *entrada, char *valor){
 	if(entrada->largo_clave < 1) return -1;
 
 	//Si todavia puedo usar circular
-	if(!cirularFinalizo2 && entrada->largo_clave < espacio_sobrante()){
+	if(!cirularFinalizo2 && entradas_que_ocuparia(entrada) < cantidad_entradas_libres()){
 		guardar_circular(entrada, valor);
 		return 0;
 	}
@@ -24,7 +24,8 @@ int guardar_bsu(t_clave_valor *entrada, char *valor){
 
 void guardar_eliminando_bsu(t_clave_valor *entrada, char *valor){
 
-	while(cantidad_entradas_libres() < tam_min_entrada(entrada->largo_valor)){
+	ordenar_lista_entradas();
+	while(cantidad_entradas_libres() < tam_min_entrada(entrada)){
 		eliminar_bsu_entrada();
 	}
 	compactar();
@@ -36,11 +37,11 @@ void guardar_eliminando_bsu(t_clave_valor *entrada, char *valor){
 
 void eliminar_bsu_entrada(){
 	int cantEntradas = list_size(instancia.tabla_entradas);
-	int indexEntradaEliminable = 0;
-	for(int i = 1; i < cantEntradas; i++){
+	int indexEntradaEliminable = 1;
+	for(int i = 2; i < cantEntradas; i++){
 		t_clave_valor *masAntiguo = list_get(instancia.tabla_entradas, indexEntradaEliminable);
 		t_clave_valor *aComparar = list_get(instancia.tabla_entradas, i);
-		if( tam_min_entrada(masAntiguo->largo_valor) < tam_min_entrada(aComparar->largo_valor) )
+		if( tam_min_entrada(masAntiguo) < tam_min_entrada(aComparar) )
 			indexEntradaEliminable = i;
 	}
 	t_clave_valor *aEliminar = list_get(instancia.tabla_entradas, indexEntradaEliminable);

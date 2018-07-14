@@ -2,7 +2,6 @@
 
 void mover_entrada(int nuevaPosicion, t_clave_valor *entrada);
 bool hay_espacio_libre_entre_entradas(t_clave_valor *entrada1, t_clave_valor *entrada2);
-void ordenar_lista_entradas();
 
 void compactar(){
 	if(cantidad_entradas_libres() == 0) return;
@@ -14,35 +13,39 @@ void compactar(){
 		t_clave_valor *entradaB = list_get(instancia.tabla_entradas, index);
 		if(entradaA->nroEntrada < 0) {index++;continue;}
 		if(hay_espacio_libre_entre_entradas(entradaA, entradaB)){
-			int entradaEscribible = entradaA->nroEntrada + tam_min_entrada(entradaA->largo_valor);
+			int entradaEscribible = entradaA->nroEntrada + tam_min_entrada(entradaA);
 			mover_entrada(entradaEscribible, entradaB);
 		}
 		index++;
 	}
 }
 
-int tam_min_entrada(int largo_valor){
-	double d = (double)largo_valor/(double)instancia.tamEntrada;
+int tam_min_entrada(t_clave_valor *entrada){
+	if(entrada->nroEntrada<0) return 0;
+	double d = (double)entrada->largo_valor/(double)instancia.tamEntrada;
+	int i = d;
+	return i==d ? i:i+1;
+}
+
+int entradas_que_ocuparia(t_clave_valor *entrada){
+	double d = (double)entrada->largo_valor/(double)instancia.tamEntrada;
 	int i = d;
 	return i==d ? i:i+1;
 }
 
 void sumardor_parcial_espacio_usado(void *contenido){
 	t_clave_valor *entrada = contenido;
-	espacioUsado += tam_min_entrada(entrada->largo_valor);
+	espacioUsado += tam_min_entrada(entrada);
 }
-
-void sumador_entradas_libres (void *contenido){
-	t_clave_valor *entrada = contenido;
-	entradasOcupadas += tam_min_entrada(entrada->largo_valor);
-}
-
 
 int cantidad_entradas_libres(){
-	entradasOcupadas = 0;
-	list_iterate(instancia.tabla_entradas, sumador_entradas_libres);
-	int output = instancia.cantEntradas-entradasOcupadas;
-	return output<0?0:output;
+	espacioUsado = 0;
+	//list_iterate(instancia.tabla_entradas, sumardor_parcial_espacio_usado);
+	for(int i = 0; i < list_size(instancia.tabla_entradas); i++){
+		t_clave_valor *entrada = list_get(instancia.tabla_entradas, i);
+		espacioUsado += tam_min_entrada(entrada);
+	}
+	return instancia.cantEntradas-espacioUsado;
 }
 
 bool comparar_entradas_posicion(void *contenido1, void *contenido2){
@@ -55,7 +58,7 @@ void ordenar_lista_entradas(){
 }
 
 bool hay_espacio_libre_entre_entradas(t_clave_valor *entrada1, t_clave_valor *entrada2){
-	return entrada1->nroEntrada + tam_min_entrada(entrada1->largo_valor) < entrada2->nroEntrada;
+	return entrada1->nroEntrada + tam_min_entrada(entrada1) < entrada2->nroEntrada;
 }
 
 void mover_entrada(int nuevaPosicion, t_clave_valor *entrada){
@@ -74,6 +77,6 @@ int obtener_ultima_entrada_libre(){
 		}
 	}
 	t_clave_valor *maximo = list_get(instancia.tabla_entradas, indexEntradaMaxima);
-	return entradaMaxima + tam_min_entrada(maximo->largo_valor);
+	return entradaMaxima + tam_min_entrada(maximo);
 }
 

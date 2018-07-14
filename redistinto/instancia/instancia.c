@@ -140,7 +140,10 @@ int manejar_operacion(Message * msg) {
 
 int agregar_clave_a_lista(char* clave, int largo_clave){
 	t_clave_valor* clave_valor_existente = buscar_clave_valor (clave);
-	if (clave_valor_existente != NULL) return OK;
+	if (clave_valor_existente != NULL){
+		log_debug(log_inst, "GET %s (Intento)", clave);
+		return OK;
+	}
 
 	t_clave_valor *clave_valor = malloc(sizeof(t_clave_valor));
 	clave_valor->largo_clave=largo_clave;
@@ -177,10 +180,16 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 				break;
 		}
 	}else{
-		if(tam_min_entrada(largo_valor) > tam_min_entrada(entrada->largo_valor)){
+		//FIX HORRIBLE IGNORAR POR EL AMOR DE DIOS
+		t_clave_valor* entrada2 = malloc(sizeof(t_clave_valor));
+		entrada2->largo_valor = largo_valor;
+		entrada2->nroEntrada = 10;
+		if(tam_min_entrada(entrada2) > tam_min_entrada(entrada)){
 			log_debug(log_inst, "Valor %s ocupa mas entradas que el valor anterior asignado a esta clave", valor);
+			free(entrada2);
 			return VALOR_MUY_GRANDE;
 		}
+		free(entrada2);
 		memcpy(storage+entrada->nroEntrada*instancia.tamEntrada, valor, largo_valor);
 	}
 	log_debug(log_inst, "SET %s", entrada->clave);
@@ -218,7 +227,7 @@ void guardar(void * contenido){
 	char* ruta = calloc(1, strlen(instancia.path)+entrada->largo_clave+1);
 	memcpy(ruta, instancia.path, strlen(instancia.path));
 	memcpy(ruta+strlen(instancia.path), entrada->clave, entrada->largo_clave);
-	if (LOGUEAR_DUMPS) log_debug(log_inst, "Guardando en %s", ruta);
+	log_debug(log_inst, "Guardando en %s", ruta);
 	FILE* file = fopen(ruta, "w");
 	char *ptrLectura = storage+entrada->nroEntrada*instancia.tamEntrada;
 	fwrite(ptrLectura, sizeof(char), entrada->largo_valor, file);
@@ -234,13 +243,14 @@ void eliminar_entrada(void *contenido){
 
 
 void* dump_automatico(void *pepe){
+	if(!HACER_DUMPS) return NULL;
 	while(true){
 		sleep(instancia.int_dump);
-		if (LOGUEAR_DUMPS) log_debug(log_inst, "Autodump iniciado");
+		log_debug(log_inst, "Autodump iniciado");
 		sem_wait(semTabla);
 		list_iterate(instancia.tabla_entradas, guardar);
 		sem_post(semTabla);
-		if (LOGUEAR_DUMPS) log_debug(log_inst, "Autodump finalizado");
+		log_debug(log_inst, "Autodump finalizado");
 	}
 	return NULL;
 }
