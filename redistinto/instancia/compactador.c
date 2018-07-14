@@ -4,10 +4,10 @@ void mover_entrada(int nuevaPosicion, t_clave_valor *entrada);
 bool hay_espacio_libre_entre_entradas(t_clave_valor *entrada1, t_clave_valor *entrada2);
 void loguearEntrada(void* input){
 	t_clave_valor * entrada = (t_clave_valor *) input;
-	char* buff = calloc(1,(entrada->largo_valor)+1);
+	char* buff = calloc(1,entrada->largo_valor+1);
 	memcpy(buff, storage+entrada->nroEntrada*instancia.tamEntrada, entrada->largo_valor);
-	log_debug(log_inst, "clave: %s, valor: %s, largo_valor: %d, entradas: %d", entrada->clave, buff, entrada->largo_valor, tam_min_entrada(entrada));
-	free(buff);
+	log_debug(log_inst, "clave: %s, valor: %s, largo_valor: %d, entradas: %d, posicion %d", entrada->clave, buff, entrada->largo_valor, tam_min_entrada(entrada), entrada->nroEntrada);
+free(buff);
 }
 void loguearEntradas(){
 	list_iterate(instancia.tabla_entradas, loguearEntrada);
