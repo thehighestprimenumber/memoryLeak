@@ -430,7 +430,12 @@ struct_ready* seleccionar_esi_ready_sjf_sd() {
 		list_sort(cola_ready,(void*)ordenar_menos_instrucciones);
 		esi_seleccionado = list_get(cola_ready, 0);
 		list_remove(cola_ready, 0);
+		log_info(log_planificador,"ESI Seleccionado: %d", esi_seleccionado->pcb.pid);
 		return esi_seleccionado;
+	}
+	else
+	{
+		log_info(log_planificador,"No se encontro esi a seleccionar");
 	}
 
 	//Si no encuentro nada retorno null
@@ -579,6 +584,17 @@ int manejar_resultado(int socket,Message* msg) {
 				if (esiRunning.pid > 0)
 					envio_ejecutar(esiRunning.pid);
 			}
+			else if (socket != esiRunning.pid && esiRunning.pid > 0)
+			{
+				envio_ejecutar(esiRunning.pid);
+			}
+			else
+			{
+				planificar_esis();
+				if (esiRunning.pid > 0)
+					envio_ejecutar(esiRunning.pid);
+			}
+
 			return 0;
 		//En estos casos envío mensaje al esi para que se desconecte saliendo del bucle
 		case CLAVE_INEXISTENTE:
