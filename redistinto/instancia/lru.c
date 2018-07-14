@@ -35,7 +35,7 @@ void guardar_eliminando_lru(t_clave_valor *entrada, char *valor){
 	compactar();
 	int posEntrada = obtener_ultima_entrada_libre();
 	log_debug(log_inst, "Guardado LRU de %s en la entrada nro %d", valor, posEntrada);
-	memcpy(storage + posEntrada, valor, entrada->largo_valor);
+	memcpy(storage + posEntrada*instancia.tamEntrada, valor, entrada->largo_valor);
 	entrada->nroEntrada = posEntrada;
 	entrada->datos = malloc(sizeof(t_info_lru));
 	((t_info_lru*) entrada->datos)->instant = get_time_millisec();

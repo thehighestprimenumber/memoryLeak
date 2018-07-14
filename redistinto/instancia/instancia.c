@@ -106,6 +106,7 @@ int inicializar(char* argv[]){
 int manejar_operacion(Message * msg) {
 	t_operacion * operacion;
 	desempaquetar_operacion(msg, &operacion);
+	operacion->largo_valor = operacion->largo_valor-1;
 	int resultado;
 	sem_wait(semTabla);
 	switch (operacion->tipo) {

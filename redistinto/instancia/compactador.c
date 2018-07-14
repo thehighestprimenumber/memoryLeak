@@ -10,12 +10,19 @@ void compactar(){
 
 	while(index+1 < cantEntradas){
 		t_clave_valor *entradaA = list_get(instancia.tabla_entradas, index);
-		t_clave_valor *entradaB = list_get(instancia.tabla_entradas, index);
-		if(entradaA->nroEntrada < 0) {index++;continue;}
-		if(hay_espacio_libre_entre_entradas(entradaA, entradaB)){
-			int entradaEscribible = entradaA->nroEntrada + tam_min_entrada(entradaA);
-			mover_entrada(entradaEscribible, entradaB);
+		t_clave_valor *entradaB = list_get(instancia.tabla_entradas, index+1);
+		if(entradaA->nroEntrada < 0 && entradaB->nroEntrada > 0) {
+			if(hay_espacio_libre_entre_entradas(entradaA, entradaB)){
+				int entradaEscribible = 0;
+				mover_entrada(entradaEscribible, entradaB);
+			}
+		}else{
+			if(hay_espacio_libre_entre_entradas(entradaA, entradaB)){
+				int entradaEscribible = entradaA->nroEntrada + tam_min_entrada(entradaA);
+				mover_entrada(entradaEscribible, entradaB);
+			}
 		}
+
 		index++;
 	}
 }
@@ -62,7 +69,7 @@ bool hay_espacio_libre_entre_entradas(t_clave_valor *entrada1, t_clave_valor *en
 }
 
 void mover_entrada(int nuevaPosicion, t_clave_valor *entrada){
-	memcpy(storage + nuevaPosicion, storage + entrada->nroEntrada, entrada->largo_valor);
+	memcpy(storage + nuevaPosicion*instancia.tamEntrada, storage + entrada->nroEntrada*instancia.tamEntrada, entrada->largo_valor);
 	entrada->nroEntrada = nuevaPosicion;
 }
 
