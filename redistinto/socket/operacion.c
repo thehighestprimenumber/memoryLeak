@@ -119,7 +119,7 @@ void empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente, Message
 	memcpy(msg->contenido + sizeof(OperacionHeader) + op->largo_clave, op->valor, op->largo_valor);
 
 	//Liberamos lo que ya no nos sirve
-	free_memory(&opHeader);
+	free_memory((void*)&opHeader);
 	*output = msg;
 
 }
