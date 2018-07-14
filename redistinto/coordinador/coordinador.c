@@ -127,6 +127,9 @@ int procesarSolicitudDeEsi(Message* msg, int socket_solicitante) {
 				instancia->entradas_libres = resultado;
 				resultado = OK;
 			}
+			if (resultado == CLAVE_INEXISTENTE) {
+				log_error(log_coordinador, "la clave no se pudo guardar porque fue eliminada de la instancia");
+			}
 		}
 	}
 	Message* rta_a_esi;
