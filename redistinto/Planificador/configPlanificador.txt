@@ -1,8 +1,8 @@
 puerto=8002
-algoritmo=SJF-CD
+algoritmo=SJF-SD
 estimacion=3
 ip_planificador=10.0.2.15
 IP_coordinador=10.0.2.15
-puerto_coordinador=8087
+puerto_coordinador=8086
 alfa_planificador=50
-claves_bloqueadas=spoiler2,principal3,spoiler3,principal4
+claves_bloqueadas=postre:ingredientes1

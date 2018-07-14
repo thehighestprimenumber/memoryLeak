@@ -268,11 +268,11 @@ void aceptar_conexion(int socket, char* nombreScript) {
 	pcb.tamanio_script = cantidad_lineas_script(contenidoScript);
 
 	//Al conectarse queda parado en la primera instruccion
-	pcb.rafaga_actual_real++;
-	pcb.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)pcb.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * pcb.estimado_rafaga_actual;
+	//pcb.rafaga_actual_real++;
+	//pcb.estimado_proxima_rafaga = ((double)planificador.alfaPlanificacion / (double)100 * (double)pcb.rafaga_actual_real) + ((double)1 - (double)planificador.alfaPlanificacion / (double)100) * pcb.estimado_rafaga_actual;
 
 	//En el caso de la conexión, inicio el tiempo de espera en 1
-	pcb.tiempo_espera = 1;
+	//pcb.tiempo_espera = 1;
 	agregar_ready(pcb);
 
 
@@ -363,7 +363,7 @@ void liberar_esi_por_clave(struct_blocked* pcb) {
 		//Recalculo estimaciones
 		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
 		esi_a_desbloquear->pcb.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esi_a_desbloquear->pcb.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esi_a_desbloquear->pcb.estimado_rafaga_actual;
-		esi_a_desbloquear->pcb.rafaga_actual_real = 0;
+		esi_a_desbloquear->pcb.rafaga_actual_real = 1;
 		esi_a_desbloquear->pcb.tiempo_espera = 0;
 		esi_a_desbloquear->pcb.tiempo_respuesta = 0;
 
@@ -465,7 +465,7 @@ struct_ready* seleccionar_esi_ready_sjf_cd() {
 				//Recalculo estimaciones
 				esiRunning.estimado_rafaga_actual = esiRunning.estimado_proxima_rafaga;
 				esiRunning.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esiRunning.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esiRunning.estimado_rafaga_actual;
-				esiRunning.rafaga_actual_real = 0;
+				esiRunning.rafaga_actual_real = 1;
 				esiRunning.tiempo_espera = 0;
 				esiRunning.tiempo_respuesta = 0;
 				agregar_ready(esiRunning);
@@ -812,7 +812,7 @@ void desbloquear_esi() {
 		//Recalculo estimaciones
 		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
 		esi_a_desbloquear->pcb.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esi_a_desbloquear->pcb.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esi_a_desbloquear->pcb.estimado_rafaga_actual;
-		esi_a_desbloquear->pcb.rafaga_actual_real = 0;
+		esi_a_desbloquear->pcb.rafaga_actual_real = 1;
 		esi_a_desbloquear->pcb.tiempo_espera = 0;
 		esi_a_desbloquear->pcb.tiempo_respuesta = 0;
 
@@ -1042,6 +1042,11 @@ void consola_desbloquear() {
 		struct_blocked* esi_a_desbloquear;
 		esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)buscar_esi_a_desbloquear);
 		list_remove_by_condition(cola_esi_blocked, ((void*) buscar_esi_a_desbloquear));
+		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
+		esi_a_desbloquear->pcb.estimado_proxima_rafaga = (double)((planificador.alfaPlanificacion / 100 * esi_a_desbloquear->pcb.rafaga_actual_real)) + ((double)(1 - planificador.alfaPlanificacion / 100) * esi_a_desbloquear->pcb.estimado_rafaga_actual);
+		esi_a_desbloquear->pcb.rafaga_actual_real = 1;
+		esi_a_desbloquear->pcb.tiempo_espera = 0;
+		esi_a_desbloquear->pcb.tiempo_respuesta = 0;
 		agregar_ready(esi_a_desbloquear->pcb);
 
 		log_info(log_consola,"Se desbloqueo el esi %d para la clave %s",esi_a_desbloquear->pcb.pid,esi_a_desbloquear->clave);
