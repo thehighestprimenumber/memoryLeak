@@ -121,14 +121,14 @@ void esperar_operacion(fila_tabla_instancias* instancia){
 		free_msg(&mensaje);
 			//log_debug(logger_coordinador, "se solicita %s %s %s", tipoMensajeNombre[operacion->header->tipo], operacion->clave, operacion->valor);
 
-		Message *respuesta = malloc(sizeof(Message));
-			if (await_msg(instancia->socket_instancia, respuesta)<0){
+		Message respuesta;
+			if (await_msg(instancia->socket_instancia, &respuesta)<0){
 				coordinador.resultado_global = ERROR_DE_RECEPCION;
 				log_error(log_coordinador, "error al recibir respuesta de la instancia");
 			}
 
-			else coordinador.resultado_global = desempaquetar_resultado(respuesta);
-			free_msg(&respuesta);
+			else coordinador.resultado_global = desempaquetar_resultado(&respuesta);
+			//free_msg(&respuesta);
 
 		sem_post(&coordinador.lock_operaciones);
 	}
