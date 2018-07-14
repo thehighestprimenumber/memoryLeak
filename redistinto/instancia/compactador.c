@@ -5,8 +5,8 @@ bool hay_espacio_libre_entre_entradas(t_clave_valor *entrada1, t_clave_valor *en
 void loguearEntrada(void* input){
 	t_clave_valor * entrada = (t_clave_valor *) input;
 	char* buff = calloc(1,entrada->largo_valor+1);
-	memcpy(buff, storage+entrada->nroEntrada*instancia.tamEntrada, sizeof(buff));
-	log_debug(log_inst, "clave: %s, valor: %s, largo_valor: %d, entradas: %d", entrada->clave, buff, entrada->largo_valor, tam_min_entrada(entrada));
+	memcpy(buff, storage+entrada->nroEntrada*instancia.tamEntrada, entrada->largo_valor);
+	log_debug(log_inst, "clave: %s, valor: %s, largo_valor: %d, entradas: %d, posicion %d", entrada->clave, buff, entrada->largo_valor, tam_min_entrada(entrada), entrada->nroEntrada);
 	free(buff);
 }
 void loguearEntradas(){
@@ -16,17 +16,17 @@ void compactar(){
 	if(cantidad_entradas_libres() == 0) return;
 	ordenar_lista_entradas();
 	int index = 0, cantEntradas = list_size(instancia.tabla_entradas);
-
+	t_clave_valor *entradaA, *entradaB;
 	while(index+1 < cantEntradas){
-		t_clave_valor *entradaA = list_get(instancia.tabla_entradas, index);
-		t_clave_valor *entradaB = list_get(instancia.tabla_entradas, index+1);
+		entradaA = list_get(instancia.tabla_entradas, index);
+		entradaB = list_get(instancia.tabla_entradas, index+1);
 		if(entradaA->nroEntrada < 0 && entradaB->nroEntrada > 0) {
 			if(hay_espacio_libre_entre_entradas(entradaA, entradaB)){
 				int entradaEscribible = 0;
 				mover_entrada(entradaEscribible, entradaB);
 			}
 		}else{
-			if(hay_espacio_libre_entre_entradas(entradaA, entradaB)){
+			if(entradaA->nroEntrada >= 0 && hay_espacio_libre_entre_entradas(entradaA, entradaB)){
 				int entradaEscribible = entradaA->nroEntrada + tam_min_entrada(entradaA);
 				mover_entrada(entradaEscribible, entradaB);
 			}

@@ -32,7 +32,7 @@ int main(int argc,char *argv[]) {
 				break;
 
 		}
-		//free_msg(&msg);
+		free_msg(&msg);
 	}
 	free(semTabla);
 	return EXIT_SUCCESS;
@@ -195,6 +195,8 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 			return VALOR_MUY_GRANDE;
 		}
 		free(entrada2);
+		if(instancia.algorimoActual == LRU) ((t_info_lru*) entrada->datos)->instant = get_time_millisec();
+		entrada->largo_valor = largo_valor;
 		memcpy(storage+entrada->nroEntrada*instancia.tamEntrada, valor, largo_valor);
 	}
 	log_debug(log_inst, "SET %s", entrada->clave);
