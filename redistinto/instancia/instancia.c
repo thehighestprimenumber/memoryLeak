@@ -9,11 +9,11 @@ int main(int argc,char *argv[]) {
 	pthread_create(&autoDumps, NULL, dump_automatico, NULL);
 
 	while (1) {
-		Message *msg = malloc(sizeof(Message));
-		msg->contenido = NULL;
-		msg->header = NULL;
+		Message msg;
+		msg.contenido = NULL;
+		msg.header = NULL;
 		log_debug(log_inst, "esperando mensaje");
-		int resultado = await_msg(socket_coordinador, msg);
+		int resultado = await_msg(socket_coordinador, &msg);
 		log_debug(log_inst, "llego un mensaje. parseando...");
 		if (resultado<0){
 			log_debug(log_inst, "error de recepcion");
@@ -21,18 +21,18 @@ int main(int argc,char *argv[]) {
 			//continue;
 		}
 
-		switch (msg->header->tipo_mensaje){
+		switch (msg.header->tipo_mensaje){
 			case ACK:
 				printf("ok");
 				break;
 			case OPERACION:
-				manejar_operacion(msg);
+				manejar_operacion(&msg);
 				break;
-			default: printf("%s: mensaje recibido: %s", instancia.nombre_inst, (char*) msg->contenido);
+			default: printf("%s: mensaje recibido: %s", instancia.nombre_inst, (char*) msg.contenido);
 				break;
 
 		}
-		free_msg(&msg);
+		//free_msg(&msg);
 	}
 	free(semTabla);
 	return EXIT_SUCCESS;
@@ -68,7 +68,7 @@ int inicializar(char* argv[]){
 		log_debug(log_inst, "Algoritmo: CIRC");
 		inicializar_circular();
 	}
-	instancia.path = leer_propiedad_string(config, "punto_montaje");//"/home/utnso/instancia1/\0";
+	instancia.path = leer_propiedad_string(config, "punto_montaje");
 	log_debug(log_inst, "punto_montaje: %s", instancia.path);
 	instancia.int_dump = leer_propiedad_int(config, "dump");
 	log_debug(log_inst, "intervalo_dump: %d", instancia.int_dump);
@@ -96,7 +96,7 @@ int inicializar(char* argv[]){
 	if (resStat == -1) {
 	    mkdir(dir, 0777);
 	}else{
-		recuperar_claves();
+		//recuperar_claves();
 	}
 	free(dir);
 
@@ -124,9 +124,11 @@ int manejar_operacion(Message * msg) {
 			break;
 		case op_SET:
 			resultado = asignar_valor_a_clave(operacion->clave, operacion->largo_clave, operacion->valor, operacion->largo_valor);
+			loguearEntradas();
 			break;
 		case op_STORE:
 			resultado = guardar_entrada(operacion->clave, operacion->largo_clave);
+			loguearEntradas();
 			break;
 	}
 	sem_post(semTabla);
@@ -257,6 +259,7 @@ void* dump_automatico(void *pepe){
 		sem_post(semTabla);
 		if(LOGUEAR_DUMPS) log_debug(log_inst, "Autodump finalizado");
 	}
+	pthread_exit(0);
 	return NULL;
 }
 
@@ -308,6 +311,7 @@ void recuperar_claves(){
 		free(dir);
 		free(file_name);
 	    fclose(entry_file);
+	    //closedir(FD);
 	}
 
 }
