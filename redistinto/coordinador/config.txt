@@ -1,5 +1,5 @@
 ip_coordinador=127.0.0.1
-puerto=8007
+puerto=8086
 retardo=1
 algoritmo=LSU
 cantidad_entradas=10
