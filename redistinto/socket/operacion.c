@@ -9,19 +9,25 @@
 
 void free_operacion(t_operacion ** operacion) {
 	if (operacion != NULL && (*operacion) != NULL) {
-		if ((*operacion)->valor != NULL){
-			free((*operacion)->valor);
-			(*operacion)->valor = NULL;
-		}
-		if ((*operacion)->clave != NULL){
-			free((*operacion)->clave);
-			(*operacion)->clave = NULL;
-		}
+		destroy_operacion(*operacion);
 		free(*operacion);
 		*operacion = NULL;
 	}
 }
 
+void destroy_operacion(void * input) {
+	t_operacion * operacion = (t_operacion *) input;
+	if (operacion != NULL) {
+		if ((operacion)->valor != NULL){
+			free((operacion)->valor);
+			(operacion)->valor = NULL;
+		}
+		if ((operacion)->clave != NULL){
+			free((operacion)->clave);
+			(operacion)->clave = NULL;
+		}
+	}
+}
 void empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente, Message**  output){
 	if (texto == NULL || length < 1)
 		return;
@@ -113,7 +119,7 @@ void empaquetar_op_en_mensaje(t_operacion * op, tipoRemitente remitente, Message
 	memcpy(msg->contenido + sizeof(OperacionHeader) + op->largo_clave, op->valor, op->largo_valor);
 
 	//Liberamos lo que ya no nos sirve
-	free_memory(&opHeader);
+	free_memory((void*)&opHeader);
 	*output = msg;
 
 }

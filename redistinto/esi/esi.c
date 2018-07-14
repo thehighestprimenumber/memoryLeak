@@ -4,10 +4,12 @@
 //#define nombre_script "ESI_MilanesaCompleta"
 //#define nombre_script "ESI_MultiClave"
 //#define nombre_script "ESI_MultiReemplazo"
-//#define nombre_script "ESI_Compactador1"
-#define nombre_script "ESI_Westworld"
+#define nombre_script "ESI_Compactador1"
+//#define nombre_script "ESI_Westworld"
 //#define nombre_script "ESI_Remixado"
 
+//#define nombre_script "ESI_ClaveNoTomada"
+//#define nombre_script "ESI_ClaveInexistente"
 
 //#define nombre_script "ESI_ClaveLarga"
 
@@ -103,7 +105,7 @@ void conectar_a_coordinador(esi_configuracion* pConfig) {
 }
 
 t_operacion * crearOperacion(tipoOperacion tipo, char* clave, int largoClave, char* valor, int largoValor) {
-	t_operacion * operacion = (t_operacion * ) calloc(1, sizeof(t_operacion));
+	t_operacion * operacion = calloc(1, sizeof(t_operacion));
 	operacion->tipo = tipo;
 	operacion->largo_clave = largoClave;
 	operacion->largo_valor = largoValor;
@@ -188,7 +190,7 @@ int ejecutar_proxima_operacion(){
 	}
 	loguear_resultado(log_esi, resultado);
 	free_msg(&rta);
-	list_remove(operaciones, 0);
+	list_remove_and_destroy_element(operaciones, 0, &destroy_operacion);
 	return OK;
 }
 

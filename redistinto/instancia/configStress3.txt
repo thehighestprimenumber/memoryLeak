@@ -3,4 +3,4 @@ puerto_coordinador=8086
 algoritmo=CIRC
 punto_montaje=/home/utnso/inst3/
 nombre_instancia=Inst3
-dump=50
+dump=10

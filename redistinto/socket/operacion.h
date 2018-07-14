@@ -34,7 +34,7 @@ typedef struct {
 } __attribute__((packed)) ConfigStorage;
 
 void free_operacion(t_operacion ** operacion);
-
+void destroy_operacion(void * input);
 void empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente, Message** msg);
 void desempaquetar_texto(Message* msg, char** texto);
 
