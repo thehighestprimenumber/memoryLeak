@@ -15,10 +15,9 @@
 #include <commons/txt.h>
 #include <pthread.h>
 #include <dirent.h>
-#include "compactador.h"
 
 #define OK 0
-#define LOGUEAR_DUMPS 1
+#define HACER_DUMPS false
 #define configuracionDefault "configInstancia.txt\0"
 
 typedef enum algorimoReemplazo{CIRC, LRU, BSU} algorimoReemplazo;
@@ -31,9 +30,11 @@ typedef struct{
 	void *datos;
 } t_clave_valor;
 
+#include "compactador.h"
 #include "circular.h"
 #include "lru.h"
 #include "bsu.h"
+
 
 typedef struct {
 	int identificador;
@@ -68,7 +69,6 @@ void eliminar_entrada(void *contenido);
 int guardar_entrada(char* clave, int largo_clave);
 void* dump_automatico(void*);
 void recuperar_claves();
-int tam_min_entrada(int largo_valor);
 void sumardor_parcial_espacio_usado(void *contenido);
 
 #endif /* INSTANCIA_INSTANCIA_H_ */
