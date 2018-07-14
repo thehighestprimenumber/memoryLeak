@@ -1,5 +1,5 @@
 puerto=8002
-algoritmo=SJF-SD
+algoritmo=SJF-CD
 estimacion=3
 ip_planificador=10.0.2.15
 IP_coordinador=10.0.2.15

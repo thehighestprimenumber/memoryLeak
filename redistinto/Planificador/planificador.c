@@ -459,6 +459,18 @@ struct_ready* seleccionar_esi_ready_sjf_cd() {
 		if ((esiRunning.pid == 0) || (esi_seleccionado->pcb.estimado_proxima_rafaga < esiRunning.estimado_proxima_rafaga))
 		{
 			list_remove(cola_ready, 0);
+
+			if (esiRunning.pid > 0)
+			{
+				//Recalculo estimaciones
+				esiRunning.estimado_rafaga_actual = esiRunning.estimado_proxima_rafaga;
+				esiRunning.estimado_proxima_rafaga = (planificador.alfaPlanificacion / 100 * esiRunning.rafaga_actual_real) + (1 - planificador.alfaPlanificacion / 100) * esiRunning.estimado_rafaga_actual;
+				esiRunning.rafaga_actual_real = 0;
+				esiRunning.tiempo_espera = 0;
+				esiRunning.tiempo_respuesta = 0;
+				agregar_ready(esiRunning);
+			}
+
 			return esi_seleccionado;
 		}
 	}
@@ -795,7 +807,7 @@ void desbloquear_esi() {
 	esi_a_desbloquear = (struct_blocked*)list_find(cola_esi_blocked, (void*)clave_ya_bloqueada);
 	if (esi_a_desbloquear != NULL)
 	{
-		list_remove_by_condition(cola_esi_blocked, ((void*) clave_set_disponible));
+		list_remove_by_condition(cola_esi_blocked, ((void*) clave_ya_bloqueada));
 
 		//Recalculo estimaciones
 		esi_a_desbloquear->pcb.estimado_rafaga_actual = esi_a_desbloquear->pcb.estimado_proxima_rafaga;
