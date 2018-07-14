@@ -6,8 +6,6 @@
 #include <semaphore.h>
 
 #define MAX_LEN_INSTANCE_NAME 20
-#define MAX_LEN_NOMBRE_CLAVE 40
-#define MAX_CLAVES_INSTANCIA 100
 
 
 typedef struct {
@@ -18,8 +16,7 @@ t_tabla_instancias tabla_instancias;
 
 typedef struct {
 	int socket_instancia;
-	int max_claves_instancia;
-	char claves[MAX_CLAVES_INSTANCIA][MAX_LEN_NOMBRE_CLAVE];
+	t_list* claves;
 	int esta_activa;
 	sem_t lock;
 	char nombre_instancia[MAX_LEN_INSTANCE_NAME];

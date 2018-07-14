@@ -1,6 +1,6 @@
 IP_coordinador=10.0.2.15
 puerto_coordinador=8086
 algoritmo=LRU
-punto_montaje=/home/utnso/instancia1/
-nombre_instancia=Instancia1
+punto_montaje=/home/utnso/inst2/
+nombre_instancia=Inst2
 dump=10

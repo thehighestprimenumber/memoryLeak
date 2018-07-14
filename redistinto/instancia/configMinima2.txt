@@ -1,5 +1,5 @@
 IP_coordinador=10.0.2.15
-puerto_coordinador=8087
+puerto_coordinador=8086
 algoritmo=CIRC
 punto_montaje=/home/utnso/inst2/
 nombre_instancia=Inst2

@@ -106,8 +106,12 @@ int procesarSolicitudDeEsi(Message* msg, int socket_solicitante) {
 //			, tipoMensajeNombre[op->tipo], clave, op->valor, socket);
 		if (op->tipo == op_GET){
 			instancia = seleccionar_instancia(op->clave);
-			if (instancia != NULL)
-				agregarClave(instancia, op->clave);
+			if (instancia != NULL){
+				char* clave = calloc(1, strlen(op->clave)+1);
+				memcpy(clave, op->clave, strlen(op->clave));
+				list_add(instancia->claves, clave);
+			}
+
 		} else {
 			buscar_instancia_por_valor_criterio(op->clave, &criterio_clave, &instancia );
 		}

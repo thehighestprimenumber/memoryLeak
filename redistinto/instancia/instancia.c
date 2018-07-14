@@ -9,11 +9,11 @@ int main(int argc,char *argv[]) {
 	pthread_create(&autoDumps, NULL, dump_automatico, NULL);
 
 	while (1) {
-		Message *msg = malloc(sizeof(Message));
-		msg->contenido = NULL;
-		msg->header = NULL;
+		Message msg;
+		msg.contenido = NULL;
+		msg.header = NULL;
 		log_debug(log_inst, "esperando mensaje");
-		int resultado = await_msg(socket_coordinador, msg);
+		int resultado = await_msg(socket_coordinador, &msg);
 		log_debug(log_inst, "llego un mensaje. parseando...");
 		if (resultado<0){
 			log_debug(log_inst, "error de recepcion");
@@ -21,18 +21,18 @@ int main(int argc,char *argv[]) {
 			//continue;
 		}
 
-		switch (msg->header->tipo_mensaje){
+		switch (msg.header->tipo_mensaje){
 			case ACK:
 				printf("ok");
 				break;
 			case OPERACION:
-				manejar_operacion(msg);
+				manejar_operacion(&msg);
 				break;
-			default: printf("%s: mensaje recibido: %s", instancia.nombre_inst, (char*) msg->contenido);
+			default: printf("%s: mensaje recibido: %s", instancia.nombre_inst, (char*) msg.contenido);
 				break;
 
 		}
-		free_msg(&msg);
+		//free_msg(&msg);
 	}
 	free(semTabla);
 	return EXIT_SUCCESS;
@@ -68,7 +68,7 @@ int inicializar(char* argv[]){
 		log_debug(log_inst, "Algoritmo: CIRC");
 		inicializar_circular();
 	}
-	instancia.path = leer_propiedad_string(config, "punto_montaje");//"/home/utnso/instancia1/\0";
+	instancia.path = leer_propiedad_string(config, "punto_montaje");
 	log_debug(log_inst, "punto_montaje: %s", instancia.path);
 	instancia.int_dump = leer_propiedad_int(config, "dump");
 	log_debug(log_inst, "intervalo_dump: %d", instancia.int_dump);
@@ -96,7 +96,7 @@ int inicializar(char* argv[]){
 	if (resStat == -1) {
 	    mkdir(dir, 0777);
 	}else{
-		recuperar_claves();
+		//recuperar_claves();
 	}
 	free(dir);
 
@@ -106,12 +106,15 @@ int inicializar(char* argv[]){
 int manejar_operacion(Message * msg) {
 	t_operacion * operacion;
 	desempaquetar_operacion(msg, &operacion);
+	operacion->largo_valor = operacion->largo_valor-1;
 	int resultado;
 	sem_wait(semTabla);
 	switch (operacion->tipo) {
 		case op_GET:
+			log_debug(log_inst, "GET %s", operacion->clave);
 			switch(instancia.algorimoActual){
 				case LRU:
+
 					registrar_set_lru(operacion->clave);
 					break;
 				default:
@@ -121,9 +124,11 @@ int manejar_operacion(Message * msg) {
 			break;
 		case op_SET:
 			resultado = asignar_valor_a_clave(operacion->clave, operacion->largo_clave, operacion->valor, operacion->largo_valor);
+			loguearEntradas();
 			break;
 		case op_STORE:
 			resultado = guardar_entrada(operacion->clave, operacion->largo_clave);
+			loguearEntradas();
 			break;
 	}
 	sem_post(semTabla);
@@ -140,7 +145,10 @@ int manejar_operacion(Message * msg) {
 
 int agregar_clave_a_lista(char* clave, int largo_clave){
 	t_clave_valor* clave_valor_existente = buscar_clave_valor (clave);
-	if (clave_valor_existente != NULL) return OK;
+	if (clave_valor_existente != NULL){
+		log_debug(log_inst, "GET %s (Intento)", clave);
+		return OK;
+	}
 
 	t_clave_valor *clave_valor = malloc(sizeof(t_clave_valor));
 	clave_valor->largo_clave=largo_clave;
@@ -150,7 +158,7 @@ int agregar_clave_a_lista(char* clave, int largo_clave){
 	clave_valor->datos = NULL;
 	memcpy(clave_valor->clave, clave, largo_clave);
 	list_add(instancia.tabla_entradas, clave_valor);
-	log_debug(log_inst, "GET %s", clave_valor->clave);
+	//log_debug(log_inst, "GET %s", clave_valor->clave);
 	return OK;
 }
 
@@ -177,13 +185,21 @@ int asignar_valor_a_clave(char* clave, int largo_clave, char* valor, int largo_v
 				break;
 		}
 	}else{
-		if(tam_min_entrada(largo_valor) > tam_min_entrada(entrada->largo_valor)){
+		//FIX HORRIBLE IGNORAR POR EL AMOR DE DIOS
+		t_clave_valor* entrada2 = malloc(sizeof(t_clave_valor));
+		entrada2->largo_valor = largo_valor;
+		entrada2->nroEntrada = 10;
+		if(tam_min_entrada(entrada2) > tam_min_entrada(entrada)){
 			log_debug(log_inst, "Valor %s ocupa mas entradas que el valor anterior asignado a esta clave", valor);
+			free(entrada2);
 			return VALOR_MUY_GRANDE;
 		}
+		free(entrada2);
 		memcpy(storage+entrada->nroEntrada*instancia.tamEntrada, valor, largo_valor);
 	}
 	log_debug(log_inst, "SET %s", entrada->clave);
+	int entradasLibres = cantidad_entradas_libres();
+	log_debug(log_inst, "Informo %d entradas libres", entradasLibres);
 	return cantidad_entradas_libres();
 }
 
@@ -218,7 +234,7 @@ void guardar(void * contenido){
 	char* ruta = calloc(1, strlen(instancia.path)+entrada->largo_clave+1);
 	memcpy(ruta, instancia.path, strlen(instancia.path));
 	memcpy(ruta+strlen(instancia.path), entrada->clave, entrada->largo_clave);
-	if (LOGUEAR_DUMPS) log_debug(log_inst, "Guardando en %s", ruta);
+	if(LOGUEAR_DUMPS) log_debug(log_inst, "Guardando en %s", ruta);
 	FILE* file = fopen(ruta, "w");
 	char *ptrLectura = storage+entrada->nroEntrada*instancia.tamEntrada;
 	fwrite(ptrLectura, sizeof(char), entrada->largo_valor, file);
@@ -234,14 +250,16 @@ void eliminar_entrada(void *contenido){
 
 
 void* dump_automatico(void *pepe){
+	if(!HACER_DUMPS) return NULL;
 	while(true){
 		sleep(instancia.int_dump);
-		if (LOGUEAR_DUMPS) log_debug(log_inst, "Autodump iniciado");
+		if(LOGUEAR_DUMPS) log_debug(log_inst, "Autodump iniciado");
 		sem_wait(semTabla);
 		list_iterate(instancia.tabla_entradas, guardar);
 		sem_post(semTabla);
-		if (LOGUEAR_DUMPS) log_debug(log_inst, "Autodump finalizado");
+		if(LOGUEAR_DUMPS) log_debug(log_inst, "Autodump finalizado");
 	}
+	pthread_exit(0);
 	return NULL;
 }
 
@@ -293,6 +311,7 @@ void recuperar_claves(){
 		free(dir);
 		free(file_name);
 	    fclose(entry_file);
+	    //closedir(FD);
 	}
 
 }

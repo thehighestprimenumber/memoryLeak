@@ -966,4 +966,10 @@ STORE futbol:messi
 [INFO] 20:07:27:717 ESI/(6636:6636): Recibida instruccion de ejecutar
 [INFO] 20:07:27:717 ESI/(6636:6636): se envia el mensaje a coordinador para la operacion: GET futbol:messi
 [INFO] 20:07:28:718 ESI/(6636:6636): resultado: CLAVE_DUPLICADA
-[INFO] 20:07:28:718 ESI/(6636:6636): envio mensaje a planificador: CLAVE_DUPLICADA
+[INFO] 20:07:28:718 ESI/(6636:6636): envio mensaje a planificador: CLAVE_DUPLICADA[TRACE] 23:12:11:869 ESI/(4477:4477): Inicia el proceso ESI
+[TRACE] 23:12:11:869 ESI/(4477:4477): El puerto del coordinador es: 8087
+[TRACE] 23:12:11:869 ESI/(4477:4477): La ip del coordinador es: 10.0.2.15
+[TRACE] 23:12:11:869 ESI/(4477:4477): El puerto del planificador es: 8002
+[TRACE] 23:12:11:869 ESI/(4477:4477): La ip del planificador es: 10.0.2.15
+[TRACE] 23:12:11:870 ESI/(4477:4477): El nombre del script es: ESI_Westworld
+[ERROR] 23:12:11:870 ESI/(4477:4477): Fallo conexion con el Coordinador

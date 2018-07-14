@@ -2,8 +2,8 @@
 # include "coordinador.h"
 # include "logger_coordinador.h"
 
-char* ruta_arch_config = "./config_coordinador.txt";
-char* ruta_arch_config_debug = "../config_coordinador.txt";
+char* ruta_arch_config = "./config.txt";
+char* ruta_arch_config_debug = "../config.txt";
 
 int leer_propiedad_int (t_config *configuracion, char* propiedad){
 	if (config_has_property(configuracion, propiedad)){

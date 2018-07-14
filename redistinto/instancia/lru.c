@@ -9,10 +9,13 @@ void inicializar_lru(){
 }
 
 int guardar_lru(t_clave_valor *entrada, char *valor){
-	if(entrada->largo_clave < 1) return -1;
+	if(entrada->largo_valor < 1) return -1;
+
+	int cantEntradasLibres = cantidad_entradas_libres();
+	int tamMinEntrada = entradas_que_ocuparia(entrada);
 
 	//Si todavia puedo usar circular
-	if(!cirularFinalizo && entrada->largo_clave < espacio_sobrante()){
+	if(!cirularFinalizo && tamMinEntrada <= cantEntradasLibres){
 		entrada->datos = malloc(sizeof(t_info_lru));
 		((t_info_lru*) entrada->datos)->instant = get_time_millisec();
 		guardar_circular(entrada, valor);
@@ -25,30 +28,36 @@ int guardar_lru(t_clave_valor *entrada, char *valor){
 
 
 void guardar_eliminando_lru(t_clave_valor *entrada, char *valor){
-
-	while(cantidad_entradas_libres() < tam_min_entrada(entrada->largo_valor)){
+	ordenar_lista_entradas();
+	while(cantidad_entradas_libres() < entradas_que_ocuparia(entrada)){
 		eliminar_lru_entrada();
 	}
 	compactar();
 	int posEntrada = obtener_ultima_entrada_libre();
-	memcpy(storage + posEntrada, valor, entrada->largo_valor);
+	log_debug(log_inst, "Guardado LRU de %s en la entrada nro %d", valor, posEntrada);
+	memcpy(storage + posEntrada*instancia.tamEntrada, valor, entrada->largo_valor);
 	entrada->nroEntrada = posEntrada;
 	entrada->datos = malloc(sizeof(t_info_lru));
 	((t_info_lru*) entrada->datos)->instant = get_time_millisec();
-	list_add(instancia.tabla_entradas, entrada);
+	//list_add(instancia.tabla_entradas, entrada);
 }
 
 
 void eliminar_lru_entrada(){
-	int cantEntradas = list_size(instancia.tabla_entradas);
-	int indexEntradaEliminable = 0;
+	int cantEntradas = list_size(instancia.tabla_entradas);//Porque hay una que es una mentirita piadosa
+	int indexEntradaEliminable = 1;
+	t_clave_valor *masAntiguo, *aComparar;
 	for(int i = 1; i < cantEntradas; i++){
-		t_clave_valor *masAntiguo = list_get(instancia.tabla_entradas, indexEntradaEliminable);
-		t_clave_valor *aComparar = list_get(instancia.tabla_entradas, i);
+		masAntiguo = list_get(instancia.tabla_entradas, indexEntradaEliminable);
+		aComparar = list_get(instancia.tabla_entradas, i);
 		if(((t_info_lru*) masAntiguo->datos)->instant > ((t_info_lru*) aComparar->datos)->instant )
 			indexEntradaEliminable = i;
 	}
 	t_clave_valor *aEliminar = list_get(instancia.tabla_entradas, indexEntradaEliminable);
+	char *valor = calloc(aEliminar->largo_valor+1,1);
+	memcpy(valor, storage + aEliminar->nroEntrada*instancia.tamEntrada, aEliminar->largo_valor);
+	log_debug(log_inst, "Borrado LRU de %s", valor);
+	free(valor);
 	list_remove(instancia.tabla_entradas, indexEntradaEliminable);
 	free(aEliminar->datos);
 	eliminar_entrada(aEliminar);

@@ -9,19 +9,25 @@
 
 void free_operacion(t_operacion ** operacion) {
 	if (operacion != NULL && (*operacion) != NULL) {
-		if ((*operacion)->valor != NULL){
-			free((*operacion)->valor);
-			(*operacion)->valor = NULL;
-		}
-		if ((*operacion)->clave != NULL){
-			free((*operacion)->clave);
-			(*operacion)->clave = NULL;
-		}
+		destroy_operacion(*operacion);
 		free(*operacion);
 		*operacion = NULL;
 	}
 }
 
+void destroy_operacion(void * input) {
+	t_operacion * operacion = (t_operacion *) input;
+	if (operacion != NULL) {
+		if ((operacion)->valor != NULL){
+			free((operacion)->valor);
+			(operacion)->valor = NULL;
+		}
+		if ((operacion)->clave != NULL){
+			free((operacion)->clave);
+			(operacion)->clave = NULL;
+		}
+	}
+}
 void empaquetar_texto(char* texto, unsigned int length, tipoRemitente remitente, Message**  output){
 	if (texto == NULL || length < 1)
 		return;

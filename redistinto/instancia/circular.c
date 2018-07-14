@@ -4,20 +4,19 @@ void inicializar_circular(){
 	entradaActual = 0;
 }
 
-int espacio_sobrante(){
-	return (instancia.cantEntradas-entradaActual)*instancia.tamEntrada;
+int entradas_hasta_el_final(){
+	return instancia.cantEntradas-entradaActual;
 }
 
 int guardar_circular(t_clave_valor *entrada, char *valor){
 	if(entrada->largo_clave < 1) return -1;
-	if(entrada->largo_clave > espacio_sobrante()){
+	if(entradas_que_ocuparia(entrada) > entradas_hasta_el_final()){
 		entradaActual = 0;
-		return guardar_circular(entrada, valor);
 	}
 	int nroEntrada = entradaActual;
 	entradaAEliminar = entradaActual;
-
-	entradaActual =+ tam_min_entrada(entrada->largo_valor);
+	log_debug(log_inst, "Guardado CIRC de %s en la entrada nro %d", valor, nroEntrada);
+	entradaActual += entradas_que_ocuparia(entrada);
 
 	while(entradaAEliminar<entradaActual){
 		list_remove_and_destroy_by_condition(instancia.tabla_entradas,eliminable, eliminar_entrada);
